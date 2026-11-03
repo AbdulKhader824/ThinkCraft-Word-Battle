@@ -1,10 +1,13 @@
 import 'dart:async';
 
+import 'package:thinkcraft_word_battle/models/answer_group.dart';
 import 'package:thinkcraft_word_battle/models/category.dart';
 import 'package:thinkcraft_word_battle/models/game_phase.dart';
 import 'package:thinkcraft_word_battle/models/player.dart';
 import 'package:thinkcraft_word_battle/models/room.dart';
 import 'package:thinkcraft_word_battle/models/round.dart';
+import 'package:thinkcraft_word_battle/models/round_results.dart';
+import 'package:thinkcraft_word_battle/models/vote.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
 
 const localId = 'me';
@@ -84,6 +87,14 @@ class FakeGameService implements GameService {
   Future<void> submitAnswers() async => calls.add('submitAnswers');
 
   @override
+  Future<void> castVote(String ballotItemId, VoteChoice choice) async {
+    calls.add('castVote $ballotItemId ${choice.name}');
+  }
+
+  @override
+  Future<void> playAgain() async => calls.add('playAgain');
+
+  @override
   Future<void> refresh() async => calls.add('refresh');
 
   @override
@@ -114,6 +125,56 @@ Room fakeLetterRoom({
     ],
     usedLetters: usedLetters,
     round: Round(number: 1, pickerId: pickerId, letter: letter),
+  );
+}
+
+Room fakeVotingRoom({
+  List<BallotItem> ballot = const [],
+  Map<String, VoteChoice> myVotes = const {},
+}) {
+  return Room(
+    code: 'ABC234',
+    phase: GamePhase.validating,
+    players: [
+      fakePlayer(localId, name: 'Sam', isHost: true),
+      fakePlayer('bot', name: 'Luna'),
+      fakePlayer('bot2', name: 'Kai'),
+    ],
+    round: Round(
+      number: 1,
+      pickerId: localId,
+      letter: 'M',
+      ballot: ballot,
+      myVotes: myVotes,
+    ),
+  );
+}
+
+/// Results for Sam, Luna and Kai, using the [scores] given by player id.
+Room fakeResultsRoom({
+  required Map<String, ScoreLine> scores,
+  Map<String, List<AnswerLine>> lines = const {},
+  int roundNumber = 1,
+}) {
+  final ids = [localId, 'bot', 'bot2'];
+  return Room(
+    code: 'ABC234',
+    phase: GamePhase.results,
+    players: [
+      fakePlayer(localId, name: 'Sam', isHost: true),
+      fakePlayer('bot', name: 'Luna'),
+      fakePlayer('bot2', name: 'Kai'),
+    ],
+    scores: scores,
+    round: Round(
+      number: roundNumber,
+      pickerId: localId,
+      letter: 'M',
+      results: RoundResults(
+        scores: {for (final id in ids) id: scores[id] ?? const ScoreLine()},
+        lines: {for (final id in ids) id: lines[id] ?? const []},
+      ),
+    ),
   );
 }
 

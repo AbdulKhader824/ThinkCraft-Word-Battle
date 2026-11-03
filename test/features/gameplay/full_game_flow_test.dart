@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:thinkcraft_word_battle/app/router.dart';
+import 'package:thinkcraft_word_battle/features/validation/validation_screen.dart';
 import 'package:thinkcraft_word_battle/models/game_phase.dart';
 import 'package:thinkcraft_word_battle/services/local_game_service.dart';
 import 'package:thinkcraft_word_battle/services/rules/game_rules.dart';
@@ -39,9 +40,37 @@ void main() {
     expect(gameService(tester).room!.phase, GamePhase.validating);
     expect(currentRoute(tester), AppRoutes.validation);
 
-    await tapAndSettle(tester, find.text('Return Home'));
+    final skip = find.text('Not sure? Skip this one');
+    while (skip.evaluate().isNotEmpty) {
+      await tester.pump(ValidationScreen.tapGuard);
+      await tapAndSettle(tester, skip);
+    }
+    expect(find.text('Counting the votes...'), findsOneWidget);
+
+    await tester.pump(_timing.voting.$2);
+    await tester.pumpAndSettle();
+    expect(currentRoute(tester), AppRoutes.results);
+    expect(find.text('Round 1 results'), findsOneWidget);
+
+    await tapAndSettle(tester, find.text('Play Again'));
+    expect(currentRoute(tester), AppRoutes.letterSelection);
+    expect(gameService(tester).room!.round!.number, 2);
+    expect(find.textContaining('is choosing the letter'), findsOneWidget);
+
+    await tapAndSettle(tester, find.byTooltip('Back'));
+    await tapAndSettle(tester, find.text('Leave Game'));
     expect(currentRoute(tester), AppRoutes.home);
     expect(gameService(tester).room, isNull);
+  });
+
+  testWidgets('Return Home from the results clears the game', (tester) async {
+    final service = FakeGameService(fakeResultsRoom(scores: const {}));
+    await pumpGame(tester, service: service);
+    await tester.pumpAndSettle();
+
+    await tapAndSettle(tester, find.text('Return Home'));
+
+    expect(currentRoute(tester), AppRoutes.home);
   });
 
   testWidgets('a whole game runs on the real service, as guest', (

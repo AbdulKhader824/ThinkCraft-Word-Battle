@@ -4,15 +4,21 @@ import 'dart:math';
 import 'package:clock/clock.dart';
 
 import '../models/answer.dart';
+import '../models/answer_group.dart';
 import '../models/category.dart';
 import '../models/game_phase.dart';
 import '../models/player.dart';
 import '../models/room.dart';
 import '../models/round.dart';
+import '../models/round_results.dart';
+import '../models/vote.dart';
 import 'bot_player.dart';
 import 'game_service.dart';
+import 'rules/answer_rules.dart';
 import 'rules/game_rules.dart';
 import 'rules/room_input_rules.dart';
+import 'rules/scoring_rules.dart';
+import 'rules/vote_rules.dart';
 
 /// How long simulated players take to act.
 class BotTiming {
@@ -23,6 +29,7 @@ class BotTiming {
     this.letterReveal = const Duration(milliseconds: 1800),
     this.answer = const (Duration(seconds: 25), Duration(seconds: 80)),
     this.afterHumanSubmit = const (Duration(seconds: 1), Duration(seconds: 5)),
+    this.voting = const (Duration(seconds: 1), Duration(seconds: 3)),
   });
 
   final (Duration, Duration) ready;
@@ -33,14 +40,22 @@ class BotTiming {
 
   /// Bots finish soon after the player submits, to avoid a long wait.
   final (Duration, Duration) afterHumanSubmit;
+
+  /// How long bots take to vote once the player has finished.
+  final (Duration, Duration) voting;
 }
 
 /// A complete game on this device, with bots as the other players.
 ///
 /// This is the only place that knows the other players aren't real.
 class LocalGameService implements GameService {
-  LocalGameService({Random? random, this.timing = const BotTiming()})
-    : _random = random ?? Random();
+  /// [createBot] lets tests script exactly what bots answer.
+  LocalGameService({
+    Random? random,
+    this.timing = const BotTiming(),
+    BotPlayer Function(Random random)? createBot,
+  }) : _random = random ?? Random(),
+       _createBot = createBot ?? ((random) => BotPlayer(random: random));
 
   static const _localId = 'local-player';
   static const _botNames = [
@@ -57,11 +72,17 @@ class LocalGameService implements GameService {
 
   final BotTiming timing;
   final Random _random;
+  final BotPlayer Function(Random random) _createBot;
   final _changes = StreamController<Room?>.broadcast();
   final _timers = <Timer>{};
   final _botAnswerTimers = <String, Timer>{};
   final _bots = <String, BotPlayer>{};
   final _answers = <String, Map<Category, String>>{};
+
+  // Who wrote what stays here until results, away from the published room.
+  var _lockedAnswers = <Answer>[];
+  var _groups = <AnswerGroup>[];
+  var _votes = <Vote>[];
 
   Room? _room;
 
@@ -157,6 +178,44 @@ class LocalGameService implements GameService {
   }
 
   @override
+  Future<void> castVote(String ballotItemId, VoteChoice choice) async {
+    final room = _requirePhase(GamePhase.validating);
+    final round = room.round!;
+    if (round.myVotes.containsKey(ballotItemId)) {
+      throw StateError('You have already voted on this answer.');
+    }
+    final group = _groups.firstWhere((group) => group.id == ballotItemId);
+
+    if (choice != VoteChoice.skip) {
+      _votes = VoteRules.addVote(
+        _votes,
+        Vote(
+          voterId: _localId,
+          groupId: group.id,
+          isValid: choice == VoteChoice.valid,
+        ),
+        group,
+      );
+    }
+
+    final updated = round.copyWith(
+      myVotes: {...round.myVotes, ballotItemId: choice},
+    );
+    _publish(room.copyWith(round: updated));
+
+    if (updated.nextBallotItem == null) _scheduleBotVotes();
+  }
+
+  @override
+  Future<void> playAgain() async {
+    final room = _requirePhase(GamePhase.results);
+    final everyLetterUsed = room.usedLetters.length == GameRules.letters.length;
+
+    _room = room.copyWith(usedLetters: everyLetterUsed ? {} : null);
+    _beginRound();
+  }
+
+  @override
   Future<void> refresh() async {
     final deadline = _room?.round?.deadline;
     if (!_isAnswering || deadline == null) return;
@@ -219,13 +278,16 @@ class LocalGameService implements GameService {
     _botAnswerTimers.clear();
     _bots.clear();
     _answers.clear();
+    _lockedAnswers = [];
+    _groups = [];
+    _votes = [];
     _room = null;
   }
 
   void _startSession({required String code, required List<Player> players}) {
     _clearSession();
     for (final player in players.where((player) => player.isBot)) {
-      _bots[player.id] = BotPlayer(random: _random);
+      _bots[player.id] = _createBot(_random);
     }
     _publish(Room(code: code, players: players));
 
@@ -398,21 +460,82 @@ class LocalGameService implements GameService {
       _answers[entry.key] ??= entry.value.answersFor(round.letter!);
     }
 
+    _lockedAnswers = [
+      for (final player in room.players)
+        for (final category in Category.values)
+          Answer(
+            playerId: player.id,
+            category: category,
+            text: (_answers[player.id]?[category] ?? '').trim(),
+          ),
+    ];
+    _groups = AnswerRules.groupAnswers(
+      answers: _lockedAnswers,
+      letter: round.letter!,
+      playerIds: room.playerIds,
+    );
+    _votes = [];
+
+    final ballot = [
+      for (final group in _groups)
+        if (VoteRules.canVote(group, _localId))
+          BallotItem(id: group.id, category: group.category, text: group.text),
+    ];
+
     _publish(
       room.copyWith(
         phase: GamePhase.validating,
         round: round.copyWith(
-          submittedPlayerIds: {for (final player in room.players) player.id},
-          answers: [
-            for (final player in room.players)
-              for (final category in Category.values)
-                Answer(
-                  playerId: player.id,
-                  category: category,
-                  text: (_answers[player.id]?[category] ?? '').trim(),
-                ),
-          ],
+          submittedPlayerIds: room.playerIds.toSet(),
+          ballot: ballot,
         ),
+      ),
+    );
+
+    if (ballot.isEmpty) _scheduleBotVotes();
+  }
+
+  void _scheduleBotVotes() {
+    _after(_between(timing.voting), _finishVoting);
+  }
+
+  /// Collects the bots' votes, scores the round and publishes the results.
+  void _finishVoting() {
+    final room = _room!;
+    final round = room.round!;
+
+    for (final group in _groups) {
+      for (final MapEntry(key: botId, value: bot) in _bots.entries) {
+        if (!VoteRules.canVote(group, botId)) continue;
+
+        final isValid = bot.voteOn(group.category, round.letter!, group.text);
+        if (isValid == null) continue;
+
+        _votes = VoteRules.addVote(
+          _votes,
+          Vote(voterId: botId, groupId: group.id, isValid: isValid),
+          group,
+        );
+      }
+    }
+
+    final results = ScoringRules.scoreRound(
+      playerIds: room.playerIds,
+      answers: _lockedAnswers,
+      groups: _groups,
+      votes: _votes,
+    );
+
+    _publish(
+      room.copyWith(
+        phase: GamePhase.results,
+        round: round.copyWith(answers: _lockedAnswers, results: results),
+        scores: {
+          for (final id in room.playerIds)
+            id:
+                (room.scores[id] ?? const ScoreLine()) +
+                (results.scores[id] ?? const ScoreLine()),
+        },
       ),
     );
   }

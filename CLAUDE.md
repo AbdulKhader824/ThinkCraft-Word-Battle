@@ -96,15 +96,23 @@ These settle conflicts and gaps in the briefs.
 | Host ready status | The host is always ready, and starts once everyone else is |
 | Bot speed | Bots take 25-80 seconds, or 1-5 seconds once the player locks in |
 | Blank answers | Locking in early with blanks asks for confirmation first |
-| Hidden answers | `Round.answers` stays empty until everyone has locked in |
+| Hidden answers | `Round.answers` stays empty until results; voters only receive `BallotItem`s, which carry no authors |
+| Voting screen | One answer at a time, so each takes one choice; players can skip; each card ignores taps for 350ms to catch double taps |
+| Lone voters | Validator points need at least 2 votes cast on an answer, in any game size |
+| Voting time | No timer, because the spec sets none; bots vote once the player finishes |
+| Bot votes | Bots judge against the word bank and trust unknown words 75% of the time |
+| Stars | One for each unique valid answer worth the full 10 points |
+| Tied leaderboard | Shared rank with the next rank skipped, so 1, 2, 2, 4 |
+| Play Again as a guest | Allowed in practice mode; Phase 5 should make it host-only |
+| Every letter used | The used letters reset after 26 rounds |
 | Player name | 2-12 letters, numbers or spaces |
 | Room code | 6 characters from A-Z and 2-9, without I, O, 0 or 1 |
 
 ## Phase status
 
 - [x] Phase 1: foundation (approved)
-- [x] Phase 2: lobby and answers (awaiting approval)
-- [ ] Phase 3: voting and scoring
+- [x] Phase 2: lobby and answers (approved)
+- [x] Phase 3: voting and scoring (awaiting approval)
 - [ ] Phase 4: polish and APK
 - Phase 5 needs separate approval.
 

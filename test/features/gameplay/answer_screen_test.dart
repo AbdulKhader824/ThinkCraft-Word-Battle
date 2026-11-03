@@ -192,7 +192,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(currentRoute(tester), AppRoutes.validation);
-    expect(find.text('Answers are in!'), findsOneWidget);
+    expect(find.text('Counting the votes...'), findsOneWidget);
   });
 
   testWidgets('the back button asks before leaving', (tester) async {

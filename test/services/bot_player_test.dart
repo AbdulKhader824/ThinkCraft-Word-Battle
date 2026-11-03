@@ -23,6 +23,45 @@ void main() {
     }
   });
 
+  group('voteOn', () {
+    double validShare(String text, Category category) {
+      var valid = 0;
+      var total = 0;
+      for (var game = 0; game < 2000; game++) {
+        final vote = bot.voteOn(category, 'M', text);
+        if (vote == null) continue;
+        total++;
+        if (vote) valid++;
+      }
+      return valid / total;
+    }
+
+    test('usually accepts a good answer', () {
+      expect(validShare('Mango', Category.food), greaterThan(0.85));
+    });
+
+    test('usually rejects a word from another category', () {
+      expect(validShare('Mango', Category.animal), lessThan(0.15));
+    });
+
+    test('ignores capitals when recognising a word', () {
+      expect(validShare('MANGO', Category.food), greaterThan(0.85));
+    });
+
+    test('tends to trust words it does not know', () {
+      expect(validShare('Marmalade', Category.food), closeTo(0.75, 0.05));
+    });
+
+    test('sometimes skips', () {
+      final votes = [
+        for (var game = 0; game < 2000; game++)
+          bot.voteOn(Category.food, 'M', 'Mango'),
+      ];
+
+      expect(votes.where((vote) => vote == null), isNotEmpty);
+    });
+  });
+
   test('mixes good, blank and deliberately wrong answers', () {
     var good = 0;
     var blank = 0;

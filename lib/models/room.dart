@@ -1,6 +1,7 @@
 import 'game_phase.dart';
 import 'player.dart';
 import 'round.dart';
+import 'round_results.dart';
 
 /// A game room. Rooms are never changed in place: every change makes a new
 /// copy with [copyWith], so a half-updated room can't reach the screen.
@@ -11,8 +12,10 @@ class Room {
     this.phase = GamePhase.lobby,
     this.round,
     Set<String> usedLetters = const {},
+    Map<String, ScoreLine> scores = const {},
   }) : players = List.unmodifiable(players),
-       usedLetters = Set.unmodifiable(usedLetters);
+       usedLetters = Set.unmodifiable(usedLetters),
+       scores = Map.unmodifiable(scores);
 
   final String code;
   final List<Player> players;
@@ -23,6 +26,11 @@ class Room {
 
   /// Letters already played in this room.
   final Set<String> usedLetters;
+
+  /// Running totals across every round, by player id.
+  final Map<String, ScoreLine> scores;
+
+  List<String> get playerIds => [for (final player in players) player.id];
 
   Player get host => players.firstWhere((player) => player.isHost);
 
@@ -40,6 +48,7 @@ class Room {
     GamePhase? phase,
     Round? round,
     Set<String>? usedLetters,
+    Map<String, ScoreLine>? scores,
   }) {
     return Room(
       code: code,
@@ -47,6 +56,7 @@ class Room {
       phase: phase ?? this.phase,
       round: round ?? this.round,
       usedLetters: usedLetters ?? this.usedLetters,
+      scores: scores ?? this.scores,
     );
   }
 }

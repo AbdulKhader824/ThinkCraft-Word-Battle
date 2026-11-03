@@ -10,12 +10,15 @@ enum GameButtonStyle {
   sunshine(AppColors.sunshine, AppColors.sunshineDeep),
   sky(AppColors.sky, AppColors.skyDeep),
   coral(AppColors.coral, AppColors.coralDeep),
-  lavender(AppColors.lavender, AppColors.lavenderDeep);
+  lavender(AppColors.lavender, AppColors.lavenderDeep),
+  valid(AppColors.valid, AppColors.validDeep, Colors.white),
+  invalid(AppColors.invalid, AppColors.invalidDeep, Colors.white);
 
-  const GameButtonStyle(this.face, this.edge);
+  const GameButtonStyle(this.face, this.edge, [this.text = AppColors.navy]);
 
   final Color face;
   final Color edge;
+  final Color text;
 }
 
 /// A chunky game button that sinks into its coloured edge when pressed.
@@ -49,7 +52,7 @@ class _GameButtonState extends State<GameButton> {
     final enabled = widget.onPressed != null;
     final face = enabled ? widget.style.face : AppColors.disabled;
     final edge = enabled ? widget.style.edge : AppColors.outline;
-    final textColor = enabled ? AppColors.navy : AppColors.disabledText;
+    final textColor = enabled ? widget.style.text : AppColors.disabledText;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
     final sink = _pressed ? _edgeDepth - 2 : 0.0;
     final radius = BorderRadius.circular(AppRadius.pill);

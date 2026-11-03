@@ -10,7 +10,8 @@ import '../features/home/splash_screen.dart';
 import '../features/lobby/create_room_screen.dart';
 import '../features/lobby/join_room_screen.dart';
 import '../features/lobby/lobby_screen.dart';
-import '../features/validation/phase_placeholder_screen.dart';
+import '../features/results/results_screen.dart';
+import '../features/validation/validation_screen.dart';
 import '../models/game_phase.dart';
 import '../services/game_providers.dart';
 
@@ -114,20 +115,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       _route(AppRoutes.lobby, const LobbyScreen()),
       _route(AppRoutes.letterSelection, const LetterSelectionScreen()),
       _route(AppRoutes.answering, const AnswerScreen()),
-      _route(
-        AppRoutes.validation,
-        const PhasePlaceholderScreen(
-          title: 'Answers are in!',
-          message: 'Voting comes in the next update.',
-        ),
-      ),
-      _route(
-        AppRoutes.results,
-        const PhasePlaceholderScreen(
-          title: 'Results',
-          message: 'The leaderboard comes in the next update.',
-        ),
-      ),
+      _route(AppRoutes.validation, const ValidationScreen()),
+      _route(AppRoutes.results, const ResultsScreen()),
     ],
   );
 

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:thinkcraft_word_battle/models/category.dart';
 import 'package:thinkcraft_word_battle/models/game_phase.dart';
 import 'package:thinkcraft_word_battle/models/room.dart';
+import 'package:thinkcraft_word_battle/models/vote.dart';
 import 'package:thinkcraft_word_battle/services/local_game_service.dart';
 import 'package:thinkcraft_word_battle/services/rules/game_rules.dart';
 import 'package:thinkcraft_word_battle/services/rules/room_input_rules.dart';
@@ -38,6 +39,16 @@ void _playToAnswering(
   service.startRound();
   service.selectLetter(letter);
   time.elapse(_revealTime);
+}
+
+/// Skips every remaining ballot item, then waits for the bots to vote.
+void _voteAndFinish(FakeAsync time, LocalGameService service) {
+  while (true) {
+    final item = _room(service).round!.nextBallotItem;
+    if (item == null) break;
+    service.castVote(item.id, VoteChoice.skip);
+  }
+  time.elapse(_timing.voting.$2);
 }
 
 void main() {
@@ -262,6 +273,7 @@ void main() {
         service.updateAnswer(Category.food, 'Man');
 
         time.elapse(GameRules.answerTime);
+        _voteAndFinish(time, service);
 
         final mine = _room(service).round!.answers
             .where((answer) => answer.playerId == service.localPlayerId);
@@ -327,6 +339,7 @@ void main() {
         service.updateAnswer(Category.animal, 'Changed');
 
         time.elapse(_timing.afterHumanSubmit.$2);
+        _voteAndFinish(time, service);
 
         final answer = _room(service).round!.answers.firstWhere(
           (a) =>
@@ -384,10 +397,11 @@ void main() {
       });
     });
 
-    test('collects six answers per player afterwards', () {
+    test('collects six answers per player at results', () {
       _game((time, service) {
         _playToAnswering(time, service, playerCount: 3);
         time.elapse(GameRules.answerTime);
+        _voteAndFinish(time, service);
 
         expect(_room(service).round!.answers, hasLength(18));
       });

@@ -1,5 +1,6 @@
 import '../models/category.dart';
 import '../models/room.dart';
+import '../models/vote.dart';
 
 /// Everything the screens can ask of a game.
 ///
@@ -40,9 +41,17 @@ abstract interface class GameService {
   /// Locks the local player's answers early. Ignored if already locked.
   Future<void> submitAnswers();
 
+  /// Records the local player's choice for a ballot item. Each item takes
+  /// one choice only.
+  Future<void> castVote(String ballotItemId, VoteChoice choice);
+
+  /// Starts the next round in this room, keeping the running totals.
+  Future<void> playAgain();
+
   /// Checks the time again, for when the app returns from the background.
   Future<void> refresh();
 
+  /// Leaves the game, clearing the room and its scores.
   Future<void> leaveRoom();
 
   void dispose();

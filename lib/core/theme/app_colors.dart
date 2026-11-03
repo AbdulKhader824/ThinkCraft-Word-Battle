@@ -17,7 +17,13 @@ abstract final class AppColors {
   static const peach = Color(0xFFFFB26B);
 
   static const valid = Color(0xFF15803D);
+  static const validDeep = Color(0xFF0F5F2D);
   static const invalid = Color(0xFFC62828);
+  static const invalidDeep = Color(0xFF8E1C1C);
+
+  static const gold = Color(0xFFD9A900);
+  static const silver = Color(0xFF8A94A6);
+  static const bronze = Color(0xFFB5763A);
 
   static const background = Color(0xFFF4FBFF);
   static const backgroundMint = Color(0xFFE3F9EF);
