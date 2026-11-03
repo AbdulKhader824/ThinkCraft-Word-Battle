@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
+import '../../core/widgets/confetti_burst.dart';
 import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
@@ -17,98 +18,226 @@ import '../../services/rules/scoring_rules.dart';
 import '../gameplay/category_style.dart';
 import '../gameplay/leave_game_guard.dart';
 
-class ResultsScreen extends ConsumerWidget {
+/// The leaderboard. One [AnimationController] runs the whole entrance: the
+/// trophy pops in, then each player slides in a little after the one above,
+/// while the totals count up from their old values.
+class ResultsScreen extends ConsumerStatefulWidget {
   const ResultsScreen({super.key});
 
+  static const entrance = Duration(milliseconds: 1400);
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ResultsScreen> createState() => _ResultsScreenState();
+}
+
+class _ResultsScreenState extends ConsumerState<ResultsScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _entrance = AnimationController(
+    vsync: this,
+    duration: ResultsScreen.entrance,
+  );
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _entrance.value = 1;
+    } else if (_entrance.value == 0 && !_entrance.isAnimating) {
+      _entrance.forward();
+    }
+  }
+
+  @override
+  void dispose() {
+    _entrance.dispose();
+    super.dispose();
+  }
+
+  /// Each card starts a little after the one above it.
+  Animation<double> _cardAnimation(int index) {
+    final start = (0.2 + index * 0.07).clamp(0.0, 0.7);
+    return CurvedAnimation(
+      parent: _entrance,
+      curve: Interval(start, start + 0.3, curve: Curves.easeOutCubic),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final room = ref.watch(gameRoomProvider);
     final results = room?.round?.results;
     final service = ref.read(gameServiceProvider);
     if (room == null || results == null) return const SizedBox.shrink();
 
     final ranked = ScoringRules.rank(room.scores, room.playerIds);
+    final myRank = ranked
+        .firstWhere((entry) => entry.playerId == service.localPlayerId)
+        .rank;
+    final counting = CurvedAnimation(
+      parent: _entrance,
+      curve: const Interval(0.3, 1, curve: Curves.easeOut),
+    );
 
     return LeaveGameGuard(
-      child: Scaffold(
-        body: GameBackground(
-          child: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppSizes.maxContentWidth,
+      child: GameFrame(
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: ListView(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    children: [
+                      _WinnerBanner(
+                        room: room,
+                        ranked: ranked,
+                        pop: CurvedAnimation(
+                          parent: _entrance,
+                          curve: const Interval(
+                            0,
+                            0.45,
+                            curve: Curves.elasticOut,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        'Tap a player to see their answers.',
+                        textAlign: TextAlign.center,
+                        style: AppText.bodySmall,
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      for (final (index, entry) in ranked.indexed) ...[
+                        _SlideIn(
+                          animation: _cardAnimation(index),
+                          child: _PlayerResultCard(
+                            player: room.playerById(entry.playerId),
+                            rank: entry.rank,
+                            gameScore: entry.score,
+                            roundScore: results.scores[entry.playerId]!,
+                            lines: results.lines[entry.playerId]!,
+                            isMe: entry.playerId == service.localPlayerId,
+                            counting: counting,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
+                    ],
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(
-                      child: ListView(
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        children: [
-                          _WinnerBanner(room: room, ranked: ranked),
-                          const SizedBox(height: AppSpacing.sm),
-                          Text(
-                            'Tap a player to see their answers.',
-                            textAlign: TextAlign.center,
-                            style: AppText.bodySmall,
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          for (final entry in ranked) ...[
-                            _PlayerResultCard(
-                              player: room.playerById(entry.playerId),
-                              rank: entry.rank,
-                              gameScore: entry.score,
-                              roundScore: results.scores[entry.playerId]!,
-                              lines: results.lines[entry.playerId]!,
-                              isMe: entry.playerId == service.localPlayerId,
-                            ),
-                            const SizedBox(height: AppSpacing.sm),
-                          ],
-                        ],
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.md,
-                        AppSpacing.xs,
-                        AppSpacing.md,
-                        AppSpacing.sm,
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: GameButton(
-                              label: 'Play Again',
-                              onPressed: service.playAgain,
-                            ),
-                          ),
-                          const SizedBox(width: AppSpacing.xs),
-                          Expanded(
-                            child: GameButton(
-                              label: 'Return Home',
-                              style: GameButtonStyle.sky,
-                              onPressed: service.leaveRoom,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.md,
+                    AppSpacing.xs,
+                    AppSpacing.md,
+                    AppSpacing.sm,
+                  ),
+                  child: _ResultActions(
+                    onPlayAgain: service.playAgain,
+                    onReturnHome: service.leaveRoom,
+                  ),
                 ),
-              ),
+              ],
             ),
-          ),
+            // A celebration only for first place, so it stays special.
+            if (myRank == 1) const Positioned.fill(child: ConfettiBurst()),
+          ],
         ),
       ),
     );
   }
 }
 
+/// Play Again and Return Home. Side by side when there's room; stacked and
+/// smaller on narrow phones or with large text, so they never crowd out the
+/// leaderboard.
+class _ResultActions extends StatelessWidget {
+  const _ResultActions({required this.onPlayAgain, required this.onReturnHome});
+
+  /// Below this width per button, the labels would wrap onto several lines.
+  static const _minSideBySideWidth = 160.0;
+  static const _maxSideBySideTextScale = 1.2;
+
+  final VoidCallback onPlayAgain;
+  final VoidCallback onReturnHome;
+
+  @override
+  Widget build(BuildContext context) {
+    final textScale = MediaQuery.textScalerOf(context).scale(1);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final halfWidth = (constraints.maxWidth - AppSpacing.xs) / 2;
+        final stacked =
+            halfWidth < _minSideBySideWidth ||
+            textScale > _maxSideBySideTextScale;
+
+        final playAgain = GameButton(
+          label: 'Play Again',
+          compact: stacked,
+          onPressed: onPlayAgain,
+        );
+        final returnHome = GameButton(
+          label: 'Return Home',
+          style: GameButtonStyle.sky,
+          compact: stacked,
+          onPressed: onReturnHome,
+        );
+
+        if (stacked) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              playAgain,
+              const SizedBox(height: AppSpacing.xxs),
+              returnHome,
+            ],
+          );
+        }
+        return Row(
+          children: [
+            Expanded(child: playAgain),
+            const SizedBox(width: AppSpacing.xs),
+            Expanded(child: returnHome),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _SlideIn extends StatelessWidget {
+  const _SlideIn({required this.animation, required this.child});
+
+  final Animation<double> animation;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: animation,
+      child: SlideTransition(
+        position: Tween(
+          begin: const Offset(0, 0.25),
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
+      ),
+    );
+  }
+}
+
 class _WinnerBanner extends StatelessWidget {
-  const _WinnerBanner({required this.room, required this.ranked});
+  const _WinnerBanner({
+    required this.room,
+    required this.ranked,
+    required this.pop,
+  });
 
   final Room room;
   final List<LeaderboardEntry> ranked;
+  final Animation<double> pop;
 
   String get _headline {
     final leaders = ranked.where((entry) => entry.rank == 1).toList();
@@ -127,10 +256,13 @@ class _WinnerBanner extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         children: [
-          const Icon(
-            Icons.emoji_events_rounded,
-            color: AppColors.sunshine,
-            size: 56,
+          ScaleTransition(
+            scale: pop,
+            child: const Icon(
+              Icons.emoji_events_rounded,
+              color: AppColors.sunshine,
+              size: 56,
+            ),
           ),
           Text(
             _headline,
@@ -152,6 +284,7 @@ class _PlayerResultCard extends StatelessWidget {
     required this.roundScore,
     required this.lines,
     required this.isMe,
+    required this.counting,
   });
 
   /// Answers worth the full 10 points were unique, which earns a star.
@@ -163,12 +296,14 @@ class _PlayerResultCard extends StatelessWidget {
   final ScoreLine roundScore;
   final List<AnswerLine> lines;
   final bool isMe;
+  final Animation<double> counting;
 
   @override
   Widget build(BuildContext context) {
     final stars = lines
         .where((line) => line.points == _uniqueAnswerPoints)
         .length;
+    final previousTotal = gameScore.total - roundScore.total;
 
     return GameCard(
       padding: EdgeInsets.zero,
@@ -208,9 +343,25 @@ class _PlayerResultCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: AppSpacing.xs),
-                Text(
-                  ScoringRules.formatPoints(gameScore.total),
-                  style: AppText.heading,
+                AnimatedBuilder(
+                  animation: counting,
+                  builder: (context, _) {
+                    final shown =
+                        previousTotal +
+                        (roundScore.total * counting.value).round();
+                    // Big totals shrink to fit rather than squeeze the name.
+                    return ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 76),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          ScoringRules.formatPoints(shown),
+                          style: AppText.heading,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),

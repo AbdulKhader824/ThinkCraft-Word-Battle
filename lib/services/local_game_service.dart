@@ -99,12 +99,14 @@ class LocalGameService implements GameService {
   Future<void> createRoom({
     required String playerName,
     required int playerCount,
+    int avatarIndex = 0,
   }) async {
     _startSession(
       code: _generateRoomCode(),
       players: _buildPlayers(
         playerName: playerName,
         playerCount: playerCount,
+        avatarIndex: avatarIndex,
         localIsHost: true,
       ),
     );
@@ -114,12 +116,14 @@ class LocalGameService implements GameService {
   Future<void> joinRoom({
     required String playerName,
     required String roomCode,
+    int avatarIndex = 0,
   }) async {
     _startSession(
       code: roomCode,
       players: _buildPlayers(
         playerName: playerName,
         playerCount: 3 + _random.nextInt(4),
+        avatarIndex: avatarIndex,
         localIsHost: false,
       ),
     );
@@ -309,10 +313,15 @@ class LocalGameService implements GameService {
   List<Player> _buildPlayers({
     required String playerName,
     required int playerCount,
+    required int avatarIndex,
     required bool localIsHost,
   }) {
+    // The player's character comes first; bots share out the rest.
+    final mine = avatarIndex.clamp(0, _avatarCount - 1);
     final avatars = List.generate(_avatarCount, (index) => index)
-      ..shuffle(_random);
+      ..shuffle(_random)
+      ..remove(mine)
+      ..insert(0, mine);
     final names =
         _botNames
             .where((name) => name.toLowerCase() != playerName.toLowerCase())

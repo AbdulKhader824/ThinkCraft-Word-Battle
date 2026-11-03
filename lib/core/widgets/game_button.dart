@@ -31,12 +31,17 @@ class GameButton extends StatefulWidget {
     required this.onPressed,
     this.icon,
     this.style = GameButtonStyle.mint,
+    this.compact = false,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
   final GameButtonStyle style;
+
+  /// A smaller button with smaller text, for secondary actions side by side.
+  /// It still meets the minimum tap size.
+  final bool compact;
 
   @override
   State<GameButton> createState() => _GameButtonState();
@@ -75,27 +80,36 @@ class _GameButtonState extends State<GameButton> {
           onTap: widget.onPressed,
           onHighlightChanged: (value) => setState(() => _pressed = value),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: AppSizes.mainButton,
+            constraints: BoxConstraints(
+              minHeight: widget.compact
+                  ? AppSizes.minTapTarget
+                  : AppSizes.mainButton,
               minWidth: double.infinity,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.lg,
-                vertical: AppSpacing.sm,
+              padding: EdgeInsets.symmetric(
+                horizontal: widget.compact ? AppSpacing.sm : AppSpacing.lg,
+                vertical: AppSpacing.xs,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   if (widget.icon != null) ...[
-                    Icon(widget.icon, color: textColor, size: 28),
-                    const SizedBox(width: AppSpacing.sm),
+                    Icon(
+                      widget.icon,
+                      color: textColor,
+                      size: widget.compact ? 22 : 28,
+                    ),
+                    SizedBox(
+                      width: widget.compact ? AppSpacing.xs : AppSpacing.sm,
+                    ),
                   ],
                   Flexible(
                     child: Text(
                       widget.label,
                       textAlign: TextAlign.center,
-                      style: AppText.button.copyWith(color: textColor),
+                      style: (widget.compact ? AppText.label : AppText.button)
+                          .copyWith(color: textColor),
                     ),
                   ),
                 ],

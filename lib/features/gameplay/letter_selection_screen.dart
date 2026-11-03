@@ -137,6 +137,7 @@ class _LetterTile extends StatelessWidget {
             child: Center(
               child: Text(
                 letter,
+                textScaler: TextScaler.noScaling,
                 style: AppText.title.copyWith(
                   fontSize: size * 0.5,
                   color: isUsed ? AppColors.disabledText : AppColors.navy,

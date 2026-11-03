@@ -4,13 +4,28 @@ import 'package:thinkcraft_word_battle/models/answer_group.dart';
 import 'package:thinkcraft_word_battle/models/category.dart';
 import 'package:thinkcraft_word_battle/models/game_phase.dart';
 import 'package:thinkcraft_word_battle/models/player.dart';
+import 'package:thinkcraft_word_battle/models/player_profile.dart';
 import 'package:thinkcraft_word_battle/models/room.dart';
 import 'package:thinkcraft_word_battle/models/round.dart';
 import 'package:thinkcraft_word_battle/models/round_results.dart';
 import 'package:thinkcraft_word_battle/models/vote.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
+import 'package:thinkcraft_word_battle/services/profile_store.dart';
 
 const localId = 'me';
+
+/// Keeps the profile in memory instead of on the device.
+class MemoryProfileStore implements ProfileStore {
+  MemoryProfileStore([this.saved = const PlayerProfile()]);
+
+  PlayerProfile saved;
+
+  @override
+  PlayerProfile load() => saved;
+
+  @override
+  Future<void> save(PlayerProfile profile) async => saved = profile;
+}
 
 Player fakePlayer(
   String id, {
@@ -59,12 +74,14 @@ class FakeGameService implements GameService {
   Future<void> createRoom({
     required String playerName,
     required int playerCount,
+    int avatarIndex = 0,
   }) async => calls.add('createRoom');
 
   @override
   Future<void> joinRoom({
     required String playerName,
     required String roomCode,
+    int avatarIndex = 0,
   }) async => calls.add('joinRoom');
 
   @override

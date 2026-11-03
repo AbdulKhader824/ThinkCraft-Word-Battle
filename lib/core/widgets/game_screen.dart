@@ -74,6 +74,44 @@ class GameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return GameFrame(
+      child: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight - AppSpacing.md * 2,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (title != null) ...[
+                  _Header(title: title!, onBack: onBack),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+                child,
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The base of every screen: background, safe area, and a width limit so
+/// layouts stay phone-shaped on tablets and wide browser windows.
+///
+/// Screens with their own layout, such as a fixed header above a scrolling
+/// list, use this directly instead of [GameScreen].
+class GameFrame extends StatelessWidget {
+  const GameFrame({super.key, required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: GameBackground(
         child: SafeArea(
@@ -82,27 +120,7 @@ class GameScreen extends StatelessWidget {
               constraints: const BoxConstraints(
                 maxWidth: AppSizes.maxContentWidth,
               ),
-              child: LayoutBuilder(
-                builder: (context, constraints) => SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight - AppSpacing.md * 2,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (title != null) ...[
-                          _Header(title: title!, onBack: onBack),
-                          const SizedBox(height: AppSpacing.md),
-                        ],
-                        child,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
+              child: child,
             ),
           ),
         ),

@@ -9,6 +9,7 @@ import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/game_text_field.dart';
 import '../../services/game_providers.dart';
+import '../../services/profile_store.dart';
 import '../../services/rules/room_input_rules.dart';
 import 'room_form_widgets.dart';
 
@@ -21,7 +22,9 @@ class JoinRoomScreen extends ConsumerStatefulWidget {
 
 class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  late final _nameController = TextEditingController(
+    text: ref.read(profileProvider).name,
+  );
   final _codeController = TextEditingController();
 
   @override
@@ -36,11 +39,15 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final name = RoomInputRules.cleanName(_nameController.text);
+    final profile = ref.read(profileProvider).copyWith(name: name);
+    await ref.read(profileProvider.notifier).save(profile);
     await ref
         .read(gameServiceProvider)
         .joinRoom(
-          playerName: RoomInputRules.cleanName(_nameController.text),
+          playerName: name,
           roomCode: _codeController.text,
+          avatarIndex: profile.avatarIndex,
         );
   }
 

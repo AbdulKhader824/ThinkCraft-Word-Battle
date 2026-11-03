@@ -105,6 +105,10 @@ These settle conflicts and gaps in the briefs.
 | Tied leaderboard | Shared rank with the next rank skipped, so 1, 2, 2, 4 |
 | Play Again as a guest | Allowed in practice mode; Phase 5 should make it host-only |
 | Every letter used | The used letters reset after 26 rounds |
+| Saved profile | Name and character are kept with shared_preferences; Create and Join fill in the name and save any change |
+| Large text | System text size is supported up to 1.6x (`ThinkCraftApp.maxTextScale`); letter tiles ignore it |
+| Confetti | Only when the local player is in first place, and never with reduced motion |
+| Orientation | Portrait only, set in the Android manifest and in `main.dart` |
 | Player name | 2-12 letters, numbers or spaces |
 | Room code | 6 characters from A-Z and 2-9, without I, O, 0 or 1 |
 
@@ -112,8 +116,8 @@ These settle conflicts and gaps in the briefs.
 
 - [x] Phase 1: foundation (approved)
 - [x] Phase 2: lobby and answers (approved)
-- [x] Phase 3: voting and scoring (awaiting approval)
-- [ ] Phase 4: polish and APK
+- [x] Phase 3: voting and scoring (approved)
+- [x] Phase 4: polish and APK (awaiting approval)
 - Phase 5 needs separate approval.
 
 ## Commands
@@ -125,7 +129,22 @@ flutter run -d chrome
 flutter emulators --launch Medium_Phone_API_35
 flutter run
 flutter build apk --debug
+flutter build apk --release
 ```
+
+Tests load the real Fredoka and Nunito fonts in `test/flutter_test_config.dart`,
+so layout tests measure text as a phone draws it. Keep that file.
+
+To change the app icon or splash, edit `assets/images/logo.svg`, then run:
+
+```powershell
+flutter test tool/render_brand_assets_test.dart
+dart run flutter_launcher_icons
+dart run flutter_native_splash:create
+```
+
+The release APK is signed with the debug key, which is fine for installing
+on test phones but not for the Play Store. Phase 5 needs a real upload key.
 
 `Medium_Phone_API_35` is the default emulator, because the Pixel 9 one uses
 about 7.5 GB of RAM.

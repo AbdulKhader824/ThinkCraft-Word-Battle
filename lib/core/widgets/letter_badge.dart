@@ -30,8 +30,10 @@ class LetterBadge extends StatelessWidget {
             ),
           ],
         ),
+        // Already huge, and sized to its tile, so system text size is ignored.
         child: Text(
           letter,
+          textScaler: TextScaler.noScaling,
           style: AppText.display.copyWith(fontSize: size * 0.6, height: 1),
         ),
       ),

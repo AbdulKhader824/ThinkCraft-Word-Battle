@@ -9,6 +9,7 @@ import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/game_text_field.dart';
 import '../../services/game_providers.dart';
+import '../../services/profile_store.dart';
 import '../../services/rules/room_input_rules.dart';
 import 'room_form_widgets.dart';
 
@@ -21,7 +22,9 @@ class CreateRoomScreen extends ConsumerStatefulWidget {
 
 class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  late final _nameController = TextEditingController(
+    text: ref.read(profileProvider).name,
+  );
   int _playerCount = 4;
 
   @override
@@ -30,16 +33,20 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     super.dispose();
   }
 
-  /// Creates the room. The router then moves to the Lobby by itself, because
-  /// the game's phase has changed.
+  /// Remembers the name, then creates the room. The router moves to the
+  /// Lobby by itself, because the game's phase has changed.
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
+    final name = RoomInputRules.cleanName(_nameController.text);
+    final profile = ref.read(profileProvider).copyWith(name: name);
+    await ref.read(profileProvider.notifier).save(profile);
     await ref
         .read(gameServiceProvider)
         .createRoom(
-          playerName: RoomInputRules.cleanName(_nameController.text),
+          playerName: name,
           playerCount: _playerCount,
+          avatarIndex: profile.avatarIndex,
         );
   }
 

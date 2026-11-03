@@ -18,12 +18,18 @@ abstract interface class GameService {
   /// The id of the person using this device.
   String? get localPlayerId;
 
+  /// [avatarIndex] is the player's chosen character; bots get the others.
   Future<void> createRoom({
     required String playerName,
     required int playerCount,
+    int avatarIndex = 0,
   });
 
-  Future<void> joinRoom({required String playerName, required String roomCode});
+  Future<void> joinRoom({
+    required String playerName,
+    required String roomCode,
+    int avatarIndex = 0,
+  });
 
   /// Marks the local player as ready or not. Hosts are always ready.
   Future<void> setReady(bool isReady);

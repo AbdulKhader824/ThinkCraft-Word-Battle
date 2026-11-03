@@ -40,40 +40,40 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
-    return Scaffold(
-      body: GameBackground(
-        child: SafeArea(
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: reduceMotion ? 1 : 0.7, end: 1),
-                duration: AppDurations.slow,
-                curve: Curves.easeOutBack,
-                builder: (context, scale, child) =>
-                    Transform.scale(scale: scale, child: child),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    SvgPicture.asset(
-                      AppAssets.logo,
-                      width: 200,
-                      semanticsLabel: '${AppStrings.appName} logo',
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      AppStrings.appName,
-                      textAlign: TextAlign.center,
-                      style: AppText.title,
-                    ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      AppStrings.tagline,
-                      textAlign: TextAlign.center,
-                      style: AppText.body,
-                    ),
-                  ],
-                ),
+    return GameFrame(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: reduceMotion ? 1 : 0.7, end: 1),
+            duration: AppDurations.slow,
+            curve: Curves.easeOutBack,
+            builder: (context, scale, child) =>
+                Transform.scale(scale: scale, child: child),
+            // Shrinks on small phones with large text, since nothing scrolls.
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SvgPicture.asset(
+                    AppAssets.logo,
+                    width: 200,
+                    semanticsLabel: '${AppStrings.appName} logo',
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    AppStrings.appName,
+                    textAlign: TextAlign.center,
+                    style: AppText.title,
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    AppStrings.tagline,
+                    textAlign: TextAlign.center,
+                    style: AppText.body,
+                  ),
+                ],
               ),
             ),
           ),

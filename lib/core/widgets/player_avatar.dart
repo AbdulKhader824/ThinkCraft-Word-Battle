@@ -8,17 +8,6 @@ import '../theme/app_colors.dart';
 class PlayerAvatar extends StatelessWidget {
   const PlayerAvatar({super.key, required this.index, this.size = 56});
 
-  static const _backgrounds = [
-    Color(0xFFE3F4FF),
-    Color(0xFFFFF4CC),
-    Color(0xFFEDE6FB),
-    Color(0xFFFFE6E3),
-    Color(0xFFE3F9EF),
-    Color(0xFFFFEEDD),
-    Color(0xFFE3F4FF),
-    Color(0xFFEDE6FB),
-  ];
-
   final int index;
   final double size;
 
@@ -32,10 +21,13 @@ class PlayerAvatar extends StatelessWidget {
       padding: EdgeInsets.all(size * 0.12),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: _backgrounds[position],
+        color: AppColors.avatarTints[position],
         border: Border.all(color: AppColors.surface, width: 3),
       ),
-      child: SvgPicture.asset(AppAssets.animals[position]),
+      child: SvgPicture.asset(
+        AppAssets.animals[position],
+        semanticsLabel: AppAssets.animalNames[position],
+      ),
     );
   }
 }

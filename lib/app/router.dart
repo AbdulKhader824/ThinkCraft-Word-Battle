@@ -11,6 +11,8 @@ import '../features/lobby/create_room_screen.dart';
 import '../features/lobby/join_room_screen.dart';
 import '../features/lobby/lobby_screen.dart';
 import '../features/results/results_screen.dart';
+import '../features/settings/how_to_play_screen.dart';
+import '../features/settings/settings_screen.dart';
 import '../features/validation/validation_screen.dart';
 import '../models/game_phase.dart';
 import '../services/game_providers.dart';
@@ -21,6 +23,8 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const createRoom = '/create';
   static const joinRoom = '/join';
+  static const settings = '/settings';
+  static const howToPlay = '/how-to-play';
   static const lobby = '/lobby';
   static const letterSelection = '/letter';
   static const answering = '/answers';
@@ -112,6 +116,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       _route(AppRoutes.home, const HomeScreen()),
       _route(AppRoutes.createRoom, const CreateRoomScreen()),
       _route(AppRoutes.joinRoom, const JoinRoomScreen()),
+      _route(AppRoutes.settings, const SettingsScreen()),
+      _route(AppRoutes.howToPlay, const HowToPlayScreen()),
       _route(AppRoutes.lobby, const LobbyScreen()),
       _route(AppRoutes.letterSelection, const LetterSelectionScreen()),
       _route(AppRoutes.answering, const AnswerScreen()),

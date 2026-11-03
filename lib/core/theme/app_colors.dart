@@ -25,10 +25,23 @@ abstract final class AppColors {
   static const silver = Color(0xFF8A94A6);
   static const bronze = Color(0xFFB5763A);
 
+  /// Soft circles behind each player's character.
+  static const avatarTints = [
+    Color(0xFFE3F4FF),
+    Color(0xFFFFF4CC),
+    Color(0xFFEDE6FB),
+    Color(0xFFFFE6E3),
+    Color(0xFFE3F9EF),
+    Color(0xFFFFEEDD),
+    Color(0xFFDFF3FF),
+    Color(0xFFF3ECFF),
+  ];
+
   static const background = Color(0xFFF4FBFF);
   static const backgroundMint = Color(0xFFE3F9EF);
   static const surface = Colors.white;
   static const outline = Color(0xFFD5DEEC);
   static const disabled = Color(0xFFDDE3EC);
-  static const disabledText = Color(0xFF5C6680);
+  // Darkened from 0xFF5C6680, which only reached 4.44:1 on [disabled].
+  static const disabledText = Color(0xFF4F5973);
 }

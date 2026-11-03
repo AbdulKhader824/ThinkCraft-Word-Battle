@@ -21,4 +21,14 @@ abstract final class AppAssets {
   static const bunny = 'assets/images/animals/bunny.svg';
 
   static const animals = [fox, penguin, owl, cat, bear, parrot, frog, bunny];
+  static const animalNames = [
+    'Fox',
+    'Penguin',
+    'Owl',
+    'Cat',
+    'Bear',
+    'Parrot',
+    'Frog',
+    'Bunny',
+  ];
 }

@@ -86,74 +86,63 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
     final service = ref.read(gameServiceProvider);
 
     return LeaveGameGuard(
-      child: Scaffold(
-        body: GameBackground(
-          child: SafeArea(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(
-                  maxWidth: AppSizes.maxContentWidth,
+      child: GameFrame(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            _RoundHeader(letter: letter, deadline: deadline),
+            // Outside the scrolling list, so it shows even when the
+            // player locks in from the bottom of the list.
+            if (locked)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  0,
+                  AppSpacing.md,
+                  AppSpacing.xs,
+                ),
+                child: _LockedBanner(room: room),
+              ),
+            Expanded(
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.md,
+                  AppSpacing.xxs,
+                  AppSpacing.md,
+                  AppSpacing.lg,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    _RoundHeader(letter: letter, deadline: deadline),
-                    // Outside the scrolling list, so it shows even when the
-                    // player locks in from the bottom of the list.
-                    if (locked)
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.md,
-                          0,
-                          AppSpacing.md,
-                          AppSpacing.xs,
-                        ),
-                        child: _LockedBanner(room: room),
+                    for (final category in Category.values) ...[
+                      _CategoryCard(
+                        category: category,
+                        letter: letter,
+                        controller: _controllers[category]!,
+                        locked: locked,
+                        isLast: category == lastCategory,
+                        onChanged: (text) {
+                          service.updateAnswer(category, text);
+                          setState(() {});
+                        },
                       ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        keyboardDismissBehavior:
-                            ScrollViewKeyboardDismissBehavior.onDrag,
-                        padding: const EdgeInsets.fromLTRB(
-                          AppSpacing.md,
-                          AppSpacing.xxs,
-                          AppSpacing.md,
-                          AppSpacing.lg,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            for (final category in Category.values) ...[
-                              _CategoryCard(
-                                category: category,
-                                letter: letter,
-                                controller: _controllers[category]!,
-                                locked: locked,
-                                isLast: category == lastCategory,
-                                onChanged: (text) {
-                                  service.updateAnswer(category, text);
-                                  setState(() {});
-                                },
-                              ),
-                              const SizedBox(height: AppSpacing.sm),
-                            ],
-                            if (!locked) ...[
-                              const SizedBox(height: AppSpacing.xs),
-                              GameButton(
-                                label: 'Lock In Answers',
-                                icon: Icons.lock_rounded,
-                                onPressed: _submit,
-                              ),
-                            ],
-                          ],
-                        ),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
+                    if (!locked) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      GameButton(
+                        label: 'Lock In Answers',
+                        icon: Icons.lock_rounded,
+                        onPressed: _submit,
                       ),
-                    ),
+                    ],
                   ],
                 ),
               ),
             ),
-          ),
+          ],
         ),
       ),
     );

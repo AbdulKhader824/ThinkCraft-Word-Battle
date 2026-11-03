@@ -49,6 +49,30 @@ class HomeScreen extends StatelessWidget {
             style: GameButtonStyle.sunshine,
             onPressed: () => context.push(AppRoutes.joinRoom),
           ),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            children: [
+              Expanded(
+                child: GameButton(
+                  label: 'How to Play',
+                  icon: Icons.menu_book_rounded,
+                  style: GameButtonStyle.lavender,
+                  compact: true,
+                  onPressed: () => context.push(AppRoutes.howToPlay),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: GameButton(
+                  label: 'Settings',
+                  icon: Icons.settings_rounded,
+                  style: GameButtonStyle.sky,
+                  compact: true,
+                  onPressed: () => context.push(AppRoutes.settings),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

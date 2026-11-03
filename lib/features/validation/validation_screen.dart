@@ -37,7 +37,7 @@ class ValidationScreen extends ConsumerWidget {
 
     return LeaveGameGuard(
       child: GameScreen(
-        title: 'Vote!',
+        title: item == null ? 'Votes are in!' : 'Vote!',
         onBack: () => confirmLeaveGame(context, ref),
         child: AnimatedSwitcher(
           duration: reduceMotion ? Duration.zero : AppDurations.medium,
