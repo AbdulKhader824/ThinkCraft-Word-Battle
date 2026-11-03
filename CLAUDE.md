@@ -92,14 +92,18 @@ These settle conflicts and gaps in the briefs.
 | Play Again | Next round in the same room, with running totals |
 | Return Home | Clears the room and scores |
 | Simulation | 1 human and 1-7 bots, with some deliberately wrong bot answers |
-| Join Room | Any valid code joins a room labelled Practice mode |
+| Join Room | Any valid code joins a room labelled Practice mode, with a bot as host |
+| Host ready status | The host is always ready, and starts once everyone else is |
+| Bot speed | Bots take 25-80 seconds, or 1-5 seconds once the player locks in |
+| Blank answers | Locking in early with blanks asks for confirmation first |
+| Hidden answers | `Round.answers` stays empty until everyone has locked in |
 | Player name | 2-12 letters, numbers or spaces |
 | Room code | 6 characters from A-Z and 2-9, without I, O, 0 or 1 |
 
 ## Phase status
 
-- [x] Phase 1: foundation (awaiting approval)
-- [ ] Phase 2: lobby and answers
+- [x] Phase 1: foundation (approved)
+- [x] Phase 2: lobby and answers (awaiting approval)
 - [ ] Phase 3: voting and scoring
 - [ ] Phase 4: polish and APK
 - Phase 5 needs separate approval.

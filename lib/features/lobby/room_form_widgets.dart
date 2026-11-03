@@ -51,6 +51,38 @@ class PracticeModeNote extends StatelessWidget {
   }
 }
 
+/// A small label for the Lobby, where space is tight.
+class PracticeModeChip extends StatelessWidget {
+  const PracticeModeChip({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.sm,
+        vertical: AppSpacing.xxs,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.sunshine,
+        borderRadius: BorderRadius.circular(AppRadius.pill),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.smart_toy_rounded, color: AppColors.navy, size: 18),
+          const SizedBox(width: AppSpacing.xxs),
+          Flexible(
+            child: Text(
+              'Practice mode: simulated players',
+              style: AppText.bodySmall,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// Large number tiles for choosing how many players are in the room.
 class PlayerCountPicker extends StatelessWidget {
   const PlayerCountPicker({

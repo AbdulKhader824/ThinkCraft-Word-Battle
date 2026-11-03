@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:thinkcraft_word_battle/features/lobby/create_room_screen.dart';
-import 'package:thinkcraft_word_battle/features/lobby/join_room_screen.dart';
-import 'package:thinkcraft_word_battle/features/lobby/room_entry_provider.dart';
-import 'package:thinkcraft_word_battle/models/room_entry.dart';
+import 'package:thinkcraft_word_battle/app/router.dart';
+import 'package:thinkcraft_word_battle/services/game_service.dart';
 
 import '../../helpers.dart';
 
@@ -14,12 +11,7 @@ String _fieldText(WidgetTester tester, int index) {
   return tester.widget<TextFormField>(_fields.at(index)).controller!.text;
 }
 
-RoomEntry? _savedEntry(WidgetTester tester, Type screen) {
-  final container = ProviderScope.containerOf(
-    tester.element(find.byType(screen)),
-  );
-  return container.read(roomEntryProvider);
-}
+GameService _service(WidgetTester tester) => gameService(tester);
 
 void main() {
   group('Create Room', () {
@@ -34,7 +26,7 @@ void main() {
       expect(find.textContaining('Practice mode'), findsOneWidget);
     });
 
-    testWidgets('an empty name shows an error and saves nothing', (
+    testWidgets('an empty name shows an error and creates nothing', (
       tester,
     ) async {
       await openCreateRoom(tester);
@@ -42,20 +34,22 @@ void main() {
       await tapAndSettle(tester, buttonLabelled('Create Room'));
 
       expect(find.text('Type your name to play.'), findsOneWidget);
-      expect(_savedEntry(tester, CreateRoomScreen), isNull);
+      expect(_service(tester).room, isNull);
     });
 
-    testWidgets('a valid form saves the name and player count', (tester) async {
+    testWidgets('a valid form creates the room and opens the Lobby', (
+      tester,
+    ) async {
       await openCreateRoom(tester);
 
       await tester.enterText(_fields.first, '  Sam  ');
       await tapAndSettle(tester, find.byKey(const ValueKey('player-count-6')));
       await tapAndSettle(tester, buttonLabelled('Create Room'));
 
-      final entry = _savedEntry(tester, CreateRoomScreen);
-      expect(entry?.playerName, 'Sam');
-      expect(entry?.playerCount, 6);
-      expect(find.textContaining('Room ready, Sam!'), findsOneWidget);
+      final room = _service(tester).room!;
+      expect(room.host.name, 'Sam');
+      expect(room.players, hasLength(6));
+      expect(currentRoute(tester), AppRoutes.lobby);
     });
 
     testWidgets('offers exactly 2 to 8 players', (tester) async {
@@ -90,14 +84,14 @@ void main() {
       expect(find.textContaining('Practice mode'), findsOneWidget);
     });
 
-    testWidgets('empty fields show errors and save nothing', (tester) async {
+    testWidgets('empty fields show errors and join nothing', (tester) async {
       await openJoinRoom(tester);
 
       await tapAndSettle(tester, buttonLabelled('Join Room'));
 
       expect(find.text('Type your name to play.'), findsOneWidget);
       expect(find.text('Type the room code.'), findsOneWidget);
-      expect(_savedEntry(tester, JoinRoomScreen), isNull);
+      expect(_service(tester).room, isNull);
     });
 
     testWidgets('a short code is rejected', (tester) async {
@@ -108,7 +102,7 @@ void main() {
       await tapAndSettle(tester, buttonLabelled('Join Room'));
 
       expect(find.text('Room codes have 6 characters.'), findsOneWidget);
-      expect(_savedEntry(tester, JoinRoomScreen), isNull);
+      expect(_service(tester).room, isNull);
     });
 
     testWidgets('typed codes become capitals and drop bad characters', (
@@ -122,17 +116,17 @@ void main() {
       expect(_fieldText(tester, 1), 'ABC234');
     });
 
-    testWidgets('a valid form saves the name and code', (tester) async {
+    testWidgets('a valid form joins the room and opens the Lobby', (
+      tester,
+    ) async {
       await openJoinRoom(tester);
 
       await tester.enterText(_fields.at(0), 'Sam');
       await tester.enterText(_fields.at(1), 'abc234');
       await tapAndSettle(tester, buttonLabelled('Join Room'));
 
-      final entry = _savedEntry(tester, JoinRoomScreen);
-      expect(entry?.playerName, 'Sam');
-      expect(entry?.roomCode, 'ABC234');
-      expect(find.textContaining('Code ABC234 accepted!'), findsOneWidget);
+      expect(_service(tester).room!.code, 'ABC234');
+      expect(currentRoute(tester), AppRoutes.lobby);
     });
   });
 }

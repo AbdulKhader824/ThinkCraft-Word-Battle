@@ -10,4 +10,15 @@ abstract final class AppStrings {
 abstract final class AppAssets {
   static const logo = 'assets/images/logo.svg';
   static const tilo = 'assets/images/tilo.svg';
+
+  static const fox = 'assets/images/animals/fox.svg';
+  static const penguin = 'assets/images/animals/penguin.svg';
+  static const owl = 'assets/images/animals/owl.svg';
+  static const cat = 'assets/images/animals/cat.svg';
+  static const bear = 'assets/images/animals/bear.svg';
+  static const parrot = 'assets/images/animals/parrot.svg';
+  static const frog = 'assets/images/animals/frog.svg';
+  static const bunny = 'assets/images/animals/bunny.svg';
+
+  static const animals = [fox, penguin, owl, cat, bear, parrot, frog, bunny];
 }

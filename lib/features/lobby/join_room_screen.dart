@@ -8,9 +8,8 @@ import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/game_text_field.dart';
-import '../../models/room_entry.dart';
+import '../../services/game_providers.dart';
 import '../../services/rules/room_input_rules.dart';
-import 'room_entry_provider.dart';
 import 'room_form_widgets.dart';
 
 class JoinRoomScreen extends ConsumerStatefulWidget {
@@ -32,20 +31,17 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  /// Joins the room. The router then moves to the Lobby by itself, because
+  /// the game's phase has changed.
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final name = RoomInputRules.cleanName(_nameController.text);
-    final code = _codeController.text;
-    ref
-        .read(roomEntryProvider.notifier)
-        .save(RoomEntry.join(playerName: name, roomCode: code));
-
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('Code $code accepted! The Lobby comes next.')),
-      );
+    await ref
+        .read(gameServiceProvider)
+        .joinRoom(
+          playerName: RoomInputRules.cleanName(_nameController.text),
+          roomCode: _codeController.text,
+        );
   }
 
   @override

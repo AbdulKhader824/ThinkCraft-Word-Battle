@@ -8,9 +8,8 @@ import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/game_text_field.dart';
-import '../../models/room_entry.dart';
+import '../../services/game_providers.dart';
 import '../../services/rules/room_input_rules.dart';
-import 'room_entry_provider.dart';
 import 'room_form_widgets.dart';
 
 class CreateRoomScreen extends ConsumerStatefulWidget {
@@ -31,19 +30,17 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  /// Creates the room. The router then moves to the Lobby by itself, because
+  /// the game's phase has changed.
+  Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final name = RoomInputRules.cleanName(_nameController.text);
-    ref
-        .read(roomEntryProvider.notifier)
-        .save(RoomEntry.create(playerName: name, playerCount: _playerCount));
-
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(content: Text('Room ready, $name! The Lobby comes next.')),
-      );
+    await ref
+        .read(gameServiceProvider)
+        .createRoom(
+          playerName: RoomInputRules.cleanName(_nameController.text),
+          playerCount: _playerCount,
+        );
   }
 
   @override

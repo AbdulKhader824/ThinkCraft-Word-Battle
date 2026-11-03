@@ -5,27 +5,35 @@ import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text.dart';
 
-/// A large labelled text input with big rounded corners.
+/// A large text input with big rounded corners.
 class GameTextField extends StatelessWidget {
   const GameTextField({
     super.key,
-    required this.label,
     required this.hint,
     required this.controller,
-    required this.validator,
+    this.label,
+    this.validator,
     this.inputFormatters,
     this.textCapitalization = TextCapitalization.words,
     this.textInputAction = TextInputAction.next,
+    this.enabled = true,
+    this.onChanged,
     this.onSubmitted,
   });
 
-  final String label;
+  /// Extra room kept below a field when the keyboard scrolls it into view,
+  /// so a warning under the field isn't hidden.
+  static const _keyboardPadding = EdgeInsets.fromLTRB(20, 20, 20, 72);
+
+  final String? label;
   final String hint;
   final TextEditingController controller;
-  final String? Function(String?) validator;
+  final String? Function(String?)? validator;
   final List<TextInputFormatter>? inputFormatters;
   final TextCapitalization textCapitalization;
   final TextInputAction textInputAction;
+  final bool enabled;
+  final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
 
   OutlineInputBorder _border(Color color) {
@@ -40,15 +48,20 @@ class GameTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: AppText.label),
-        const SizedBox(height: AppSpacing.xs),
+        if (label != null) ...[
+          Text(label!, style: AppText.label),
+          const SizedBox(height: AppSpacing.xs),
+        ],
         TextFormField(
           controller: controller,
           validator: validator,
+          enabled: enabled,
           inputFormatters: inputFormatters,
           textCapitalization: textCapitalization,
           textInputAction: textInputAction,
+          onChanged: onChanged,
           onFieldSubmitted: onSubmitted,
+          scrollPadding: _keyboardPadding,
           autocorrect: false,
           enableSuggestions: false,
           style: AppText.input,
@@ -64,6 +77,7 @@ class GameTextField extends StatelessWidget {
               vertical: 18,
             ),
             enabledBorder: _border(AppColors.outline),
+            disabledBorder: _border(AppColors.outline),
             focusedBorder: _border(AppColors.mintDeep),
             errorBorder: _border(AppColors.invalid),
             focusedErrorBorder: _border(AppColors.invalid),
