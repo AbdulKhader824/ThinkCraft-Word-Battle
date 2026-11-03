@@ -1,0 +1,84 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../app/router.dart';
+import '../../core/constants/app_constants.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/theme/app_text.dart';
+import '../../core/widgets/game_screen.dart';
+
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  static const displayTime = Duration(milliseconds: 1800);
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  late final Timer _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer(SplashScreen.displayTime, () {
+      if (mounted) context.go(AppRoutes.home);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
+    return Scaffold(
+      body: GameBackground(
+        child: SafeArea(
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: reduceMotion ? 1 : 0.7, end: 1),
+                duration: AppDurations.slow,
+                curve: Curves.easeOutBack,
+                builder: (context, scale, child) =>
+                    Transform.scale(scale: scale, child: child),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    SvgPicture.asset(
+                      AppAssets.logo,
+                      width: 200,
+                      semanticsLabel: '${AppStrings.appName} logo',
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    Text(
+                      AppStrings.appName,
+                      textAlign: TextAlign.center,
+                      style: AppText.title,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      AppStrings.tagline,
+                      textAlign: TextAlign.center,
+                      style: AppText.body,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
