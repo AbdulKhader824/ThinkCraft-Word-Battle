@@ -59,19 +59,21 @@ class _ReadyBadgeState extends State<ReadyBadge>
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
-    return AnimatedSwitcher(
-      duration: reduceMotion ? Duration.zero : AppDurations.medium,
-      transitionBuilder: (child, animation) => ScaleTransition(
-        scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
-        child: child,
+    return RepaintBoundary(
+      child: AnimatedSwitcher(
+        duration: reduceMotion ? Duration.zero : AppDurations.medium,
+        transitionBuilder: (child, animation) => ScaleTransition(
+          scale: CurvedAnimation(parent: animation, curve: Curves.easeOutBack),
+          child: child,
+        ),
+        child: widget.isReady
+            ? _content(key: const ValueKey('ready'), ready: true)
+            : FadeTransition(
+                key: const ValueKey('waiting'),
+                opacity: _pulse,
+                child: _content(ready: false),
+              ),
       ),
-      child: widget.isReady
-          ? _content(key: const ValueKey('ready'), ready: true)
-          : FadeTransition(
-              key: const ValueKey('waiting'),
-              opacity: _pulse,
-              child: _content(ready: false),
-            ),
     );
   }
 

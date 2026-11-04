@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../core/theme/app_spacing.dart';
 import '../features/gameplay/answer_screen.dart';
 import '../features/gameplay/letter_selection_screen.dart';
 import '../features/home/home_screen.dart';
@@ -71,23 +70,26 @@ void goBackOrHome(BuildContext context) {
   }
 }
 
+const _pageTransition = Duration(milliseconds: 300);
+
 Page<void> _gamePage(GoRouterState state, Widget child) {
   return CustomTransitionPage<void>(
     key: state.pageKey,
     child: child,
-    transitionDuration: AppDurations.medium,
-    reverseTransitionDuration: AppDurations.medium,
+    transitionDuration: _pageTransition,
+    reverseTransitionDuration: _pageTransition,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       if (MediaQuery.disableAnimationsOf(context)) return child;
 
-      final curved = CurvedAnimation(parent: animation, curve: Curves.easeOut);
+      // The new screen fades in while growing gently into place.
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutCubic,
+      );
       return FadeTransition(
         opacity: curved,
-        child: SlideTransition(
-          position: Tween(
-            begin: const Offset(0, 0.04),
-            end: Offset.zero,
-          ).animate(curved),
+        child: ScaleTransition(
+          scale: Tween(begin: 0.96, end: 1.0).animate(curved),
           child: child,
         ),
       );

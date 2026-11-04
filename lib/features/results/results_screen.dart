@@ -479,7 +479,7 @@ class _ScoreSummary extends StatelessWidget {
           label: 'Answers',
           value: ScoringRules.formatPoints(roundScore.answerPoints),
         ),
-        _ScoreChip(label: 'Validation', value: _validation),
+        _ScoreChip(label: 'Votes', value: _validation),
         _ScoreChip(
           label: 'Round',
           value: ScoringRules.formatPoints(roundScore.total),
@@ -571,8 +571,8 @@ class _VerdictChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, background, text) = switch (verdict) {
-      AnswerVerdict.valid => ('Valid', AppColors.valid, Colors.white),
-      AnswerVerdict.invalid => ('Invalid', AppColors.invalid, Colors.white),
+      AnswerVerdict.valid => ('Correct', AppColors.valid, Colors.white),
+      AnswerVerdict.invalid => ('Incorrect', AppColors.invalid, Colors.white),
       AnswerVerdict.disputed => ('Tied', AppColors.lavender, AppColors.navy),
       null => ('Empty', AppColors.disabled, AppColors.navy),
     };

@@ -80,17 +80,20 @@ class _CountdownRingState extends State<CountdownRing> {
     final seconds = (clamped.inMilliseconds / 1000).ceil();
     final progress = clamped.inMilliseconds / widget.total.inMilliseconds;
 
-    return Semantics(
-      label: '$seconds seconds left',
-      excludeSemantics: true,
-      child: SizedBox.square(
-        dimension: widget.size,
-        child: CustomPaint(
-          painter: _RingPainter(
-            progress: progress.clamp(0, 1),
-            color: _colorFor(seconds),
+    // The ring changes five times a second; only it is redrawn.
+    return RepaintBoundary(
+      child: Semantics(
+        label: '$seconds seconds left',
+        excludeSemantics: true,
+        child: SizedBox.square(
+          dimension: widget.size,
+          child: CustomPaint(
+            painter: _RingPainter(
+              progress: progress.clamp(0, 1),
+              color: _colorFor(seconds),
+            ),
+            child: Center(child: Text('$seconds', style: AppText.heading)),
           ),
-          child: Center(child: Text('$seconds', style: AppText.heading)),
         ),
       ),
     );

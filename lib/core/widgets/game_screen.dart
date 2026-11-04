@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import '../constants/app_constants.dart';
 
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
-import '../theme/app_text.dart';
+import 'rainbow_title.dart';
+import 'entrance.dart';
 
-/// The soft game background used behind every screen.
+/// The sky behind every screen: soft clouds, a smiling sun and a few
+/// stars. It never takes taps, and sits behind everything.
 class GameBackground extends StatelessWidget {
   const GameBackground({super.key, required this.child});
 
@@ -17,48 +22,47 @@ class GameBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.background, AppColors.backgroundMint],
+          colors: [AppColors.skyTop, AppColors.skyBottom],
         ),
       ),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          _bubble(top: -50, left: -40, size: 170, color: AppColors.sky),
-          _bubble(top: 90, right: -56, size: 130, color: AppColors.sunshine),
-          _bubble(
-            bottom: -60,
-            right: -30,
-            size: 190,
-            color: AppColors.lavender,
+          // The scenery never changes, so it's drawn once and reused.
+          RepaintBoundary(
+            child: IgnorePointer(
+              child: Stack(
+                children: [
+                  _sticker(AppAssets.sun, top: -34, right: -34, width: 130),
+                  _sticker(AppAssets.cloud, top: 70, left: -40, width: 150),
+                  _sticker(AppAssets.cloud, top: 230, right: -50, width: 120),
+                  _sticker(AppAssets.cloud, bottom: 40, left: -30, width: 170),
+                  _sticker(AppAssets.star, top: 14, left: 18, width: 26),
+                  _sticker(AppAssets.star, bottom: 150, right: 14, width: 30),
+                ],
+              ),
+            ),
           ),
-          _bubble(bottom: 110, left: -60, size: 120, color: AppColors.coral),
           child,
         ],
       ),
     );
   }
 
-  Widget _bubble({
+  Widget _sticker(
+    String asset, {
     double? top,
     double? bottom,
     double? left,
     double? right,
-    required double size,
-    required Color color,
+    required double width,
   }) {
     return Positioned(
       top: top,
       bottom: bottom,
       left: left,
       right: right,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: color.withValues(alpha: 0.22),
-        ),
-      ),
+      child: SvgPicture.asset(asset, width: width),
     );
   }
 }
@@ -87,10 +91,12 @@ class GameScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 if (title != null) ...[
-                  _Header(title: title!, onBack: onBack),
+                  Entrance(
+                    child: _Header(title: title!, onBack: onBack),
+                  ),
                   const SizedBox(height: AppSpacing.md),
                 ],
-                child,
+                Entrance(index: 1, child: child),
               ],
             ),
           ),
@@ -158,7 +164,14 @@ class _Header extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.sm),
         ],
-        Expanded(child: Text(title, style: AppText.title)),
+        // Long titles shrink to fit rather than wrap or overflow.
+        Expanded(
+          child: FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: RainbowTitle(title),
+          ),
+        ),
       ],
     );
   }

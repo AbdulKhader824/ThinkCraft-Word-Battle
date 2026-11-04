@@ -259,8 +259,8 @@ void main() {
     });
 
     for (final (label, sound) in [
-      ('Valid', GameSound.valid),
-      ('Invalid', GameSound.invalid),
+      ('Correct', GameSound.valid),
+      ('Incorrect', GameSound.invalid),
       ('Not sure? Skip this one', GameSound.tap),
     ]) {
       testWidgets('voting "$label" plays its own sound once', (tester) async {

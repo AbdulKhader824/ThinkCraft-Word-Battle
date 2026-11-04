@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/widgets/countdown_ring.dart';
+import '../../core/widgets/entrance.dart';
 import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_dialog.dart';
@@ -18,6 +18,7 @@ import '../../services/game_providers.dart';
 import '../../services/rules/game_rules.dart';
 import '../../services/sound_service.dart';
 import 'category_style.dart';
+import 'category_picture.dart';
 import 'leave_game_guard.dart';
 
 class AnswerScreen extends ConsumerStatefulWidget {
@@ -128,17 +129,20 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final category in categories) ...[
-                      _CategoryCard(
-                        category: category,
-                        letter: letter,
-                        controller: _controllers[category]!,
-                        locked: locked,
-                        isLast: category == categories.last,
-                        onChanged: (text) {
-                          service.updateAnswer(category, text);
-                          setState(() {});
-                        },
+                    for (final (index, category) in categories.indexed) ...[
+                      Entrance(
+                        index: index,
+                        child: _CategoryCard(
+                          category: category,
+                          letter: letter,
+                          controller: _controllers[category]!,
+                          locked: locked,
+                          isLast: category == categories.last,
+                          onChanged: (text) {
+                            service.updateAnswer(category, text);
+                            setState(() {});
+                          },
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.sm),
                     ],
@@ -272,6 +276,9 @@ class _CategoryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wrongLetter = !GameRules.startsWithLetter(controller.text, letter);
+    final looksGood =
+        !locked && !wrongLetter && controller.text.trim().isNotEmpty;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return GameCard(
       color: category.color,
@@ -281,9 +288,23 @@ class _CategoryCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              SvgPicture.asset(category.character, width: 44, height: 44),
+              CategoryPicture(category: category, height: 44),
               const SizedBox(width: AppSpacing.xs),
               Expanded(child: Text(category.label, style: AppText.heading)),
+              // A green tick pops in once an answer starts with the letter.
+              AnimatedSwitcher(
+                duration: reduceMotion ? Duration.zero : AppDurations.medium,
+                transitionBuilder: (child, animation) => ScaleTransition(
+                  scale: CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutBack,
+                  ),
+                  child: child,
+                ),
+                child: looksGood
+                    ? const _Tick(key: ValueKey('tick'))
+                    : const SizedBox.shrink(key: ValueKey('none')),
+              ),
               if (locked) const Icon(Icons.lock_rounded, color: AppColors.navy),
             ],
           ),
@@ -318,6 +339,28 @@ class _CategoryCard extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _Tick extends StatelessWidget {
+  const _Tick({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 32,
+      height: 32,
+      decoration: const BoxDecoration(
+        color: AppColors.valid,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.check_rounded,
+        color: Colors.white,
+        size: 22,
+        semanticLabel: 'Starts with the right letter',
       ),
     );
   }

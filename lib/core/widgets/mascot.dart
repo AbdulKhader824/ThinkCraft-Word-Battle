@@ -46,17 +46,20 @@ class _MascotState extends State<Mascot> with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _float,
-      builder: (context, child) {
-        final offset = (_float.value - 0.5) * _floatDistance * 2;
-        return Transform.translate(offset: Offset(0, offset), child: child);
-      },
-      child: SvgPicture.asset(
-        AppAssets.tilo,
-        width: widget.size,
-        height: widget.size,
-        semanticsLabel: 'Tilo, the game mascot',
+    // Floating redraws only Tilo, not the screen around it.
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _float,
+        builder: (context, child) {
+          final offset = (_float.value - 0.5) * _floatDistance * 2;
+          return Transform.translate(offset: Offset(0, offset), child: child);
+        },
+        child: SvgPicture.asset(
+          AppAssets.tilo,
+          width: widget.size,
+          height: widget.size,
+          semanticsLabel: 'Tilo, the game mascot',
+        ),
       ),
     );
   }

@@ -66,10 +66,12 @@ class _ConfettiBurstState extends State<ConfettiBurst>
   Widget build(BuildContext context) {
     if (_reduceMotion) return const SizedBox.shrink();
 
-    return IgnorePointer(
-      child: CustomPaint(
-        size: Size.infinite,
-        painter: _ConfettiPainter(_pieces, _controller),
+    return RepaintBoundary(
+      child: IgnorePointer(
+        child: CustomPaint(
+          size: Size.infinite,
+          painter: _ConfettiPainter(_pieces, _controller),
+        ),
       ),
     );
   }

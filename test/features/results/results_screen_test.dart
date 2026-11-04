@@ -115,7 +115,7 @@ void main() {
     await tapAndSettle(tester, find.text('Sam (you)'));
 
     expect(find.text('Answers: 13.33'), findsOneWidget);
-    expect(find.text('Validation: +2'), findsOneWidget);
+    expect(find.text('Votes: +2'), findsOneWidget);
     expect(find.text('Round: 15.33'), findsOneWidget);
   });
 
@@ -124,7 +124,7 @@ void main() {
 
     await tapAndSettle(tester, find.text('Luna'));
 
-    expect(find.text('Validation: -1'), findsOneWidget);
+    expect(find.text('Votes: -1'), findsOneWidget);
   });
 
   testWidgets('shows answers with their validity', (tester) async {
@@ -133,8 +133,8 @@ void main() {
     await tapAndSettle(tester, find.text('Sam (you)'));
 
     expect(find.text('Monkey'), findsOneWidget);
-    expect(find.text('Valid'), findsNWidgets(2));
-    expect(find.text('Invalid'), findsOneWidget);
+    expect(find.text('Correct'), findsNWidgets(2));
+    expect(find.text('Incorrect'), findsOneWidget);
     expect(find.text('Tied'), findsOneWidget);
     expect(find.text('Empty'), findsOneWidget);
     expect(find.text('No answer'), findsOneWidget);

@@ -22,6 +22,9 @@ extension CategoryStyle on Category {
     Category.brand => AppColors.peach,
   };
 
+  /// The illustrated picture, from `tool/import_category_pictures.py`.
+  String get picture => 'assets/images/categories/$name.webp';
+
   String get character => switch (this) {
     Category.animal => AppAssets.fox,
     Category.place => AppAssets.penguin,

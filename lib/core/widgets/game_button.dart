@@ -74,57 +74,73 @@ class _GameButtonState extends State<GameButton> {
     final sink = _pressed ? _edgeDepth - 2 : 0.0;
     final radius = BorderRadius.circular(AppRadius.pill);
 
-    return AnimatedContainer(
+    // A slight squish while pressed, as well as sinking into the edge.
+    return AnimatedScale(
+      scale: _pressed ? 0.97 : 1,
       duration: reduceMotion ? Duration.zero : AppDurations.fast,
-      curve: Curves.easeOut,
-      margin: EdgeInsets.only(top: sink, bottom: _edgeDepth - sink),
-      decoration: BoxDecoration(
-        borderRadius: radius,
-        boxShadow: [
-          BoxShadow(color: edge, offset: Offset(0, _edgeDepth - sink)),
-        ],
-      ),
-      child: Material(
-        color: face,
-        borderRadius: radius,
-        child: InkWell(
+      child: AnimatedContainer(
+        duration: reduceMotion ? Duration.zero : AppDurations.fast,
+        curve: Curves.easeOut,
+        margin: EdgeInsets.only(top: sink, bottom: _edgeDepth - sink),
+        decoration: BoxDecoration(
           borderRadius: radius,
-          onTap: widget.onPressed == null ? null : _press,
-          onHighlightChanged: (value) => setState(() => _pressed = value),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight: widget.compact
-                  ? AppSizes.minTapTarget
-                  : AppSizes.mainButton,
-              minWidth: double.infinity,
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: widget.compact ? AppSpacing.sm : AppSpacing.lg,
-                vertical: AppSpacing.xs,
+          boxShadow: [
+            BoxShadow(color: edge, offset: Offset(0, _edgeDepth - sink)),
+          ],
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(color: edge, width: 2),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color.lerp(face, Colors.white, 0.28)!, face],
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  if (widget.icon != null) ...[
-                    Icon(
-                      widget.icon,
-                      color: textColor,
-                      size: widget.compact ? 22 : 28,
-                    ),
-                    SizedBox(
-                      width: widget.compact ? AppSpacing.xs : AppSpacing.sm,
-                    ),
-                  ],
-                  Flexible(
-                    child: Text(
-                      widget.label,
-                      textAlign: TextAlign.center,
-                      style: (widget.compact ? AppText.label : AppText.button)
-                          .copyWith(color: textColor),
-                    ),
+            ),
+            child: InkWell(
+              borderRadius: radius,
+              onTap: widget.onPressed == null ? null : _press,
+              onHighlightChanged: (value) => setState(() => _pressed = value),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: widget.compact
+                      ? AppSizes.minTapTarget
+                      : AppSizes.mainButton,
+                  minWidth: double.infinity,
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: widget.compact ? AppSpacing.sm : AppSpacing.lg,
+                    vertical: AppSpacing.xs,
                   ),
-                ],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (widget.icon != null) ...[
+                        Icon(
+                          widget.icon,
+                          color: textColor,
+                          size: widget.compact ? 22 : 28,
+                        ),
+                        SizedBox(
+                          width: widget.compact ? AppSpacing.xs : AppSpacing.sm,
+                        ),
+                      ],
+                      Flexible(
+                        child: Text(
+                          widget.label,
+                          textAlign: TextAlign.center,
+                          style:
+                              (widget.compact ? AppText.label : AppText.button)
+                                  .copyWith(color: textColor),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
           ),

@@ -20,6 +20,13 @@ abstract final class AppAssets {
   static const frog = 'assets/images/animals/frog.svg';
   static const bunny = 'assets/images/animals/bunny.svg';
 
+  static const crown = 'assets/images/stickers/crown.svg';
+  static const star = 'assets/images/stickers/star.svg';
+  static const sun = 'assets/images/stickers/sun.svg';
+  static const cloud = 'assets/images/stickers/cloud.svg';
+  static const pencil = 'assets/images/stickers/pencil.svg';
+  static const stickers = [crown, star, sun, cloud, pencil];
+
   static const animals = [fox, penguin, owl, cat, bear, parrot, frog, bunny];
   static const animalNames = [
     'Fox',

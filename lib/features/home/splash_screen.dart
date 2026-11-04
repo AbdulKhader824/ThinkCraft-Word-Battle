@@ -9,6 +9,8 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/widgets/game_screen.dart';
+import '../../models/category.dart';
+import '../gameplay/category_style.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -28,6 +30,34 @@ class _SplashScreenState extends State<SplashScreen> {
     _timer = Timer(SplashScreen.displayTime, () {
       if (mounted) context.go(AppRoutes.home);
     });
+  }
+
+  bool _warmed = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_warmed) return;
+    _warmed = true;
+    _warmUp();
+  }
+
+  /// Loads the pictures used later while the splash is showing, so screens
+  /// don't stutter or pop in the first time they open.
+  void _warmUp() {
+    for (final category in Category.values) {
+      precacheImage(AssetImage(category.picture), context, onError: (_, _) {});
+    }
+    for (final path in [
+      ...AppAssets.stickers,
+      ...AppAssets.animals,
+      AppAssets.tilo,
+    ]) {
+      final loader = SvgAssetLoader(path);
+      svg.cache
+          .putIfAbsent(loader.cacheKey(null), () => loader.loadBytes(null))
+          .ignore();
+    }
   }
 
   @override

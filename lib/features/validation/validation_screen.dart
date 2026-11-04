@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -17,6 +16,7 @@ import '../../models/vote.dart';
 import '../../services/game_providers.dart';
 import '../../services/sound_service.dart';
 import '../gameplay/category_style.dart';
+import '../gameplay/category_picture.dart';
 import '../gameplay/leave_game_guard.dart';
 
 /// Shows anonymous answers one at a time. Only ballot items reach this
@@ -26,6 +26,13 @@ class ValidationScreen extends ConsumerWidget {
 
   /// How long a new answer ignores taps, to catch double taps.
   static const tapGuard = Duration(milliseconds: 350);
+
+  static const _deal = Duration(milliseconds: 300);
+  static const _countingKey = ValueKey('counting');
+
+  static Key _keyFor(BallotItem? item) {
+    return item == null ? _countingKey : ValueKey(item.id);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,12 +47,30 @@ class ValidationScreen extends ConsumerWidget {
       child: GameScreen(
         title: item == null ? 'Votes are in!' : 'Vote!',
         onBack: () => confirmLeaveGame(context, ref),
+        // Answers are dealt like cards: the next one slides in from the
+        // right as the last one slides away to the left.
         child: AnimatedSwitcher(
-          duration: reduceMotion ? Duration.zero : AppDurations.medium,
+          duration: reduceMotion ? Duration.zero : _deal,
+          switchInCurve: Curves.easeOutCubic,
+          switchOutCurve: Curves.easeInCubic,
+          layoutBuilder: (current, previous) => Stack(
+            alignment: Alignment.topCenter,
+            children: [...previous, ?current],
+          ),
+          transitionBuilder: (child, animation) {
+            final incoming = child.key == _keyFor(item);
+            return SlideTransition(
+              position: Tween(
+                begin: Offset(incoming ? 1 : -1, 0),
+                end: Offset.zero,
+              ).animate(animation),
+              child: FadeTransition(opacity: animation, child: child),
+            );
+          },
           child: item == null
-              ? const _CountingVotes()
+              ? const _CountingVotes(key: _countingKey)
               : _BallotCard(
-                  key: ValueKey(item.id),
+                  key: _keyFor(item),
                   item: item,
                   letter: letter,
                   round: round,
@@ -123,16 +148,19 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // The picture says the category at a glance.
+              Center(
+                child: CategoryPicture(category: item.category, height: 96),
+              ),
+              const SizedBox(height: AppSpacing.xs),
               Row(
                 children: [
-                  SvgPicture.asset(
-                    item.category.character,
-                    width: 56,
-                    height: 56,
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
-                    child: Text(item.category.label, style: AppText.heading),
+                    child: Text(
+                      item.category.label,
+                      textAlign: TextAlign.center,
+                      style: AppText.heading,
+                    ),
                   ),
                 ],
               ),
@@ -156,7 +184,7 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
         ),
         const SizedBox(height: AppSpacing.md),
         GameButton(
-          label: 'Valid',
+          label: 'Correct',
           icon: Icons.check_circle_rounded,
           style: GameButtonStyle.valid,
           sound: null,
@@ -164,7 +192,7 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
         ),
         const SizedBox(height: AppSpacing.sm),
         GameButton(
-          label: 'Invalid',
+          label: 'Incorrect',
           icon: Icons.cancel_rounded,
           style: GameButtonStyle.invalid,
           sound: null,
@@ -187,7 +215,7 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
 }
 
 class _CountingVotes extends StatelessWidget {
-  const _CountingVotes();
+  const _CountingVotes({super.key});
 
   @override
   Widget build(BuildContext context) {

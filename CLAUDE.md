@@ -64,6 +64,23 @@ Never hard-code colours or spacing on a screen.
 | Tap targets | At least 56dp, with 64dp for main buttons |
 | Motion | 150-400ms, reduced when the phone asks for it |
 
+Playful style: screens sit on a sky background with clouds, a sun and stars
+(`GameBackground`). Headers use `RainbowTitle`, with each letter a candy
+colour and a navy outline. Cards are cream paper (`GameCard`, optionally with
+a folded corner and a sticker). Number and letter choices use `CandyTile`,
+which shows white numbers with a navy outline and a crown on the chosen one.
+Sticker art is in `assets/images/stickers/`. Each category has an illustrated
+3:2 picture (`CategoryPicture`, from `assets/images/categories/`), used on
+Create Room, the Lobby, answer cards, voting and How to Play. The animal
+characters are still used for player avatars. To replace the pictures, run
+`py -3 tool/import_category_pictures.py "<folder of PNGs>"`, which resizes
+them to 900x600 WebP.
+
+Motion: screen parts arrive one by one through `Entrance` (give each an
+`index`). Outlined letters use `OutlinedText`, a single stroke pass, never
+stacks of shadows, which were slow. Wrap anything that animates forever in a
+`RepaintBoundary`. The splash screen preloads the category pictures and SVGs.
+
 The bundled fonts are variable fonts, so a weight must be set through
 `AppText` (which sets `fontVariations`). Setting only `fontWeight` won't
 reliably change how heavy the text looks.
@@ -97,6 +114,7 @@ These settle conflicts and gaps in the briefs.
 | Bot speed | Bots take 25-80 seconds, or 1-5 seconds once the player locks in |
 | Blank answers | Locking in early with blanks asks for confirmation first |
 | Hidden answers | `Round.answers` stays empty until results; voters only receive `BallotItem`s, which carry no authors |
+| Voting words | Players see Correct and Incorrect (not Valid and Invalid), and results show "Votes" points; code names stay `valid` and `invalid` |
 | Voting screen | One answer at a time, so each takes one choice; players can skip; each card ignores taps for 350ms to catch double taps |
 | Lone voters | Validator points need at least 2 votes cast on an answer, in any game size |
 | Voting time | No timer, because the spec sets none; bots vote once the player finishes |
@@ -157,10 +175,14 @@ The release APK is signed with the debug key, which is fine for installing
 on test phones but not for the Play Store. Phase 5 needs a real upload key.
 
 `Medium_Phone_API_35` is the default emulator, because the Pixel 9 one uses
-about 7.5 GB of RAM. If it sticks on a black screen, close it and cold-boot
-with software graphics:
+about 7.5 GB of RAM. Start it on the graphics card with a cold boot.
+Software graphics (`-gpu swiftshader_indirect`) also works, but every
+animation lags. A black screen comes from loading a snapshot saved in a
+different graphics mode, which `-no-snapshot-load` avoids:
 
 ```powershell
 & "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" emu kill
-& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd Medium_Phone_API_35 -no-snapshot-load -gpu swiftshader_indirect -no-boot-anim
+& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd Medium_Phone_API_35 -gpu host -no-snapshot-load -no-boot-anim
 ```
+
+If adb then lists the emulator as `unauthorized`, run `adb kill-server`.

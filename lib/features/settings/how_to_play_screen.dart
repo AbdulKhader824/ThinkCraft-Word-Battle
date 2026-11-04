@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app/router.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
+import '../../core/widgets/entrance.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/letter_badge.dart';
 import '../../core/widgets/player_avatar.dart';
 import '../../models/category.dart';
-import '../gameplay/category_style.dart';
+import '../gameplay/category_picture.dart';
 
 /// The rules in five short, illustrated steps, written for ages 7-16.
 class HowToPlayScreen extends StatelessWidget {
@@ -56,8 +56,8 @@ class HowToPlayScreen extends StatelessWidget {
             color: AppColors.lavender,
             title: 'Vote',
             text:
-                "Answers have no names on them. Tap Valid if it's right, "
-                "or Invalid if it isn't.",
+                "Answers have no names on them. Tap Correct if it's right, "
+                "or Incorrect if it isn't.",
             picture: _VotePicture(),
           ),
           _Step(
@@ -99,33 +99,38 @@ class _Step extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-      child: GameCard(
-        color: color,
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 18,
-                  backgroundColor: AppColors.navy,
-                  child: Text(
-                    '$number',
-                    style: AppText.label.copyWith(color: Colors.white),
+    // The steps arrive one after another, in reading order.
+    return Entrance(
+      index: number,
+      step: const Duration(milliseconds: 90),
+      child: Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+        child: GameCard(
+          color: color,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 18,
+                    backgroundColor: AppColors.navy,
+                    child: Text(
+                      '$number',
+                      style: AppText.label.copyWith(color: Colors.white),
+                    ),
                   ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(child: Text(title, style: AppText.heading)),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Center(child: picture),
-            const SizedBox(height: AppSpacing.sm),
-            Text(text, style: AppText.body),
-          ],
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(child: Text(title, style: AppText.heading)),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Center(child: picture),
+              const SizedBox(height: AppSpacing.sm),
+              Text(text, style: AppText.body),
+            ],
+          ),
         ),
       ),
     );
@@ -159,11 +164,10 @@ class _CategoriesPicture extends StatelessWidget {
       runSpacing: AppSpacing.xs,
       children: [
         for (final category in Category.values)
-          SvgPicture.asset(
-            category.character,
-            width: 40,
-            height: 40,
-            semanticsLabel: category.label,
+          CategoryPicture(
+            category: category,
+            height: 48,
+            semanticLabel: category.label,
           ),
       ],
     );
@@ -200,8 +204,8 @@ class _VotePicture extends StatelessWidget {
       spacing: AppSpacing.xs,
       runSpacing: AppSpacing.xs,
       children: [
-        _chip('Valid', Icons.check_circle_rounded, AppColors.valid),
-        _chip('Invalid', Icons.cancel_rounded, AppColors.invalid),
+        _chip('Correct', Icons.check_circle_rounded, AppColors.valid),
+        _chip('Incorrect', Icons.cancel_rounded, AppColors.invalid),
       ],
     );
   }

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app/router.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
@@ -62,6 +64,8 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             GameCard(
+              sticker: SvgPicture.asset(AppAssets.pencil, width: 56),
+              foldedCorner: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [

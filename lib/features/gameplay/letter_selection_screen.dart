@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
+import '../../core/widgets/candy_tile.dart';
+import '../../core/widgets/entrance.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/letter_badge.dart';
 import '../../models/room.dart';
@@ -41,16 +43,10 @@ class LetterSelectionScreen extends ConsumerWidget {
 class _LetterChoice extends ConsumerWidget {
   const _LetterChoice({required this.room, required this.isPicker});
 
-  static const _colors = [
-    AppColors.mint,
-    AppColors.sky,
-    AppColors.sunshine,
-    AppColors.coral,
-    AppColors.lavender,
-    AppColors.peach,
-  ];
+  static const _colors = AppColors.candy;
   static const _minTile = AppSizes.minTapTarget;
   static const _gap = AppSpacing.xs;
+  static const _wave = Duration(milliseconds: 18);
 
   final Room room;
   final bool isPicker;
@@ -89,18 +85,25 @@ class _LetterChoice extends ConsumerWidget {
               runSpacing: _gap,
               alignment: WrapAlignment.center,
               children: [
+                // The tiles pop in as a quick wave from A to Z.
                 for (final (index, letter) in GameRules.letters.indexed)
-                  _LetterTile(
-                    letter: letter,
-                    size: tile,
-                    color: _colors[index % _colors.length],
-                    isUsed: room.usedLetters.contains(letter),
-                    onTap: isPicker && !room.usedLetters.contains(letter)
-                        ? () {
-                            playSound(ref, GameSound.select);
-                            service.selectLetter(letter);
-                          }
-                        : null,
+                  Entrance(
+                    index: index,
+                    step: _wave,
+                    rise: 12,
+                    fromScale: 0.5,
+                    child: _LetterTile(
+                      letter: letter,
+                      size: tile,
+                      color: _colors[index % _colors.length],
+                      isUsed: room.usedLetters.contains(letter),
+                      onTap: isPicker && !room.usedLetters.contains(letter)
+                          ? () {
+                              playSound(ref, GameSound.select);
+                              service.selectLetter(letter);
+                            }
+                          : null,
+                    ),
                   ),
               ],
             );
@@ -128,35 +131,17 @@ class _LetterTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(AppRadius.small);
-
-    return Semantics(
-      button: true,
-      enabled: onTap != null,
-      label: isUsed ? 'Letter $letter, already played' : 'Letter $letter',
-      excludeSemantics: true,
-      child: Material(
-        color: isUsed ? AppColors.disabled : color,
-        borderRadius: radius,
-        child: InkWell(
-          key: ValueKey('letter-$letter'),
-          borderRadius: radius,
-          onTap: onTap,
-          child: SizedBox.square(
-            dimension: size,
-            child: Center(
-              child: Text(
-                letter,
-                textScaler: TextScaler.noScaling,
-                style: AppText.title.copyWith(
-                  fontSize: size * 0.5,
-                  color: isUsed ? AppColors.disabledText : AppColors.navy,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ),
+    return CandyTile(
+      tapKey: ValueKey('letter-$letter'),
+      label: letter,
+      color: color,
+      used: isUsed,
+      width: size,
+      height: size,
+      semanticsLabel: isUsed
+          ? 'Letter $letter, already played'
+          : 'Letter $letter',
+      onTap: onTap,
     );
   }
 }

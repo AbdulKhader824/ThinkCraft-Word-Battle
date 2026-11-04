@@ -5,12 +5,15 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
+import '../../core/widgets/candy_tile.dart';
+import '../../core/constants/app_constants.dart';
 import '../../core/widgets/game_card.dart';
 import '../../models/category.dart';
 import '../../models/game_settings.dart';
 import '../../services/rules/room_input_rules.dart';
 import '../../services/sound_service.dart';
 import '../gameplay/category_style.dart';
+import '../gameplay/category_picture.dart';
 
 /// Keeps a room code in capitals and blocks characters it can't contain.
 class RoomCodeFormatter extends TextInputFormatter {
@@ -157,7 +160,7 @@ class AnswerTimePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NumberPicker(
-      label: 'Time to answer',
+      label: 'How much time?',
       options: GameSettings.answerSecondsOptions,
       selected: selected,
       onChanged: onChanged,
@@ -206,15 +209,16 @@ class NumberPicker extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: AppText.label),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: AppSpacing.lg),
         Wrap(
-          spacing: AppSpacing.xs,
-          runSpacing: AppSpacing.xs,
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.lg,
           children: [
-            for (final count in options)
+            for (final (index, count) in options.indexed)
               _CountTile(
                 key: ValueKey('$keyPrefix-$count'),
                 count: count,
+                color: AppColors.candy[index % AppColors.candy.length],
                 unit: unit,
                 suffix: suffix,
                 width: tileWidth,
@@ -256,14 +260,14 @@ class CategoryPicker extends StatelessWidget {
           'Categories (${selected.length} of ${Category.values.length})',
           style: AppText.label,
         ),
-        Text('Pick at least 1.', style: AppText.bodySmall),
-        const SizedBox(height: AppSpacing.xs),
+        Text('Pick your fun! Choose at least 1.', style: AppText.bodySmall),
+        const SizedBox(height: AppSpacing.md),
         LayoutBuilder(
           builder: (context, constraints) {
             final width = (constraints.maxWidth - AppSpacing.xs) / 2;
             return Wrap(
               spacing: AppSpacing.xs,
-              runSpacing: AppSpacing.xs,
+              runSpacing: AppSpacing.md,
               children: [
                 for (final category in Category.values)
                   SizedBox(
@@ -298,62 +302,95 @@ class _CategoryToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(AppRadius.small);
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final duration = reduceMotion ? Duration.zero : AppDurations.fast;
 
     return Semantics(
       button: true,
       selected: selected,
       label: category.label,
       excludeSemantics: true,
-      child: AnimatedContainer(
-        duration: reduceMotion ? Duration.zero : AppDurations.fast,
-        constraints: const BoxConstraints(minHeight: AppSizes.minTapTarget),
-        decoration: BoxDecoration(
-          color: selected ? category.color : AppColors.background,
-          borderRadius: radius,
-          border: Border.all(
-            color: selected ? AppColors.navy : AppColors.outline,
-            width: selected ? 3 : 2,
-          ),
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            key: ValueKey('category-${category.name}'),
-            borderRadius: radius,
-            onTap: () {
-              playSoundFrom(context, GameSound.select);
-              onTap();
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xs,
-                vertical: AppSpacing.xxs,
+      child: AnimatedScale(
+        scale: selected ? 1 : 0.96,
+        duration: duration,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            AnimatedContainer(
+              duration: duration,
+              decoration: BoxDecoration(
+                color: selected ? category.color : AppColors.disabled,
+                borderRadius: radius,
+                border: Border.all(
+                  color: selected ? AppColors.navy : AppColors.outline,
+                  width: selected ? 3 : 2,
+                ),
               ),
-              child: Row(
-                children: [
-                  Opacity(
-                    opacity: selected ? 1 : 0.45,
-                    child: SvgPicture.asset(
-                      category.character,
-                      width: 32,
-                      height: 32,
+              child: Material(
+                type: MaterialType.transparency,
+                child: InkWell(
+                  key: ValueKey('category-${category.name}'),
+                  borderRadius: radius,
+                  onTap: () {
+                    playSoundFrom(context, GameSound.select);
+                    onTap();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSpacing.xxs),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Unchosen pictures fade, so the chosen ones stand out.
+                        AnimatedOpacity(
+                          opacity: selected ? 1 : 0.4,
+                          duration: duration,
+                          child: LayoutBuilder(
+                            builder: (context, constraints) => CategoryPicture(
+                              category: category,
+                              height:
+                                  constraints.maxWidth /
+                                  CategoryPicture.aspectRatio,
+                            ),
+                          ),
+                        ),
+                        // A solid strip keeps the name readable.
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.xxs,
+                            vertical: AppSpacing.xxs,
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  category.label,
+                                  style: AppText.label,
+                                ),
+                              ),
+                              Icon(
+                                selected
+                                    ? Icons.check_circle_rounded
+                                    : Icons.add_circle_outline_rounded,
+                                color: AppColors.navy,
+                                size: 24,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(category.label, style: AppText.bodySmall),
-                  ),
-                  Icon(
-                    selected
-                        ? Icons.check_circle_rounded
-                        : Icons.circle_outlined,
-                    color: AppColors.navy,
-                    size: 22,
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            if (selected)
+              Positioned(
+                top: -AppSpacing.sm,
+                right: -AppSpacing.xs,
+                child: IgnorePointer(
+                  child: SvgPicture.asset(AppAssets.star, width: 34),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -367,6 +404,7 @@ class _CountTile extends StatelessWidget {
     required this.unit,
     required this.suffix,
     required this.width,
+    required this.color,
     required this.selected,
     required this.onTap,
   });
@@ -375,50 +413,22 @@ class _CountTile extends StatelessWidget {
   final String unit;
   final String suffix;
   final double width;
+  final Color color;
   final bool selected;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(AppRadius.small);
-    final reduceMotion = MediaQuery.disableAnimationsOf(context);
-
-    return Semantics(
-      button: true,
+    return CandyTile(
+      label: '$count$suffix',
+      color: color,
       selected: selected,
-      label: '$count $unit',
-      excludeSemantics: true,
-      child: AnimatedContainer(
-        duration: reduceMotion ? Duration.zero : AppDurations.fast,
-        width: width,
-        height: AppSizes.minTapTarget,
-        decoration: BoxDecoration(
-          color: selected ? AppColors.mint : AppColors.background,
-          borderRadius: radius,
-          border: Border.all(
-            color: selected ? AppColors.mintDeep : AppColors.outline,
-            width: 3,
-          ),
-        ),
-        child: Material(
-          type: MaterialType.transparency,
-          child: InkWell(
-            borderRadius: radius,
-            onTap: () {
-              playSoundFrom(context, GameSound.select);
-              onTap();
-            },
-            // Shrinks rather than overflows with large system text.
-            child: Padding(
-              padding: const EdgeInsets.all(AppSpacing.xxs),
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text('$count$suffix', style: AppText.heading),
-              ),
-            ),
-          ),
-        ),
-      ),
+      width: width,
+      semanticsLabel: '$count $unit',
+      onTap: () {
+        playSoundFrom(context, GameSound.select);
+        onTap();
+      },
     );
   }
 }

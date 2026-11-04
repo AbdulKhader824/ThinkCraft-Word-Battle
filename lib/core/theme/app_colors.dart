@@ -37,6 +37,27 @@ abstract final class AppColors {
     Color(0xFFF3ECFF),
   ];
 
+  /// The sky behind every screen, from top to bottom.
+  static const skyTop = Color(0xFFA9DCFF);
+  static const skyBottom = Color(0xFFE3F4FF);
+
+  /// Warm paper colour for cards.
+  static const cream = Color(0xFFFFF8EC);
+  static const creamFold = Color(0xFFF0DDBF);
+
+  /// Bright candy colours for tiles and rainbow titles. Numbers on them are
+  /// white with a navy outline, which reads on every one of these.
+  static const candy = [
+    Color(0xFFFF6B8B),
+    Color(0xFFFF9F43),
+    Color(0xFF3CCB6E),
+    Color(0xFF22B5A8),
+    Color(0xFF4D7CFE),
+    Color(0xFFF2B705),
+    Color(0xFFFF7A3D),
+    Color(0xFFA56BFA),
+  ];
+
   static const background = Color(0xFFF4FBFF);
   static const backgroundMint = Color(0xFFE3F9EF);
   static const surface = Colors.white;

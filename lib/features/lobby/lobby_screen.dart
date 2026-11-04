@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
+import '../../core/widgets/entrance.dart';
 import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
@@ -14,7 +16,7 @@ import '../../models/player.dart';
 import '../../models/room.dart';
 import '../../services/game_providers.dart';
 import '../../services/sound_service.dart';
-import '../gameplay/category_style.dart';
+import '../gameplay/category_picture.dart';
 import '../gameplay/leave_game_guard.dart';
 import 'ready_badge.dart';
 import 'room_form_widgets.dart';
@@ -117,11 +119,10 @@ class _SettingsSummary extends StatelessWidget {
             runSpacing: AppSpacing.xs,
             children: [
               for (final category in settings.categories)
-                SvgPicture.asset(
-                  category.character,
-                  width: 32,
-                  height: 32,
-                  semanticsLabel: category.label,
+                CategoryPicture(
+                  category: category,
+                  height: 36,
+                  semanticLabel: category.label,
                 ),
             ],
           ),
@@ -156,13 +157,20 @@ class _PlayerGrid extends StatelessWidget {
           spacing: AppSpacing.xs,
           runSpacing: AppSpacing.xs,
           children: [
+            // Each player pops in when they arrive. The key keeps a card's
+            // animation with its player, so only newcomers pop.
             for (final (index, player) in players.indexed)
-              SizedBox(
-                width: width,
-                child: _PlayerCard(
-                  player: player,
-                  isMe: player.id == myId,
-                  color: _colors[index % _colors.length],
+              Entrance(
+                key: ValueKey(player.id),
+                index: index,
+                fromScale: 0.7,
+                child: SizedBox(
+                  width: width,
+                  child: _PlayerCard(
+                    player: player,
+                    isMe: player.id == myId,
+                    color: _colors[index % _colors.length],
+                  ),
                 ),
               ),
           ],
@@ -195,7 +203,23 @@ class _PlayerCard extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.xs),
       child: Row(
         children: [
-          PlayerAvatar(index: player.avatarIndex, size: 52),
+          // The host wears a crown.
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              PlayerAvatar(index: player.avatarIndex, size: 52),
+              if (player.isHost)
+                Positioned(
+                  top: -14,
+                  left: 10,
+                  child: SvgPicture.asset(
+                    AppAssets.crown,
+                    width: 32,
+                    semanticsLabel: 'Host',
+                  ),
+                ),
+            ],
+          ),
           const SizedBox(width: AppSpacing.xs),
           Expanded(
             child: Column(

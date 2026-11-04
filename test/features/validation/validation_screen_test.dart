@@ -60,14 +60,14 @@ void main() {
     expect(find.byType(PlayerAvatar), findsNothing);
   });
 
-  testWidgets('Valid is green and Invalid is red', (tester) async {
+  testWidgets('Correct is green and Incorrect is red', (tester) async {
     await _open(tester);
 
     final valid = tester.widget<GameButton>(
-      find.widgetWithText(GameButton, 'Valid'),
+      find.widgetWithText(GameButton, 'Correct'),
     );
     final invalid = tester.widget<GameButton>(
-      find.widgetWithText(GameButton, 'Invalid'),
+      find.widgetWithText(GameButton, 'Incorrect'),
     );
 
     expect(valid.style.face, AppColors.valid);
@@ -77,7 +77,7 @@ void main() {
   testWidgets('tapping Valid casts a valid vote', (tester) async {
     final service = await _open(tester);
 
-    await tapAndSettle(tester, find.text('Valid'));
+    await tapAndSettle(tester, find.text('Correct'));
 
     expect(service.calls, contains('castVote food:mango valid'));
   });
@@ -85,7 +85,7 @@ void main() {
   testWidgets('tapping Invalid casts an invalid vote', (tester) async {
     final service = await _open(tester);
 
-    await tapAndSettle(tester, find.text('Invalid'));
+    await tapAndSettle(tester, find.text('Incorrect'));
 
     expect(service.calls, contains('castVote food:mango invalid'));
   });
@@ -101,9 +101,9 @@ void main() {
   testWidgets('a double tap only votes once', (tester) async {
     final service = await _open(tester);
 
-    await tester.tap(find.text('Valid'));
+    await tester.tap(find.text('Correct'));
     await tester.pump(const Duration(milliseconds: 50));
-    await tester.tap(find.text('Valid'));
+    await tester.tap(find.text('Correct'));
     await tester.pumpAndSettle();
 
     expect(_voteCount(service), 1);
@@ -114,7 +114,7 @@ void main() {
   ) async {
     final service = await _open(tester);
 
-    await tester.tap(find.text('Valid'));
+    await tester.tap(find.text('Correct'));
     service.emit(
       fakeVotingRoom(
         ballot: const [_mango, _moose],
@@ -124,12 +124,12 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
     expect(find.text('Moose'), findsOneWidget);
 
-    await tester.tap(find.text('Valid'));
+    await tester.tap(find.text('Correct'));
     await tester.pumpAndSettle();
     expect(service.calls, isNot(contains('castVote animal:moose valid')));
 
     await tester.pump(ValidationScreen.tapGuard);
-    await tester.tap(find.text('Valid'));
+    await tester.tap(find.text('Correct'));
     await tester.pumpAndSettle();
     expect(service.calls, contains('castVote animal:moose valid'));
   });
@@ -149,7 +149,7 @@ void main() {
     );
 
     expect(find.text('Counting the votes...'), findsOneWidget);
-    expect(find.text('Valid'), findsNothing);
+    expect(find.text('Correct'), findsNothing);
   });
 
   testWidgets('shows the waiting message with nothing to vote on', (
@@ -163,7 +163,7 @@ void main() {
   testWidgets('fits on a small phone', (tester) async {
     await _open(tester, size: const Size(320, 568));
 
-    expect(find.text('Valid'), findsOneWidget);
+    expect(find.text('Correct'), findsOneWidget);
   });
 
   testWidgets('the back button asks before leaving', (tester) async {
