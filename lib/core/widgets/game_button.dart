@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../services/sound_service.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 import '../theme/app_text.dart';
@@ -32,6 +33,7 @@ class GameButton extends StatefulWidget {
     this.icon,
     this.style = GameButtonStyle.mint,
     this.compact = false,
+    this.sound = GameSound.tap,
   });
 
   final String label;
@@ -43,6 +45,10 @@ class GameButton extends StatefulWidget {
   /// It still meets the minimum tap size.
   final bool compact;
 
+  /// Played when the button is pressed. Null for none, when the screen
+  /// plays its own sound instead.
+  final GameSound? sound;
+
   @override
   State<GameButton> createState() => _GameButtonState();
 }
@@ -51,6 +57,12 @@ class _GameButtonState extends State<GameButton> {
   static const _edgeDepth = 6.0;
 
   bool _pressed = false;
+
+  void _press() {
+    final sound = widget.sound;
+    if (sound != null) playSoundFrom(context, sound);
+    widget.onPressed!();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +89,7 @@ class _GameButtonState extends State<GameButton> {
         borderRadius: radius,
         child: InkWell(
           borderRadius: radius,
-          onTap: widget.onPressed,
+          onTap: widget.onPressed == null ? null : _press,
           onHighlightChanged: (value) => setState(() => _pressed = value),
           child: ConstrainedBox(
             constraints: BoxConstraints(

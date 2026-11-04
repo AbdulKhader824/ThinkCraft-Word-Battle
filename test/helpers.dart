@@ -11,6 +11,7 @@ import 'package:thinkcraft_word_battle/services/game_providers.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
 import 'package:thinkcraft_word_battle/services/local_game_service.dart';
 import 'package:thinkcraft_word_battle/services/profile_store.dart';
+import 'package:thinkcraft_word_battle/services/sound_service.dart';
 
 import 'fakes.dart';
 
@@ -24,6 +25,7 @@ Future<void> pumpGame(
   Size size = const Size(360, 800),
   GameService? service,
   ProfileStore? profiles,
+  FakeSoundPlayer? sounds,
   double textScale = 1,
   bool reduceMotion = true,
 }) async {
@@ -47,6 +49,8 @@ Future<void> pumpGame(
         profileStoreProvider.overrideWithValue(
           profiles ?? MemoryProfileStore(),
         ),
+        // Tests never play real audio; they record what would have played.
+        soundPlayerProvider.overrideWithValue(sounds ?? FakeSoundPlayer()),
       ],
       child: const ThinkCraftApp(),
     ),
@@ -61,7 +65,13 @@ Future<void> goToHome(WidgetTester tester) async {
 }
 
 /// Scrolls a widget into view, then taps it.
+///
+/// Typing leaves a text field focused, and Flutter keeps scrolling a focused
+/// field back into view, which would undo the scroll to [finder]. Clearing
+/// focus first is what dismissing the keyboard does on a phone.
 Future<void> tapAndSettle(WidgetTester tester, Finder finder) async {
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pump();
   await tester.ensureVisible(finder);
   await tester.pumpAndSettle();
   await tester.tap(finder);

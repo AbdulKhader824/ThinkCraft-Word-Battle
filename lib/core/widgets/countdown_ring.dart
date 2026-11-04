@@ -18,11 +18,16 @@ class CountdownRing extends StatefulWidget {
     required this.deadline,
     required this.total,
     this.size = 76,
+    this.onSecond,
   });
 
   final DateTime deadline;
   final Duration total;
   final double size;
+
+  /// Called each time the whole seconds left goes down, such as from 6
+  /// to 5.
+  final ValueChanged<int>? onSecond;
 
   @override
   State<CountdownRing> createState() => _CountdownRingState();
@@ -30,15 +35,30 @@ class CountdownRing extends StatefulWidget {
 
 class _CountdownRingState extends State<CountdownRing> {
   static const _updateEvery = Duration(milliseconds: 200);
-  static const _warningSeconds = 30;
-  static const _dangerSeconds = 10;
+
+  // Colours change at the same share of any timer: for 90 seconds that's
+  // yellow at 30 and red at 10, and for 30 seconds it's 10 and 4.
+  int get _warningSeconds => (widget.total.inSeconds / 3).ceil();
+  int get _dangerSeconds => (widget.total.inSeconds / 9).ceil();
 
   late final Timer _timer;
+  late int _lastSecond;
+
+  int get _secondsLeft {
+    final left = widget.deadline.difference(clock.now());
+    return left.isNegative ? 0 : (left.inMilliseconds / 1000).ceil();
+  }
 
   @override
   void initState() {
     super.initState();
-    _timer = Timer.periodic(_updateEvery, (_) => setState(() {}));
+    _lastSecond = _secondsLeft;
+    _timer = Timer.periodic(_updateEvery, (_) {
+      final seconds = _secondsLeft;
+      if (seconds < _lastSecond) widget.onSecond?.call(seconds);
+      _lastSecond = seconds;
+      setState(() {});
+    });
   }
 
   @override

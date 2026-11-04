@@ -15,6 +15,7 @@ import '../../models/answer_group.dart';
 import '../../models/round.dart';
 import '../../models/vote.dart';
 import '../../services/game_providers.dart';
+import '../../services/sound_service.dart';
 import '../gameplay/category_style.dart';
 import '../gameplay/leave_game_guard.dart';
 
@@ -93,6 +94,11 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
     if (!_acceptsVotes) return;
 
     _acceptsVotes = false;
+    playSound(ref, switch (choice) {
+      VoteChoice.valid => GameSound.valid,
+      VoteChoice.invalid => GameSound.invalid,
+      VoteChoice.skip => GameSound.tap,
+    });
     ref.read(gameServiceProvider).castVote(widget.item.id, choice);
   }
 
@@ -153,6 +159,7 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
           label: 'Valid',
           icon: Icons.check_circle_rounded,
           style: GameButtonStyle.valid,
+          sound: null,
           onPressed: () => _vote(VoteChoice.valid),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -160,6 +167,7 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
           label: 'Invalid',
           icon: Icons.cancel_rounded,
           style: GameButtonStyle.invalid,
+          sound: null,
           onPressed: () => _vote(VoteChoice.invalid),
         ),
         const SizedBox(height: AppSpacing.xs),

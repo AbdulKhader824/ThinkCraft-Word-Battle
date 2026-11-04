@@ -24,10 +24,14 @@ class BotPlayer {
 
   final Random random;
 
-  Map<Category, String> answersFor(String letter) {
+  /// Answers for the room's [categories]. A deliberately wrong answer can
+  /// still come from any category, which is what makes it wrong.
+  Map<Category, String> answersFor(
+    String letter, [
+    Iterable<Category> categories = Category.values,
+  ]) {
     return {
-      for (final category in Category.values)
-        category: _answerFor(letter, category),
+      for (final category in categories) category: _answerFor(letter, category),
     };
   }
 

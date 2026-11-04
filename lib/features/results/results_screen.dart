@@ -15,6 +15,7 @@ import '../../models/room.dart';
 import '../../models/round_results.dart';
 import '../../services/game_providers.dart';
 import '../../services/rules/scoring_rules.dart';
+import '../../services/sound_service.dart';
 import '../gameplay/category_style.dart';
 import '../gameplay/leave_game_guard.dart';
 
@@ -37,9 +38,15 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen>
     duration: ResultsScreen.entrance,
   );
 
+  bool _playedFanfare = false;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (!_playedFanfare) {
+      _playedFanfare = true;
+      playSound(ref, _isWinner() ? GameSound.win : GameSound.results);
+    }
     if (MediaQuery.disableAnimationsOf(context)) {
       _entrance.value = 1;
     } else if (_entrance.value == 0 && !_entrance.isAnimating) {
@@ -51,6 +58,15 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen>
   void dispose() {
     _entrance.dispose();
     super.dispose();
+  }
+
+  /// True when this player has won the whole game.
+  bool _isWinner() {
+    final room = ref.read(gameRoomProvider);
+    final myId = ref.read(gameServiceProvider).localPlayerId;
+    if (room == null || myId == null || !room.isFinalRound) return false;
+    final ranked = ScoringRules.rank(room.scores, room.playerIds);
+    return ranked.firstWhere((entry) => entry.playerId == myId).rank == 1;
   }
 
   /// Each card starts a little after the one above it.
@@ -134,14 +150,19 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen>
                     AppSpacing.sm,
                   ),
                   child: _ResultActions(
-                    onPlayAgain: service.playAgain,
+                    // After the final round, a new game replaces the next round.
+                    nextLabel: room.isFinalRound ? 'New Game' : 'Next Round',
+                    onNext: room.isFinalRound
+                        ? service.newGame
+                        : service.nextRound,
                     onReturnHome: service.leaveRoom,
                   ),
                 ),
               ],
             ),
-            // A celebration only for first place, so it stays special.
-            if (myRank == 1) const Positioned.fill(child: ConfettiBurst()),
+            // Saved for winning the whole game, so it stays special.
+            if (room.isFinalRound && myRank == 1)
+              const Positioned.fill(child: ConfettiBurst()),
           ],
         ),
       ),
@@ -149,17 +170,22 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen>
   }
 }
 
-/// Play Again and Return Home. Side by side when there's room; stacked and
-/// smaller on narrow phones or with large text, so they never crowd out the
-/// leaderboard.
+/// Next Round (or New Game) and Return Home. Side by side when there's room;
+/// stacked and smaller on narrow phones or with large text, so they never
+/// crowd out the leaderboard.
 class _ResultActions extends StatelessWidget {
-  const _ResultActions({required this.onPlayAgain, required this.onReturnHome});
+  const _ResultActions({
+    required this.nextLabel,
+    required this.onNext,
+    required this.onReturnHome,
+  });
 
   /// Below this width per button, the labels would wrap onto several lines.
   static const _minSideBySideWidth = 160.0;
   static const _maxSideBySideTextScale = 1.2;
 
-  final VoidCallback onPlayAgain;
+  final String nextLabel;
+  final VoidCallback onNext;
   final VoidCallback onReturnHome;
 
   @override
@@ -173,10 +199,10 @@ class _ResultActions extends StatelessWidget {
             halfWidth < _minSideBySideWidth ||
             textScale > _maxSideBySideTextScale;
 
-        final playAgain = GameButton(
-          label: 'Play Again',
+        final next = GameButton(
+          label: nextLabel,
           compact: stacked,
-          onPressed: onPlayAgain,
+          onPressed: onNext,
         );
         final returnHome = GameButton(
           label: 'Return Home',
@@ -189,7 +215,7 @@ class _ResultActions extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              playAgain,
+              next,
               const SizedBox(height: AppSpacing.xxs),
               returnHome,
             ],
@@ -197,7 +223,7 @@ class _ResultActions extends StatelessWidget {
         }
         return Row(
           children: [
-            Expanded(child: playAgain),
+            Expanded(child: next),
             const SizedBox(width: AppSpacing.xs),
             Expanded(child: returnHome),
           ],
@@ -244,7 +270,13 @@ class _WinnerBanner extends StatelessWidget {
     if (leaders.length > 1) return "It's a tie!";
 
     final name = room.playerById(leaders.single.playerId).name;
-    return room.round!.number == 1 ? '$name wins!' : '$name is leading!';
+    return room.isFinalRound ? '$name wins!' : '$name is leading!';
+  }
+
+  String get _subtitle {
+    if (!room.isFinalRound) return '${roundLabel(room)} results';
+    final rounds = room.settings.rounds;
+    return rounds == 1 ? 'Final results' : 'Final results after $rounds rounds';
   }
 
   @override
@@ -269,7 +301,7 @@ class _WinnerBanner extends StatelessWidget {
             textAlign: TextAlign.center,
             style: AppText.title.copyWith(color: Colors.white),
           ),
-          Text('Round ${room.round!.number} results', style: onNavy),
+          Text(_subtitle, textAlign: TextAlign.center, style: onNavy),
         ],
       ),
     );

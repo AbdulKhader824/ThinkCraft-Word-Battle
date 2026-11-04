@@ -89,7 +89,7 @@ These settle conflicts and gaps in the briefs.
 | Timer runs out | Lock what was typed; blank fields count as empty |
 | Skipped vote | Abstains and scores 0 |
 | Letter picker | Host first, then rotating; used letters are greyed out |
-| Play Again | Next round in the same room, with running totals |
+| Next Round | Next round in the same room, with running totals |
 | Return Home | Clears the room and scores |
 | Simulation | 1 human and 1-7 bots, with some deliberately wrong bot answers |
 | Join Room | Any valid code joins a room labelled Practice mode, with a bot as host |
@@ -109,6 +109,12 @@ These settle conflicts and gaps in the briefs.
 | Large text | System text size is supported up to 1.6x (`ThinkCraftApp.maxTextScale`); letter tiles ignore it |
 | Confetti | Only when the local player is in first place, and never with reduced motion |
 | Orientation | Portrait only, set in the Android manifest and in `main.dart` |
+| Room settings | The host picks 1, 3, 5 or 10 rounds (default 3), a 30, 60 or 90 second timer (default 90) and any of the six categories (at least 1, default all) on Create Room; `GameSettings` validates them |
+| Sound effects | Original tones made by `tool/generate_sounds.py`; on by default with a switch in Settings; they mix with other audio instead of pausing it; votes and Lock In play their own sound instead of the button pop |
+| Shorter timers | Bot answer times scale with the timer, and the ring turns yellow at a third and red at a ninth of the time left |
+| Joined rooms | Guests play by the host's settings; the practice bot host uses the standard 3 rounds and all categories |
+| Between rounds | Results shows Next Round, or New Game after the final round; New Game keeps players and settings but clears scores and letters |
+| Final round | The banner names the game winner, and confetti only plays for winning the whole game |
 | Player name | 2-12 letters, numbers or spaces |
 | Room code | 6 characters from A-Z and 2-9, without I, O, 0 or 1 |
 
@@ -135,6 +141,10 @@ flutter build apk --release
 Tests load the real Fredoka and Nunito fonts in `test/flutter_test_config.dart`,
 so layout tests measure text as a phone draws it. Keep that file.
 
+To change a sound effect, edit `tool/generate_sounds.py`, then run
+`py -3 tool/generate_sounds.py`. Screens play sounds through `playSound`
+in `lib/services/sound_service.dart`, which respects the Settings switch.
+
 To change the app icon or splash, edit `assets/images/logo.svg`, then run:
 
 ```powershell
@@ -147,4 +157,10 @@ The release APK is signed with the debug key, which is fine for installing
 on test phones but not for the Play Store. Phase 5 needs a real upload key.
 
 `Medium_Phone_API_35` is the default emulator, because the Pixel 9 one uses
-about 7.5 GB of RAM.
+about 7.5 GB of RAM. If it sticks on a black screen, close it and cold-boot
+with software graphics:
+
+```powershell
+& "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe" emu kill
+& "$env:LOCALAPPDATA\Android\Sdk\emulator\emulator.exe" -avd Medium_Phone_API_35 -no-snapshot-load -gpu swiftshader_indirect -no-boot-anim
+```

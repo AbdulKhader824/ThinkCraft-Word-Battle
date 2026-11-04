@@ -30,7 +30,8 @@ class HowToPlayScreen extends StatelessWidget {
             title: 'Make a room',
             text:
                 'Create a room, or join one with a code. '
-                'Play with 2 to 8 players.',
+                'Play with 2 to 8 players. The host picks how many rounds '
+                'and which categories.',
             picture: _PlayersPicture(),
           ),
           _Step(
@@ -45,8 +46,9 @@ class HowToPlayScreen extends StatelessWidget {
             color: AppColors.sunshine,
             title: 'Think fast!',
             text:
-                'You have 90 seconds. Write an animal, a place, a name, '
-                'a movie, a food and a brand that start with the letter.',
+                'The host picks a timer of 30, 60 or 90 seconds. Before it '
+                'runs out, write a word for each category, like an animal '
+                'or a food, that starts with the letter.',
             picture: _CategoriesPicture(),
           ),
           _Step(

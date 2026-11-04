@@ -28,8 +28,11 @@ class _ScriptedBot extends BotPlayer {
   final String answer;
 
   @override
-  Map<Category, String> answersFor(String letter) {
-    return {for (final category in Category.values) category: answer};
+  Map<Category, String> answersFor(
+    String letter, [
+    Iterable<Category> categories = Category.values,
+  ]) {
+    return {for (final category in categories) category: answer};
   }
 
   @override
@@ -256,7 +259,7 @@ void main() {
         playFullRound(time, service);
         final firstPicker = _room(service).round!.pickerId;
 
-        service.playAgain();
+        service.nextRound();
 
         final room = _room(service);
         expect(room.phase, GamePhase.letterSelection);
@@ -271,7 +274,7 @@ void main() {
         _playToVoting(time, service);
         playFullRound(time, service);
 
-        service.playAgain();
+        service.nextRound();
 
         expect(_room(service).usedLetters, {'M'});
       });
@@ -282,7 +285,7 @@ void main() {
         _playToVoting(time, service);
         playFullRound(time, service);
 
-        service.playAgain();
+        service.nextRound();
         time.elapse(_timing.pickLetter);
 
         expect(_room(service).round!.letter, isNot('M'));
@@ -295,11 +298,11 @@ void main() {
         _playToVoting(time, service, playerCount: 2);
         playFullRound(time, service);
 
-        service.playAgain();
+        service.nextRound();
         time.elapse(_timing.pickLetter + _timing.letterReveal);
         time.elapse(GameRules.answerTime);
         playFullRound(time, service);
-        service.playAgain();
+        service.nextRound();
 
         expect(_room(service).round!.pickerId, service.localPlayerId);
       });
@@ -314,7 +317,7 @@ void main() {
         final firstRound = _room(service).round!.results!.scores[botId]!;
         expect(firstTotals[botId]!.total, firstRound.total);
 
-        service.playAgain();
+        service.nextRound();
         time.elapse(_timing.pickLetter + _timing.letterReveal);
         time.elapse(GameRules.answerTime);
         playFullRound(time, service);
@@ -332,7 +335,7 @@ void main() {
         _playToVoting(time, service);
         playFullRound(time, service);
 
-        service.playAgain();
+        service.nextRound();
 
         final round = _room(service).round!;
         expect(round.answers, isEmpty);
@@ -345,7 +348,7 @@ void main() {
       _game((time, service) {
         _playToVoting(time, service);
 
-        expect(service.playAgain, throwsStateError);
+        expect(service.nextRound, throwsStateError);
       });
     });
   });

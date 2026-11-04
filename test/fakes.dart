@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:thinkcraft_word_battle/models/answer_group.dart';
 import 'package:thinkcraft_word_battle/models/category.dart';
 import 'package:thinkcraft_word_battle/models/game_phase.dart';
+import 'package:thinkcraft_word_battle/models/game_settings.dart';
 import 'package:thinkcraft_word_battle/models/player.dart';
 import 'package:thinkcraft_word_battle/models/player_profile.dart';
 import 'package:thinkcraft_word_battle/models/room.dart';
@@ -11,8 +12,20 @@ import 'package:thinkcraft_word_battle/models/round_results.dart';
 import 'package:thinkcraft_word_battle/models/vote.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
 import 'package:thinkcraft_word_battle/services/profile_store.dart';
+import 'package:thinkcraft_word_battle/services/sound_service.dart';
 
 const localId = 'me';
+
+/// Records which sounds would have played, instead of playing them.
+class FakeSoundPlayer implements SoundPlayer {
+  final played = <GameSound>[];
+
+  @override
+  void play(GameSound sound) => played.add(sound);
+
+  @override
+  void dispose() {}
+}
 
 /// Keeps the profile in memory instead of on the device.
 class MemoryProfileStore implements ProfileStore {
@@ -75,7 +88,14 @@ class FakeGameService implements GameService {
     required String playerName,
     required int playerCount,
     int avatarIndex = 0,
-  }) async => calls.add('createRoom');
+    GameSettings? settings,
+  }) async {
+    calls.add('createRoom');
+    createdWith = settings;
+  }
+
+  /// The settings passed to the last [createRoom].
+  GameSettings? createdWith;
 
   @override
   Future<void> joinRoom({
@@ -109,7 +129,10 @@ class FakeGameService implements GameService {
   }
 
   @override
-  Future<void> playAgain() async => calls.add('playAgain');
+  Future<void> nextRound() async => calls.add('nextRound');
+
+  @override
+  Future<void> newGame() async => calls.add('newGame');
 
   @override
   Future<void> refresh() async => calls.add('refresh');
@@ -124,8 +147,8 @@ class FakeGameService implements GameService {
   void dispose() => _changes.close();
 }
 
-Room fakeLobby({required List<Player> players}) {
-  return Room(code: 'ABC234', players: players);
+Room fakeLobby({required List<Player> players, GameSettings? settings}) {
+  return Room(code: 'ABC234', players: players, settings: settings);
 }
 
 Room fakeLetterRoom({
@@ -168,14 +191,17 @@ Room fakeVotingRoom({
 }
 
 /// Results for Sam, Luna and Kai, using the [scores] given by player id.
+/// With the default single round, these are the final results.
 Room fakeResultsRoom({
   required Map<String, ScoreLine> scores,
   Map<String, List<AnswerLine>> lines = const {},
   int roundNumber = 1,
+  int rounds = 1,
 }) {
   final ids = [localId, 'bot', 'bot2'];
   return Room(
     code: 'ABC234',
+    settings: GameSettings(rounds: rounds),
     phase: GamePhase.results,
     players: [
       fakePlayer(localId, name: 'Sam', isHost: true),
@@ -198,9 +224,11 @@ Room fakeResultsRoom({
 Room fakeAnsweringRoom({
   required DateTime deadline,
   Set<String> submitted = const {},
+  GameSettings? settings,
 }) {
   return Room(
     code: 'ABC234',
+    settings: settings,
     phase: GamePhase.answering,
     players: [
       fakePlayer(localId, name: 'Sam', isHost: true),

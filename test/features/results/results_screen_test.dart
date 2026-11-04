@@ -41,11 +41,13 @@ Future<FakeGameService> _open(
   WidgetTester tester, {
   Map<String, ScoreLine>? scores,
   int roundNumber = 1,
+  int rounds = 1,
   Size size = const Size(360, 800),
 }) async {
   final service = FakeGameService(
     fakeResultsRoom(
       roundNumber: roundNumber,
+      rounds: rounds,
       lines: {localId: _lines},
       scores:
           scores ??
@@ -157,19 +159,38 @@ void main() {
     expect(colors, contains(AppColors.bronze));
   });
 
-  testWidgets('later rounds show who is leading', (tester) async {
-    await _open(tester, roundNumber: 2);
+  testWidgets('before the last round, shows who is leading', (tester) async {
+    await _open(tester, roundNumber: 2, rounds: 5);
 
     expect(find.text('Sam is leading!'), findsOneWidget);
-    expect(find.text('Round 2 results'), findsOneWidget);
+    expect(find.text('Round 2 of 5 results'), findsOneWidget);
   });
 
-  testWidgets('Play Again asks for the next round', (tester) async {
-    final service = await _open(tester);
+  testWidgets('before the last round, offers the next round', (tester) async {
+    final service = await _open(tester, roundNumber: 2, rounds: 5);
 
-    await tapAndSettle(tester, find.text('Play Again'));
+    expect(find.text('New Game'), findsNothing);
+    await tapAndSettle(tester, find.text('Next Round'));
 
-    expect(service.calls, contains('playAgain'));
+    expect(service.calls, contains('nextRound'));
+  });
+
+  testWidgets('after the last round, announces the final winner', (
+    tester,
+  ) async {
+    await _open(tester, roundNumber: 5, rounds: 5);
+
+    expect(find.text('Sam wins!'), findsOneWidget);
+    expect(find.text('Final results after 5 rounds'), findsOneWidget);
+  });
+
+  testWidgets('after the last round, offers a new game', (tester) async {
+    final service = await _open(tester, roundNumber: 5, rounds: 5);
+
+    expect(find.text('Next Round'), findsNothing);
+    await tapAndSettle(tester, find.text('New Game'));
+
+    expect(service.calls, contains('newGame'));
   });
 
   testWidgets('Return Home leaves the game', (tester) async {
@@ -184,7 +205,7 @@ void main() {
   testWidgets('fits on a small phone', (tester) async {
     await _open(tester, size: const Size(320, 568));
 
-    expect(find.text('Play Again'), findsOneWidget);
+    expect(find.text('New Game'), findsOneWidget);
     expect(find.text('Return Home'), findsOneWidget);
   });
 }

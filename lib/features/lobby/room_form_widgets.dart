@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/widgets/game_card.dart';
+import '../../models/category.dart';
+import '../../models/game_settings.dart';
 import '../../services/rules/room_input_rules.dart';
+import '../../services/sound_service.dart';
+import '../gameplay/category_style.dart';
 
 /// Keeps a room code in capitals and blocks characters it can't contain.
 class RoomCodeFormatter extends TextInputFormatter {
@@ -96,22 +101,123 @@ class PlayerCountPicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return NumberPicker(
+      label: 'How many players?',
+      options: [
+        for (
+          var count = RoomInputRules.minPlayers;
+          count <= RoomInputRules.maxPlayers;
+          count++
+        )
+          count,
+      ],
+      selected: selected,
+      onChanged: onChanged,
+      keyPrefix: 'player-count',
+      unit: 'players',
+    );
+  }
+}
+
+/// Large number tiles for choosing how many rounds the game lasts.
+class RoundCountPicker extends StatelessWidget {
+  const RoundCountPicker({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final int selected;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return NumberPicker(
+      label: 'How many rounds?',
+      options: GameSettings.roundOptions,
+      selected: selected,
+      onChanged: onChanged,
+      keyPrefix: 'round-count',
+      unit: 'rounds',
+    );
+  }
+}
+
+/// Big tiles for choosing how long each round's timer runs.
+class AnswerTimePicker extends StatelessWidget {
+  const AnswerTimePicker({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final int selected;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return NumberPicker(
+      label: 'Time to answer',
+      options: GameSettings.answerSecondsOptions,
+      selected: selected,
+      onChanged: onChanged,
+      keyPrefix: 'answer-time',
+      unit: 'seconds',
+      suffix: 's',
+      tileWidth: 72,
+    );
+  }
+}
+
+/// A row of big number tiles where exactly one is chosen.
+class NumberPicker extends StatelessWidget {
+  const NumberPicker({
+    super.key,
+    required this.label,
+    required this.options,
+    required this.selected,
+    required this.onChanged,
+    required this.keyPrefix,
+    required this.unit,
+    this.suffix = '',
+    this.tileWidth = AppSizes.minTapTarget,
+  });
+
+  /// Shown after the number on the tile, such as "s" for seconds.
+  final String suffix;
+
+  /// Wider tiles fit labels like "90s".
+  final double tileWidth;
+
+  final String label;
+  final List<int> options;
+  final int selected;
+  final ValueChanged<int> onChanged;
+
+  /// Tiles get keys like `round-count-5`, for tests.
+  final String keyPrefix;
+
+  /// Read aloud after the number, such as "5 rounds".
+  final String unit;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('How many players?', style: AppText.label),
+        Text(label, style: AppText.label),
         const SizedBox(height: AppSpacing.xs),
         Wrap(
           spacing: AppSpacing.xs,
           runSpacing: AppSpacing.xs,
           children: [
-            for (
-              var count = RoomInputRules.minPlayers;
-              count <= RoomInputRules.maxPlayers;
-              count++
-            )
+            for (final count in options)
               _CountTile(
+                key: ValueKey('$keyPrefix-$count'),
                 count: count,
+                unit: unit,
+                suffix: suffix,
+                width: tileWidth,
                 selected: count == selected,
                 onTap: () => onChanged(count),
               ),
@@ -122,14 +228,69 @@ class PlayerCountPicker extends StatelessWidget {
   }
 }
 
-class _CountTile extends StatelessWidget {
-  const _CountTile({
-    required this.count,
+/// Toggles for the categories in the game. At least one stays chosen.
+class CategoryPicker extends StatelessWidget {
+  const CategoryPicker({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final Set<Category> selected;
+  final ValueChanged<Set<Category>> onChanged;
+
+  void _toggle(Category category) {
+    if (!selected.contains(category)) {
+      onChanged({...selected, category});
+    } else if (selected.length > 1) {
+      onChanged({...selected}..remove(category));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Categories (${selected.length} of ${Category.values.length})',
+          style: AppText.label,
+        ),
+        Text('Pick at least 1.', style: AppText.bodySmall),
+        const SizedBox(height: AppSpacing.xs),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final width = (constraints.maxWidth - AppSpacing.xs) / 2;
+            return Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                for (final category in Category.values)
+                  SizedBox(
+                    width: width,
+                    child: _CategoryToggle(
+                      category: category,
+                      selected: selected.contains(category),
+                      onTap: () => _toggle(category),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _CategoryToggle extends StatelessWidget {
+  const _CategoryToggle({
+    required this.category,
     required this.selected,
     required this.onTap,
   });
 
-  final int count;
+  final Category category;
   final bool selected;
   final VoidCallback onTap;
 
@@ -141,11 +302,95 @@ class _CountTile extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: '$count players',
+      label: category.label,
       excludeSemantics: true,
       child: AnimatedContainer(
         duration: reduceMotion ? Duration.zero : AppDurations.fast,
-        width: AppSizes.minTapTarget,
+        constraints: const BoxConstraints(minHeight: AppSizes.minTapTarget),
+        decoration: BoxDecoration(
+          color: selected ? category.color : AppColors.background,
+          borderRadius: radius,
+          border: Border.all(
+            color: selected ? AppColors.navy : AppColors.outline,
+            width: selected ? 3 : 2,
+          ),
+        ),
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkWell(
+            key: ValueKey('category-${category.name}'),
+            borderRadius: radius,
+            onTap: () {
+              playSoundFrom(context, GameSound.select);
+              onTap();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xs,
+                vertical: AppSpacing.xxs,
+              ),
+              child: Row(
+                children: [
+                  Opacity(
+                    opacity: selected ? 1 : 0.45,
+                    child: SvgPicture.asset(
+                      category.character,
+                      width: 32,
+                      height: 32,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.xs),
+                  Expanded(
+                    child: Text(category.label, style: AppText.bodySmall),
+                  ),
+                  Icon(
+                    selected
+                        ? Icons.check_circle_rounded
+                        : Icons.circle_outlined,
+                    color: AppColors.navy,
+                    size: 22,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CountTile extends StatelessWidget {
+  const _CountTile({
+    super.key,
+    required this.count,
+    required this.unit,
+    required this.suffix,
+    required this.width,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final int count;
+  final String unit;
+  final String suffix;
+  final double width;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(AppRadius.small);
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: '$count $unit',
+      excludeSemantics: true,
+      child: AnimatedContainer(
+        duration: reduceMotion ? Duration.zero : AppDurations.fast,
+        width: width,
         height: AppSizes.minTapTarget,
         decoration: BoxDecoration(
           color: selected ? AppColors.mint : AppColors.background,
@@ -158,10 +403,19 @@ class _CountTile extends StatelessWidget {
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
-            key: ValueKey('player-count-$count'),
             borderRadius: radius,
-            onTap: onTap,
-            child: Center(child: Text('$count', style: AppText.heading)),
+            onTap: () {
+              playSoundFrom(context, GameSound.select);
+              onTap();
+            },
+            // Shrinks rather than overflows with large system text.
+            child: Padding(
+              padding: const EdgeInsets.all(AppSpacing.xxs),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text('$count$suffix', style: AppText.heading),
+              ),
+            ),
           ),
         ),
       ),

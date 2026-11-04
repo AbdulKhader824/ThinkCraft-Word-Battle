@@ -48,6 +48,20 @@ void main() {
     await _playAnimations(tester);
   });
 
+  testWidgets('no confetti for leading before the last round', (tester) async {
+    await pumpGame(
+      tester,
+      service: FakeGameService(
+        fakeResultsRoom(scores: _iWin, roundNumber: 1, rounds: 3),
+      ),
+      reduceMotion: false,
+    );
+    await tester.pump();
+
+    expect(find.byType(ConfettiBurst), findsNothing);
+    await _playAnimations(tester);
+  });
+
   testWidgets('no confetti when someone else wins', (tester) async {
     await _open(tester, _iLose, reduceMotion: false);
 
@@ -89,10 +103,10 @@ void main() {
     await pumpGame(tester, service: service, reduceMotion: false);
     await tester.pump(const Duration(milliseconds: 300));
 
-    await tester.tap(find.text('Play Again'));
+    await tester.tap(find.text('New Game'));
     await tester.pump();
 
-    expect(service.calls, contains('playAgain'));
+    expect(service.calls, contains('newGame'));
     await _playAnimations(tester);
   });
 }

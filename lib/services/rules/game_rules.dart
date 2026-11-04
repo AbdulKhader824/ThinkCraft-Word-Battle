@@ -1,5 +1,7 @@
 /// Rules for rounds and answers. Plain Dart, with no Flutter imports.
 abstract final class GameRules {
+  /// The standard answer timer. Rooms can choose a shorter one, which is
+  /// in `GameSettings.answerTime`.
   static const answerTime = Duration(seconds: 90);
 
   static final letters = List<String>.unmodifiable(

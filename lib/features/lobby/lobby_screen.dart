@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -8,9 +9,12 @@ import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/player_avatar.dart';
+import '../../models/game_settings.dart';
 import '../../models/player.dart';
 import '../../models/room.dart';
 import '../../services/game_providers.dart';
+import '../../services/sound_service.dart';
+import '../gameplay/category_style.dart';
 import '../gameplay/leave_game_guard.dart';
 import 'ready_badge.dart';
 import 'room_form_widgets.dart';
@@ -22,6 +26,14 @@ class LobbyScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final room = ref.watch(gameRoomProvider);
     final myId = ref.watch(gameServiceProvider).localPlayerId;
+    ref.listen(gameRoomProvider, (previous, next) {
+      int readyOthers(Room? room) => (room?.players ?? const [])
+          .where((player) => player.id != myId && player.isReady)
+          .length;
+      if (readyOthers(next) > readyOthers(previous)) {
+        playSound(ref, GameSound.ready);
+      }
+    });
     if (room == null || myId == null) return const SizedBox.shrink();
 
     return LeaveGameGuard(
@@ -32,6 +44,8 @@ class LobbyScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             _RoomCodeCard(code: room.code),
+            const SizedBox(height: AppSpacing.sm),
+            _SettingsSummary(settings: room.settings),
             const SizedBox(height: AppSpacing.md),
             _PlayerGrid(players: room.players, myId: myId),
             const SizedBox(height: AppSpacing.lg),
@@ -67,6 +81,50 @@ class _RoomCodeCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           const PracticeModeChip(),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shows everyone the host's choices before the game starts.
+class _SettingsSummary extends StatelessWidget {
+  const _SettingsSummary({required this.settings});
+
+  final GameSettings settings;
+
+  @override
+  Widget build(BuildContext context) {
+    final rounds = settings.rounds == 1
+        ? '1 round'
+        : '${settings.rounds} rounds';
+    final categories = settings.usesEveryCategory
+        ? 'All categories'
+        : '${settings.categories.length} categories';
+
+    return GameCard(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$rounds · ${settings.answerSeconds}s each · $categories',
+            style: AppText.label,
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final category in settings.categories)
+                SvgPicture.asset(
+                  category.character,
+                  width: 32,
+                  height: 32,
+                  semanticsLabel: category.label,
+                ),
+            ],
+          ),
         ],
       ),
     );

@@ -1,4 +1,5 @@
 import '../models/category.dart';
+import '../models/game_settings.dart';
 import '../models/room.dart';
 import '../models/vote.dart';
 
@@ -19,10 +20,12 @@ abstract interface class GameService {
   String? get localPlayerId;
 
   /// [avatarIndex] is the player's chosen character; bots get the others.
+  /// [settings] are the rounds and categories, chosen by the host.
   Future<void> createRoom({
     required String playerName,
     required int playerCount,
     int avatarIndex = 0,
+    GameSettings? settings,
   });
 
   Future<void> joinRoom({
@@ -51,8 +54,13 @@ abstract interface class GameService {
   /// one choice only.
   Future<void> castVote(String ballotItemId, VoteChoice choice);
 
-  /// Starts the next round in this room, keeping the running totals.
-  Future<void> playAgain();
+  /// Starts the next round, keeping the running totals. Not allowed after
+  /// the final round.
+  Future<void> nextRound();
+
+  /// Starts again from round 1 with the same players and settings, clearing
+  /// the scores and used letters.
+  Future<void> newGame();
 
   /// Checks the time again, for when the app returns from the background.
   Future<void> refresh();

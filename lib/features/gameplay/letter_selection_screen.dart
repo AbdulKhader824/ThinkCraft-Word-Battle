@@ -9,6 +9,8 @@ import '../../core/widgets/letter_badge.dart';
 import '../../models/room.dart';
 import '../../services/game_providers.dart';
 import '../../services/rules/game_rules.dart';
+import '../../services/sound_service.dart';
+import 'category_style.dart';
 import 'leave_game_guard.dart';
 
 class LetterSelectionScreen extends ConsumerWidget {
@@ -62,6 +64,11 @@ class _LetterChoice extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
+          roundLabel(room),
+          textAlign: TextAlign.center,
+          style: AppText.label,
+        ),
+        Text(
           isPicker
               ? 'Choose the letter for everyone!'
               : '${picker.name} is choosing the letter...',
@@ -89,7 +96,10 @@ class _LetterChoice extends ConsumerWidget {
                     color: _colors[index % _colors.length],
                     isUsed: room.usedLetters.contains(letter),
                     onTap: isPicker && !room.usedLetters.contains(letter)
-                        ? () => service.selectLetter(letter)
+                        ? () {
+                            playSound(ref, GameSound.select);
+                            service.selectLetter(letter);
+                          }
                         : null,
                   ),
               ],
@@ -152,13 +162,25 @@ class _LetterTile extends StatelessWidget {
 }
 
 /// Pops the chosen letter onto the screen.
-class _LetterReveal extends StatelessWidget {
+class _LetterReveal extends ConsumerStatefulWidget {
   const _LetterReveal({required this.letter});
 
   final String letter;
 
   @override
+  ConsumerState<_LetterReveal> createState() => _LetterRevealState();
+}
+
+class _LetterRevealState extends ConsumerState<_LetterReveal> {
+  @override
+  void initState() {
+    super.initState();
+    playSound(ref, GameSound.reveal);
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final letter = widget.letter;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
 
     return Column(

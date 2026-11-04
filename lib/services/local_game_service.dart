@@ -7,6 +7,7 @@ import '../models/answer.dart';
 import '../models/answer_group.dart';
 import '../models/category.dart';
 import '../models/game_phase.dart';
+import '../models/game_settings.dart';
 import '../models/player.dart';
 import '../models/room.dart';
 import '../models/round.dart';
@@ -36,6 +37,9 @@ class BotTiming {
   final Duration hostStart;
   final Duration pickLetter;
   final Duration letterReveal;
+
+  /// How long bots take to answer in a standard 90-second round. Shorter
+  /// rounds scale this down, so bots still usually beat the timer.
   final (Duration, Duration) answer;
 
   /// Bots finish soon after the player submits, to avoid a long wait.
@@ -100,9 +104,11 @@ class LocalGameService implements GameService {
     required String playerName,
     required int playerCount,
     int avatarIndex = 0,
+    GameSettings? settings,
   }) async {
     _startSession(
       code: _generateRoomCode(),
+      settings: settings ?? GameSettings.standard,
       players: _buildPlayers(
         playerName: playerName,
         playerCount: playerCount,
@@ -118,8 +124,10 @@ class LocalGameService implements GameService {
     required String roomCode,
     int avatarIndex = 0,
   }) async {
+    // A guest plays by the host's settings. The bot host uses the standard.
     _startSession(
       code: roomCode,
+      settings: GameSettings.standard,
       players: _buildPlayers(
         playerName: playerName,
         playerCount: 3 + _random.nextInt(4),
@@ -211,11 +219,23 @@ class LocalGameService implements GameService {
   }
 
   @override
-  Future<void> playAgain() async {
+  Future<void> nextRound() async {
     final room = _requirePhase(GamePhase.results);
-    final everyLetterUsed = room.usedLetters.length == GameRules.letters.length;
+    if (room.isFinalRound) throw StateError('That was the final round.');
 
-    _room = room.copyWith(usedLetters: everyLetterUsed ? {} : null);
+    _beginRound();
+  }
+
+  @override
+  Future<void> newGame() async {
+    final room = _requirePhase(GamePhase.results);
+
+    // A fresh room keeps the code, players and settings, and drops the rest.
+    _room = Room(
+      code: room.code,
+      players: room.players,
+      settings: room.settings,
+    );
     _beginRound();
   }
 
@@ -288,12 +308,16 @@ class LocalGameService implements GameService {
     _room = null;
   }
 
-  void _startSession({required String code, required List<Player> players}) {
+  void _startSession({
+    required String code,
+    required GameSettings settings,
+    required List<Player> players,
+  }) {
     _clearSession();
     for (final player in players.where((player) => player.isBot)) {
       _bots[player.id] = _createBot(_random);
     }
-    _publish(Room(code: code, players: players));
+    _publish(Room(code: code, players: players, settings: settings));
 
     for (final player in players.where((p) => p.isBot && !p.isReady)) {
       _after(_between(timing.ready), () => _setPlayerReady(player.id, true));
@@ -408,24 +432,34 @@ class LocalGameService implements GameService {
     final room = _room!;
     final round = room.round!;
 
+    final answerTime = room.settings.answerTime;
+    // Bot speeds are set for the standard 90 seconds, so shorter rounds
+    // make them hurry by the same amount.
+    final botSpeed =
+        answerTime.inMilliseconds / GameRules.answerTime.inMilliseconds;
+
     _answers.clear();
     _publish(
       room.copyWith(
         phase: GamePhase.answering,
-        round: round.copyWith(deadline: clock.now().add(GameRules.answerTime)),
+        round: round.copyWith(deadline: clock.now().add(answerTime)),
       ),
     );
 
-    _after(GameRules.answerTime, _finishAnswering);
+    _after(answerTime, _finishAnswering);
     for (final botId in _bots.keys) {
-      _scheduleBotAnswer(botId, _between(timing.answer));
+      _scheduleBotAnswer(botId, _between(timing.answer) * botSpeed);
     }
   }
 
   void _scheduleBotAnswer(String botId, Duration delay) {
     _botAnswerTimers[botId] = _after(delay, () {
       _botAnswerTimers.remove(botId);
-      _answers[botId] = _bots[botId]!.answersFor(_room!.round!.letter!);
+      final room = _room!;
+      _answers[botId] = _bots[botId]!.answersFor(
+        room.round!.letter!,
+        room.settings.categories,
+      );
       _markSubmitted(botId);
     });
   }
@@ -466,12 +500,15 @@ class LocalGameService implements GameService {
     _botAnswerTimers.clear();
 
     for (final entry in _bots.entries) {
-      _answers[entry.key] ??= entry.value.answersFor(round.letter!);
+      _answers[entry.key] ??= entry.value.answersFor(
+        round.letter!,
+        room.settings.categories,
+      );
     }
 
     _lockedAnswers = [
       for (final player in room.players)
-        for (final category in Category.values)
+        for (final category in room.settings.categories)
           Answer(
             playerId: player.id,
             category: category,

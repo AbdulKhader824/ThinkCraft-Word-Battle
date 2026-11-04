@@ -16,6 +16,7 @@ import '../../models/category.dart';
 import '../../models/room.dart';
 import '../../services/game_providers.dart';
 import '../../services/rules/game_rules.dart';
+import '../../services/sound_service.dart';
 import 'category_style.dart';
 import 'leave_game_guard.dart';
 
@@ -53,8 +54,11 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
 
   Future<void> _submit() async {
     final service = ref.read(gameServiceProvider);
-    final blanks = _controllers.values
-        .where((controller) => controller.text.trim().isEmpty)
+    // Only count the categories in this game, not every answer field.
+    final categories =
+        ref.read(gameRoomProvider)?.settings.categories ?? Category.values;
+    final blanks = categories
+        .where((category) => _controllers[category]!.text.trim().isEmpty)
         .length;
 
     if (blanks > 0) {
@@ -67,6 +71,8 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
       );
       if (!submit) return;
     }
+    if (!mounted) return;
+    playSound(ref, GameSound.lock);
     await service.submitAnswers();
   }
 
@@ -82,7 +88,7 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
     }
 
     final locked = round!.submittedPlayerIds.contains(myId);
-    final lastCategory = Category.values.last;
+    final categories = room.settings.categories;
     final service = ref.read(gameServiceProvider);
 
     return LeaveGameGuard(
@@ -90,7 +96,13 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _RoundHeader(letter: letter, deadline: deadline),
+            _RoundHeader(
+              letter: letter,
+              deadline: deadline,
+              total: room.settings.answerTime,
+              roundLabel: roundLabel(room),
+              locked: locked,
+            ),
             // Outside the scrolling list, so it shows even when the
             // player locks in from the bottom of the list.
             if (locked)
@@ -116,13 +128,13 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    for (final category in Category.values) ...[
+                    for (final category in categories) ...[
                       _CategoryCard(
                         category: category,
                         letter: letter,
                         controller: _controllers[category]!,
                         locked: locked,
-                        isLast: category == lastCategory,
+                        isLast: category == categories.last,
                         onChanged: (text) {
                           service.updateAnswer(category, text);
                           setState(() {});
@@ -135,6 +147,8 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
                       GameButton(
                         label: 'Lock In Answers',
                         icon: Icons.lock_rounded,
+                        // Locking in plays its own chime instead.
+                        sound: null,
                         onPressed: _submit,
                       ),
                     ],
@@ -151,10 +165,23 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
 
 /// Stays on screen while the answers scroll, so the timer is always visible.
 class _RoundHeader extends ConsumerWidget {
-  const _RoundHeader({required this.letter, required this.deadline});
+  const _RoundHeader({
+    required this.letter,
+    required this.deadline,
+    required this.total,
+    required this.roundLabel,
+    required this.locked,
+  });
+
+  static const _tickFrom = 5;
 
   final String letter;
   final DateTime deadline;
+
+  /// The room's answer time, so the ring drains at the right speed.
+  final Duration total;
+  final String roundLabel;
+  final bool locked;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -169,9 +196,26 @@ class _RoundHeader extends ConsumerWidget {
         children: [
           LetterBadge(letter: letter),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text('Find $letter words!', style: AppText.heading)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Find $letter words!', style: AppText.heading),
+                Text(roundLabel, style: AppText.bodySmall),
+              ],
+            ),
+          ),
           const SizedBox(width: AppSpacing.sm),
-          CountdownRing(deadline: deadline, total: GameRules.answerTime),
+          CountdownRing(
+            deadline: deadline,
+            total: total,
+            // A soft tick for the last seconds, until answers are locked.
+            onSecond: (seconds) {
+              if (!locked && seconds > 0 && seconds <= _tickFrom) {
+                playSound(ref, GameSound.tick);
+              }
+            },
+          ),
         ],
       ),
     );

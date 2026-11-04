@@ -19,13 +19,14 @@ class PrefsProfileStore implements ProfileStore {
 
   static const _nameKey = 'player_name';
   static const _avatarKey = 'player_avatar';
+  static const _soundKey = 'sound_on';
 
   final SharedPreferencesWithCache _prefs;
 
   static Future<PrefsProfileStore> open() async {
     final prefs = await SharedPreferencesWithCache.create(
       cacheOptions: const SharedPreferencesWithCacheOptions(
-        allowList: {_nameKey, _avatarKey},
+        allowList: {_nameKey, _avatarKey, _soundKey},
       ),
     );
     return PrefsProfileStore(prefs);
@@ -36,6 +37,7 @@ class PrefsProfileStore implements ProfileStore {
     final avatar = _prefs.getInt(_avatarKey) ?? 0;
     return PlayerProfile(
       name: _prefs.getString(_nameKey) ?? '',
+      soundOn: _prefs.getBool(_soundKey) ?? true,
       avatarIndex: avatar.clamp(0, PlayerProfile.avatarCount - 1),
     );
   }
@@ -44,6 +46,7 @@ class PrefsProfileStore implements ProfileStore {
   Future<void> save(PlayerProfile profile) async {
     await _prefs.setString(_nameKey, profile.name);
     await _prefs.setInt(_avatarKey, profile.avatarIndex);
+    await _prefs.setBool(_soundKey, profile.soundOn);
   }
 }
 

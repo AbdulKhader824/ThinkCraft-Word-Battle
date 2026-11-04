@@ -50,9 +50,9 @@ void main() {
     await tester.pump(_timing.voting.$2);
     await tester.pumpAndSettle();
     expect(currentRoute(tester), AppRoutes.results);
-    expect(find.text('Round 1 results'), findsOneWidget);
+    expect(find.text('Round 1 of 3 results'), findsOneWidget);
 
-    await tapAndSettle(tester, find.text('Play Again'));
+    await tapAndSettle(tester, find.text('Next Round'));
     expect(currentRoute(tester), AppRoutes.letterSelection);
     expect(gameService(tester).room!.round!.number, 2);
     expect(find.textContaining('is choosing the letter'), findsOneWidget);

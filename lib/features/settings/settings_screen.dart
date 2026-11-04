@@ -15,6 +15,7 @@ import '../../core/widgets/player_avatar.dart';
 import '../../models/player_profile.dart';
 import '../../services/profile_store.dart';
 import '../../services/rules/room_input_rules.dart';
+import '../../services/sound_service.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -27,6 +28,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nameController;
   late int _avatarIndex;
+  late bool _soundOn;
 
   @override
   void initState() {
@@ -34,6 +36,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final profile = ref.read(profileProvider);
     _nameController = TextEditingController(text: profile.name);
     _avatarIndex = profile.avatarIndex;
+    _soundOn = profile.soundOn;
   }
 
   @override
@@ -54,10 +57,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await ref
         .read(profileProvider.notifier)
         .save(
-          PlayerProfile(
-            name: RoomInputRules.cleanName(_nameController.text),
-            avatarIndex: _avatarIndex,
-          ),
+          ref
+              .read(profileProvider)
+              .copyWith(
+                soundOn: _soundOn,
+                name: RoomInputRules.cleanName(_nameController.text),
+                avatarIndex: _avatarIndex,
+              ),
         );
     if (!mounted) return;
     ScaffoldMessenger.of(context)
@@ -115,6 +121,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
             ),
+            const SizedBox(height: AppSpacing.md),
+            GameCard(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+              child: Material(
+                type: MaterialType.transparency,
+                child: SwitchListTile(
+                  key: const ValueKey('sound-switch'),
+                  value: _soundOn,
+                  onChanged: (on) {
+                    setState(() => _soundOn = on);
+                    // A preview, so turning sound on proves it works.
+                    if (on) {
+                      ref.read(soundPlayerProvider).play(GameSound.select);
+                    }
+                  },
+                  secondary: Icon(
+                    _soundOn
+                        ? Icons.volume_up_rounded
+                        : Icons.volume_off_rounded,
+                    color: AppColors.navy,
+                    size: 28,
+                  ),
+                  title: Text('Sound effects', style: AppText.label),
+                  subtitle: Text(
+                    'Pops, chimes and fanfares',
+                    style: AppText.bodySmall,
+                  ),
+                ),
+              ),
+            ),
             const SizedBox(height: AppSpacing.lg),
             GameButton(
               label: 'Save',
@@ -151,7 +187,10 @@ class _AvatarChoice extends StatelessWidget {
       child: InkWell(
         key: ValueKey('avatar-$index'),
         customBorder: const CircleBorder(),
-        onTap: onTap,
+        onTap: () {
+          playSoundFrom(context, GameSound.select);
+          onTap();
+        },
         child: AnimatedContainer(
           duration: reduceMotion ? Duration.zero : AppDurations.fast,
           padding: const EdgeInsets.all(AppSpacing.xxs),

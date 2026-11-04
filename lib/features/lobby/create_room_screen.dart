@@ -8,6 +8,8 @@ import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/game_text_field.dart';
+import '../../models/category.dart';
+import '../../models/game_settings.dart';
 import '../../services/game_providers.dart';
 import '../../services/profile_store.dart';
 import '../../services/rules/room_input_rules.dart';
@@ -26,6 +28,9 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
     text: ref.read(profileProvider).name,
   );
   int _playerCount = 4;
+  int _rounds = GameSettings.defaultRounds;
+  int _answerSeconds = GameSettings.defaultAnswerSeconds;
+  Set<Category> _categories = Category.values.toSet();
 
   @override
   void dispose() {
@@ -47,6 +52,11 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
           playerName: name,
           playerCount: _playerCount,
           avatarIndex: profile.avatarIndex,
+          settings: GameSettings(
+            rounds: _rounds,
+            answerSeconds: _answerSeconds,
+            categories: _categories,
+          ),
         );
   }
 
@@ -81,6 +91,29 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                   PlayerCountPicker(
                     selected: _playerCount,
                     onChanged: (count) => setState(() => _playerCount = count),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            GameCard(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  RoundCountPicker(
+                    selected: _rounds,
+                    onChanged: (rounds) => setState(() => _rounds = rounds),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  AnswerTimePicker(
+                    selected: _answerSeconds,
+                    onChanged: (seconds) =>
+                        setState(() => _answerSeconds = seconds),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  CategoryPicker(
+                    selected: _categories,
+                    onChanged: (chosen) => setState(() => _categories = chosen),
                   ),
                 ],
               ),
