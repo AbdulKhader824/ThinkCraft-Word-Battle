@@ -5,6 +5,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/widgets/confetti_burst.dart';
+import '../../core/widgets/countdown_ring.dart';
 import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
@@ -14,6 +15,7 @@ import '../../models/player.dart';
 import '../../models/room.dart';
 import '../../models/round_results.dart';
 import '../../services/game_providers.dart';
+import '../../services/rules/game_rules.dart';
 import '../../services/rules/scoring_rules.dart';
 import '../../services/sound_service.dart';
 import '../gameplay/category_style.dart';
@@ -149,14 +151,20 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen>
                     AppSpacing.md,
                     AppSpacing.sm,
                   ),
-                  child: _ResultActions(
-                    // After the final round, a new game replaces the next round.
-                    nextLabel: room.isFinalRound ? 'New Game' : 'Next Round',
-                    onNext: room.isFinalRound
-                        ? service.newGame
-                        : service.nextRound,
-                    onReturnHome: service.leaveRoom,
-                  ),
+                  // Every round must be played, so only the final results
+                  // offer a way home. Before that, everyone presses Next
+                  // Round, and the panel shows who has.
+                  child: room.isFinalRound
+                      ? _ResultActions(
+                          nextLabel: 'New Game',
+                          onNext: service.newGame,
+                          onReturnHome: service.leaveRoom,
+                        )
+                      : _NextRoundPanel(
+                          room: room,
+                          myId: service.localPlayerId,
+                          onReady: service.nextRound,
+                        ),
                 ),
               ],
             ),
@@ -170,7 +178,183 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen>
   }
 }
 
-/// Next Round (or New Game) and Return Home. Side by side when there's room;
+/// Next Round, with a countdown and every player's face showing whether
+/// they're ready. Anyone not ready when the time runs out leaves the room.
+class _NextRoundPanel extends StatelessWidget {
+  const _NextRoundPanel({
+    required this.room,
+    required this.myId,
+    required this.onReady,
+  });
+
+  final Room room;
+  final String? myId;
+  final VoidCallback onReady;
+
+  @override
+  Widget build(BuildContext context) {
+    final round = room.round!;
+    final ready = round.nextRoundReadyIds;
+    final deadline = round.nextRoundDeadline;
+    final iAmReady = ready.contains(myId);
+    final waiting = room.players.length - ready.length;
+
+    final status = !iAmReady
+        ? 'Press Next Round when you are ready!'
+        : waiting == 1
+        ? 'Waiting for 1 more player...'
+        : 'Waiting for $waiting more players...';
+
+    return GameCard(
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              if (deadline != null) ...[
+                CountdownRing(
+                  deadline: deadline,
+                  total: GameRules.nextRoundWait,
+                  size: 56,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(status, style: AppText.label),
+                    Text(
+                      'Players not ready in time leave the room.',
+                      style: AppText.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Wrap(
+            spacing: AppSpacing.xs,
+            runSpacing: AppSpacing.xs,
+            alignment: WrapAlignment.center,
+            children: [
+              for (final player in room.players)
+                _ReadyFace(
+                  player: player,
+                  isReady: ready.contains(player.id),
+                  isMe: player.id == myId,
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          GameButton(
+            label: iAmReady ? 'Waiting...' : 'Next Round',
+            icon: iAmReady
+                ? Icons.hourglass_top_rounded
+                : Icons.arrow_forward_rounded,
+            compact: true,
+            onPressed: iAmReady ? null : onReady,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A player's face with a green tick once they're ready, or an hourglass
+/// while they're still deciding.
+class _ReadyFace extends StatelessWidget {
+  const _ReadyFace({
+    required this.player,
+    required this.isReady,
+    required this.isMe,
+  });
+
+  final Player player;
+  final bool isReady;
+  final bool isMe;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = isMe ? 'You' : player.name;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
+    return Semantics(
+      label: isReady ? '$name, ready' : '$name, waiting',
+      excludeSemantics: true,
+      child: SizedBox(
+        width: 52,
+        child: Column(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                AnimatedOpacity(
+                  opacity: isReady ? 1 : 0.55,
+                  duration: reduceMotion ? Duration.zero : AppDurations.medium,
+                  child: PlayerAvatar(index: player.avatarIndex, size: 44),
+                ),
+                Positioned(
+                  right: -4,
+                  bottom: -4,
+                  child: AnimatedSwitcher(
+                    duration: reduceMotion
+                        ? Duration.zero
+                        : AppDurations.medium,
+                    transitionBuilder: (child, animation) => ScaleTransition(
+                      scale: CurvedAnimation(
+                        parent: animation,
+                        curve: Curves.easeOutBack,
+                      ),
+                      child: child,
+                    ),
+                    child: _StatusDot(key: ValueKey(isReady), isReady: isReady),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.xxs),
+            Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppText.bodySmall,
+              textScaler: TextScaler.noScaling,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusDot extends StatelessWidget {
+  const _StatusDot({super.key, required this.isReady});
+
+  final bool isReady;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 22,
+      height: 22,
+      decoration: BoxDecoration(
+        color: isReady ? AppColors.valid : AppColors.sunshine,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+      child: Icon(
+        isReady ? Icons.check_rounded : Icons.hourglass_top_rounded,
+        color: isReady ? Colors.white : AppColors.navy,
+        size: 14,
+      ),
+    );
+  }
+}
+
+/// New Game and Return Home, after the final round. Side by side when there's room;
 /// stacked and smaller on narrow phones or with large text, so they never
 /// crowd out the leaderboard.
 class _ResultActions extends StatelessWidget {

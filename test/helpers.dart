@@ -58,10 +58,16 @@ Future<void> pumpGame(
   await tester.pump();
 }
 
-/// Waits for the splash screen to finish and lands on Home.
+/// Waits for the splash screen to finish and lands on the game hub.
 Future<void> goToHome(WidgetTester tester) async {
   await tester.pump(SplashScreen.displayTime);
   await tester.pumpAndSettle();
+}
+
+/// Goes from the hub into Word Battle, where Create and Join Room are.
+Future<void> goToWordBattle(WidgetTester tester) async {
+  await goToHome(tester);
+  await tapAndSettle(tester, buttonLabelled('Play'));
 }
 
 /// Scrolls a widget into view, then taps it.

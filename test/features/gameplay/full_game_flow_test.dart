@@ -14,7 +14,7 @@ const _timing = BotTiming();
 void main() {
   testWidgets('a whole game runs on the real service, as host', (tester) async {
     await pumpGame(tester);
-    await goToHome(tester);
+    await goToWordBattle(tester);
 
     await tapAndSettle(tester, buttonLabelled('Create Room'));
     await tester.enterText(find.byType(TextFormField).first, 'Sam');
@@ -48,11 +48,19 @@ void main() {
     expect(find.text('Counting the votes...'), findsOneWidget);
 
     await tester.pump(_timing.voting.$2);
-    await tester.pumpAndSettle();
+    await pumpFrames(tester);
+    await tester.pump(const Duration(seconds: 2));
     expect(currentRoute(tester), AppRoutes.results);
     expect(find.text('Round 1 of 3 results'), findsOneWidget);
 
-    await tapAndSettle(tester, find.text('Next Round'));
+    // The wait for Next Round counts down, so it never settles: pump
+    // frames until the bots have pressed it too.
+    await tester.tap(find.text('Next Round'));
+    for (var wait = 0; wait < 50; wait++) {
+      await tester.pump(const Duration(milliseconds: 100));
+      if (gameService(tester).room!.phase == GamePhase.letterSelection) break;
+    }
+    await tester.pumpAndSettle();
     expect(currentRoute(tester), AppRoutes.letterSelection);
     expect(gameService(tester).room!.round!.number, 2);
     expect(find.textContaining('is choosing the letter'), findsOneWidget);
@@ -77,7 +85,7 @@ void main() {
     tester,
   ) async {
     await pumpGame(tester);
-    await goToHome(tester);
+    await goToWordBattle(tester);
 
     await tapAndSettle(tester, buttonLabelled('Join Room'));
     await tester.enterText(find.byType(TextFormField).at(0), 'Sam');

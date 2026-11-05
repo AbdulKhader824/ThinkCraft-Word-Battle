@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../features/gameplay/answer_screen.dart';
 import '../features/gameplay/letter_selection_screen.dart';
-import '../features/home/home_screen.dart';
+import '../features/home/word_battle_screen.dart';
 import '../features/home/splash_screen.dart';
+import '../features/hub/game_catalog.dart';
+import '../features/hub/hub_screen.dart';
 import '../features/lobby/create_room_screen.dart';
 import '../features/lobby/join_room_screen.dart';
 import '../features/lobby/lobby_screen.dart';
@@ -20,6 +22,7 @@ import '../services/game_providers.dart';
 abstract final class AppRoutes {
   static const splash = '/';
   static const home = '/home';
+  static const wordBattle = GameCatalog.wordBattleRoute;
   static const createRoom = '/create';
   static const joinRoom = '/join';
   static const settings = '/settings';
@@ -115,7 +118,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         gameRedirect(state.matchedLocation, phase.value),
     routes: [
       _route(AppRoutes.splash, const SplashScreen()),
-      _route(AppRoutes.home, const HomeScreen()),
+      _route(AppRoutes.home, const HubScreen()),
+      _route(AppRoutes.wordBattle, const WordBattleScreen()),
       _route(AppRoutes.createRoom, const CreateRoomScreen()),
       _route(AppRoutes.joinRoom, const JoinRoomScreen()),
       _route(AppRoutes.settings, const SettingsScreen()),

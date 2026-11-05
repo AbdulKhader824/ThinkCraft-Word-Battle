@@ -18,7 +18,10 @@ class Round {
     List<BallotItem> ballot = const [],
     Map<String, VoteChoice> myVotes = const {},
     this.results,
-  }) : submittedPlayerIds = Set.unmodifiable(submittedPlayerIds),
+    Set<String> nextRoundReadyIds = const {},
+    this.nextRoundDeadline,
+  }) : nextRoundReadyIds = Set.unmodifiable(nextRoundReadyIds),
+       submittedPlayerIds = Set.unmodifiable(submittedPlayerIds),
        answers = List.unmodifiable(answers),
        ballot = List.unmodifiable(ballot),
        myVotes = Map.unmodifiable(myVotes);
@@ -48,6 +51,14 @@ class Round {
   /// Null until the votes are counted.
   final RoundResults? results;
 
+  /// Players who have pressed Next Round on the results.
+  final Set<String> nextRoundReadyIds;
+
+  /// When the wait for Next Round ends. The next round then starts with the
+  /// players who are ready, and the others leave the room. Null after the
+  /// final round, which has no next round.
+  final DateTime? nextRoundDeadline;
+
   /// The next answer to vote on, or null when finished.
   BallotItem? get nextBallotItem {
     for (final item in ballot) {
@@ -64,6 +75,8 @@ class Round {
     List<BallotItem>? ballot,
     Map<String, VoteChoice>? myVotes,
     RoundResults? results,
+    Set<String>? nextRoundReadyIds,
+    DateTime? nextRoundDeadline,
   }) {
     return Round(
       number: number,
@@ -75,6 +88,8 @@ class Round {
       ballot: ballot ?? this.ballot,
       myVotes: myVotes ?? this.myVotes,
       results: results ?? this.results,
+      nextRoundReadyIds: nextRoundReadyIds ?? this.nextRoundReadyIds,
+      nextRoundDeadline: nextRoundDeadline ?? this.nextRoundDeadline,
     );
   }
 }

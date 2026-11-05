@@ -31,6 +31,7 @@ class BotTiming {
     this.answer = const (Duration(seconds: 25), Duration(seconds: 80)),
     this.afterHumanSubmit = const (Duration(seconds: 1), Duration(seconds: 5)),
     this.voting = const (Duration(seconds: 1), Duration(seconds: 3)),
+    this.nextRound = const (Duration(seconds: 1), Duration(seconds: 4)),
   });
 
   final (Duration, Duration) ready;
@@ -47,6 +48,9 @@ class BotTiming {
 
   /// How long bots take to vote once the player has finished.
   final (Duration, Duration) voting;
+
+  /// How long bots take to press Next Round on the results.
+  final (Duration, Duration) nextRound;
 }
 
 /// A complete game on this device, with bots as the other players.
@@ -89,6 +93,9 @@ class LocalGameService implements GameService {
   var _votes = <Vote>[];
 
   Room? _room;
+
+  /// Ends the wait for Next Round. Cancelled if everyone is ready sooner.
+  Timer? _nextRoundWait;
 
   @override
   Room? get room => _room;
@@ -223,7 +230,7 @@ class LocalGameService implements GameService {
     final room = _requirePhase(GamePhase.results);
     if (room.isFinalRound) throw StateError('That was the final round.');
 
-    _beginRound();
+    _markNextRoundReady(_localId);
   }
 
   @override
@@ -241,7 +248,14 @@ class LocalGameService implements GameService {
 
   @override
   Future<void> refresh() async {
-    final deadline = _room?.round?.deadline;
+    final round = _room?.round;
+    final nextRoundDeadline = round?.nextRoundDeadline;
+    if (_room?.phase == GamePhase.results && nextRoundDeadline != null) {
+      if (!clock.now().isBefore(nextRoundDeadline)) _closeNextRoundWait();
+      return;
+    }
+
+    final deadline = round?.deadline;
     if (!_isAnswering || deadline == null) return;
     if (!clock.now().isBefore(deadline)) _finishAnswering();
   }
@@ -299,6 +313,7 @@ class LocalGameService implements GameService {
       timer.cancel();
     }
     _timers.clear();
+    _nextRoundWait = null;
     _botAnswerTimers.clear();
     _bots.clear();
     _answers.clear();
@@ -395,6 +410,8 @@ class LocalGameService implements GameService {
   }
 
   void _beginRound() {
+    _nextRoundWait?.cancel();
+    _nextRoundWait = null;
     final room = _room!;
     final number = (room.round?.number ?? 0) + 1;
     final picker = room.players[(number - 1) % room.players.length];
@@ -572,10 +589,19 @@ class LocalGameService implements GameService {
       votes: _votes,
     );
 
+    // After the final round there's no next round to wait for.
+    final waitUntil = room.isFinalRound
+        ? null
+        : clock.now().add(GameRules.nextRoundWait);
+
     _publish(
       room.copyWith(
         phase: GamePhase.results,
-        round: round.copyWith(answers: _lockedAnswers, results: results),
+        round: round.copyWith(
+          answers: _lockedAnswers,
+          results: results,
+          nextRoundDeadline: waitUntil,
+        ),
         scores: {
           for (final id in room.playerIds)
             id:
@@ -584,5 +610,62 @@ class LocalGameService implements GameService {
         },
       ),
     );
+
+    if (waitUntil == null) return;
+    _nextRoundWait = _after(GameRules.nextRoundWait, _closeNextRoundWait);
+    for (final botId in _bots.keys) {
+      _after(_between(timing.nextRound), () => _markNextRoundReady(botId));
+    }
+  }
+
+  /// Records that [playerId] pressed Next Round, and starts the round once
+  /// everyone has.
+  void _markNextRoundReady(String playerId) {
+    final room = _room;
+    final round = room?.round;
+    if (room == null || round == null || room.phase != GamePhase.results) {
+      return;
+    }
+    if (round.nextRoundReadyIds.contains(playerId)) return;
+
+    final ready = {...round.nextRoundReadyIds, playerId};
+    if (room.playerIds.every(ready.contains)) {
+      _beginRound();
+    } else {
+      _publish(room.copyWith(round: round.copyWith(nextRoundReadyIds: ready)));
+    }
+  }
+
+  /// The wait is over: the players who are ready carry on, and the rest
+  /// leave the room. A game needs at least 2 players, so with fewer the
+  /// room closes.
+  void _closeNextRoundWait() {
+    final room = _room;
+    if (room == null || room.phase != GamePhase.results) return;
+    final ready = room.round!.nextRoundReadyIds;
+
+    final staying = room.players.where((p) => ready.contains(p.id)).toList();
+    if (!ready.contains(_localId) || staying.length < 2) {
+      _clearSession();
+      _publish(null);
+      return;
+    }
+
+    // If the host left, the first player still here takes over.
+    final hasHost = staying.any((player) => player.isHost);
+    final players = [
+      for (final (index, player) in staying.indexed)
+        hasHost ? player : player.copyWith(isHost: index == 0),
+    ];
+    _bots.removeWhere((id, _) => !ready.contains(id));
+
+    _room = room.copyWith(
+      players: players,
+      scores: {
+        for (final entry in room.scores.entries)
+          if (ready.contains(entry.key)) entry.key: entry.value,
+      },
+    );
+    _beginRound();
   }
 }

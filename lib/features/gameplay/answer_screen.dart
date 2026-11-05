@@ -5,7 +5,6 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/widgets/countdown_ring.dart';
-import '../../core/widgets/entrance.dart';
 import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_dialog.dart';
@@ -32,6 +31,13 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
   final _controllers = {
     for (final category in Category.values) category: TextEditingController(),
   };
+
+  /// Which category is on screen. Answers are typed one category at a
+  /// time, and Next slides in the following one.
+  int _step = 0;
+
+  /// Whether the last move went forward, so cards slide the right way.
+  bool _forward = true;
 
   // Android pauses timers in the background, so check the deadline on return.
   late final AppLifecycleListener _lifecycle = AppLifecycleListener(
@@ -77,6 +83,14 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
     await service.submitAnswers();
   }
 
+  void _goTo(int step, int count) {
+    if (step == _step || step < 0 || step >= count) return;
+    setState(() {
+      _forward = step > _step;
+      _step = step;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final room = ref.watch(gameRoomProvider);
@@ -117,51 +131,331 @@ class _AnswerScreenState extends ConsumerState<AnswerScreen> {
                 child: _LockedBanner(room: room),
               ),
             Expanded(
+              child: locked
+                  ? _LockedAnswers(
+                      categories: categories,
+                      letter: letter,
+                      controllers: _controllers,
+                    )
+                  : _AnswerSteps(
+                      categories: categories,
+                      letter: letter,
+                      step: _step.clamp(0, categories.length - 1),
+                      forward: _forward,
+                      controllers: _controllers,
+                      onChanged: (category, text) {
+                        service.updateAnswer(category, text);
+                        setState(() {});
+                      },
+                      onStep: (step) => _goTo(step, categories.length),
+                      onLockIn: _submit,
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Typing one category at a time: a row of category pictures to show
+/// progress, one big card, and Next (or Lock In on the last one).
+class _AnswerSteps extends StatelessWidget {
+  const _AnswerSteps({
+    required this.categories,
+    required this.letter,
+    required this.step,
+    required this.forward,
+    required this.controllers,
+    required this.onChanged,
+    required this.onStep,
+    required this.onLockIn,
+  });
+
+  static const _slide = Duration(milliseconds: 300);
+
+  final List<Category> categories;
+  final String letter;
+  final int step;
+  final bool forward;
+  final Map<Category, TextEditingController> controllers;
+  final void Function(Category category, String text) onChanged;
+  final ValueChanged<int> onStep;
+  final VoidCallback onLockIn;
+
+  @override
+  Widget build(BuildContext context) {
+    final category = categories[step];
+    final isLast = step == categories.length - 1;
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    // With the keyboard up there's less room, so the picture shrinks.
+    final keyboardUp = MediaQuery.viewInsetsOf(context).bottom > 0;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+          child: _StepProgress(
+            categories: categories,
+            step: step,
+            controllers: controllers,
+            onTap: onStep,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Expanded(
+          // Sliding cards stay inside this area, never over the header.
+          child: ClipRect(
+            child: AnimatedSwitcher(
+              duration: reduceMotion ? Duration.zero : _slide,
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              layoutBuilder: (current, previous) => Stack(
+                alignment: Alignment.topCenter,
+                children: [...previous, ?current],
+              ),
+              // Next slides the new card in from the right; going back
+              // brings it in from the left.
+              transitionBuilder: (child, animation) {
+                final incoming = child.key == ValueKey(category);
+                final side = incoming == forward ? 1.0 : -1.0;
+                return SlideTransition(
+                  position: Tween(
+                    begin: Offset(side, 0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                );
+              },
               child: SingleChildScrollView(
+                key: ValueKey(category),
                 keyboardDismissBehavior:
                     ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: const EdgeInsets.fromLTRB(
                   AppSpacing.md,
                   AppSpacing.xxs,
                   AppSpacing.md,
-                  AppSpacing.lg,
+                  AppSpacing.md,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (final (index, category) in categories.indexed) ...[
-                      Entrance(
-                        index: index,
-                        child: _CategoryCard(
-                          category: category,
-                          letter: letter,
-                          controller: _controllers[category]!,
-                          locked: locked,
-                          isLast: category == categories.last,
-                          onChanged: (text) {
-                            service.updateAnswer(category, text);
-                            setState(() {});
-                          },
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                    ],
-                    if (!locked) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      GameButton(
+                child: _CategoryCard(
+                  category: category,
+                  letter: letter,
+                  controller: controllers[category]!,
+                  locked: false,
+                  isLast: isLast,
+                  pictureHeight: keyboardUp ? 56 : 110,
+                  autofocus: true,
+                  onChanged: (text) => onChanged(category, text),
+                  onSubmitted: isLast ? null : (_) => onStep(step + 1),
+                ),
+              ),
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.md,
+            AppSpacing.xs,
+            AppSpacing.md,
+            AppSpacing.md,
+          ),
+          child: Row(
+            children: [
+              if (step > 0) ...[
+                Material(
+                  color: AppColors.surface,
+                  shape: const CircleBorder(),
+                  elevation: 1,
+                  child: IconButton(
+                    tooltip: 'Previous',
+                    iconSize: 28,
+                    constraints: const BoxConstraints(
+                      minWidth: AppSizes.mainButton,
+                      minHeight: AppSizes.mainButton,
+                    ),
+                    color: AppColors.navy,
+                    onPressed: () {
+                      playSoundFrom(context, GameSound.tap);
+                      onStep(step - 1);
+                    },
+                    icon: const Icon(Icons.arrow_back_rounded),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              Expanded(
+                child: isLast
+                    ? GameButton(
                         label: 'Lock In Answers',
                         icon: Icons.lock_rounded,
                         // Locking in plays its own chime instead.
                         sound: null,
-                        onPressed: _submit,
+                        onPressed: onLockIn,
+                      )
+                    : GameButton(
+                        label: 'Next',
+                        icon: Icons.arrow_forward_rounded,
+                        style: GameButtonStyle.sky,
+                        onPressed: () => onStep(step + 1),
                       ),
-                    ],
-                  ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// A small picture for each category. The current one is outlined, answered
+/// ones get a green tick, and tapping one jumps straight to it.
+class _StepProgress extends StatelessWidget {
+  const _StepProgress({
+    required this.categories,
+    required this.step,
+    required this.controllers,
+    required this.onTap,
+  });
+
+  final List<Category> categories;
+  final int step;
+  final Map<Category, TextEditingController> controllers;
+  final ValueChanged<int> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            for (final (index, category) in categories.indexed)
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2),
+                  child: _ProgressChip(
+                    category: category,
+                    current: index == step,
+                    answered: controllers[category]!.text.trim().isNotEmpty,
+                    reduceMotion: reduceMotion,
+                    onTap: () {
+                      if (index != step) {
+                        playSoundFrom(context, GameSound.select);
+                      }
+                      onTap(index);
+                    },
+                  ),
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.xxs),
+        Text('${step + 1} of ${categories.length}', style: AppText.bodySmall),
+      ],
+    );
+  }
+}
+
+class _ProgressChip extends StatelessWidget {
+  const _ProgressChip({
+    required this.category,
+    required this.current,
+    required this.answered,
+    required this.reduceMotion,
+    required this.onTap,
+  });
+
+  final Category category;
+  final bool current;
+  final bool answered;
+  final bool reduceMotion;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: current,
+      label: answered ? '${category.label}, answered' : category.label,
+      // The label above says it all, so the picture and tick stay quiet.
+      excludeSemantics: true,
+      child: GestureDetector(
+        key: ValueKey('step-${category.name}'),
+        onTap: onTap,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            AnimatedScale(
+              scale: current ? 1 : 0.88,
+              duration: reduceMotion ? Duration.zero : AppDurations.fast,
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: category.color,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: current ? AppColors.navy : Colors.white,
+                    width: current ? 3 : 2,
+                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: AspectRatio(
+                    aspectRatio: CategoryPicture.aspectRatio,
+                    child: FittedBox(
+                      child: CategoryPicture(category: category, height: 40),
+                    ),
+                  ),
                 ),
               ),
             ),
+            if (answered)
+              const Positioned(top: -6, right: -4, child: _Tick(size: 20)),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// After locking in, every answer is shown at once, read-only.
+class _LockedAnswers extends StatelessWidget {
+  const _LockedAnswers({
+    required this.categories,
+    required this.letter,
+    required this.controllers,
+  });
+
+  final List<Category> categories;
+  final String letter;
+  final Map<Category, TextEditingController> controllers;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.md,
+        AppSpacing.xxs,
+        AppSpacing.md,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (final category in categories) ...[
+            _CategoryCard(
+              category: category,
+              letter: letter,
+              controller: controllers[category]!,
+              locked: true,
+              isLast: category == categories.last,
+              onChanged: (_) {},
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+        ],
       ),
     );
   }
@@ -264,6 +558,9 @@ class _CategoryCard extends StatelessWidget {
     required this.locked,
     required this.isLast,
     required this.onChanged,
+    this.onSubmitted,
+    this.pictureHeight,
+    this.autofocus = false,
   });
 
   final Category category;
@@ -272,6 +569,12 @@ class _CategoryCard extends StatelessWidget {
   final bool locked;
   final bool isLast;
   final ValueChanged<String> onChanged;
+  final ValueChanged<String>? onSubmitted;
+
+  /// Set for the big one-at-a-time card, which shows the picture large
+  /// above the name. Left null, the picture sits small beside the name.
+  final double? pictureHeight;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
@@ -286,9 +589,19 @@ class _CategoryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          if (pictureHeight != null) ...[
+            Center(
+              child: CategoryPicture(
+                category: category,
+                height: pictureHeight!,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+          ],
           Row(
             children: [
-              CategoryPicture(category: category, height: 44),
+              if (pictureHeight == null)
+                CategoryPicture(category: category, height: 44),
               const SizedBox(width: AppSpacing.xs),
               Expanded(child: Text(category.label, style: AppText.heading)),
               // A green tick pops in once an answer starts with the letter.
@@ -318,6 +631,8 @@ class _CategoryCard extends StatelessWidget {
                 ? TextInputAction.done
                 : TextInputAction.next,
             onChanged: onChanged,
+            onSubmitted: onSubmitted,
+            autofocus: autofocus,
           ),
           if (wrongLetter) ...[
             const SizedBox(height: AppSpacing.xs),
@@ -345,21 +660,23 @@ class _CategoryCard extends StatelessWidget {
 }
 
 class _Tick extends StatelessWidget {
-  const _Tick({super.key});
+  const _Tick({super.key, this.size = 32});
+
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 32,
-      height: 32,
+      width: size,
+      height: size,
       decoration: const BoxDecoration(
         color: AppColors.valid,
         shape: BoxShape.circle,
       ),
-      child: const Icon(
+      child: Icon(
         Icons.check_rounded,
         color: Colors.white,
-        size: 22,
+        size: size * 0.7,
         semanticLabel: 'Starts with the right letter',
       ),
     );

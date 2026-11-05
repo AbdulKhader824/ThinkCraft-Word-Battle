@@ -1,8 +1,13 @@
-# ThinkCraft Word Battle
+# PlayPals
 
-A standalone Flutter multiplayer word game. Tagline: "Think fast. Find unique
-words." The audience is ages 7-16, and it should also be fun for adults.
-The full briefs are in `docs/spec.md`.
+A Flutter party-game app, "Play together. Anywhere." It opens on a game hub,
+a swipeable shelf of 15 game cards. Word Battle ("Think fast. Find unique
+words.") is the first playable game, and the rest show Coming soon until
+they're built, one at a time. The audience is ages 7-16, and it should also
+be fun for adults. The full Word Battle briefs are in `docs/spec.md`.
+
+The project folder, Dart package (`thinkcraft_word_battle`) and Android
+application id keep their old names, so installs update in place.
 
 ## Working rules
 
@@ -35,6 +40,7 @@ lib/
     widgets/          shared components such as GameButton and GameCard
     constants/        app text, asset paths and limits
   features/
+    hub/              game hub and `GameCatalog`, the list of games
     home/  lobby/  gameplay/  validation/  results/  settings/
   models/             plain immutable data classes
   services/
@@ -81,9 +87,22 @@ Motion: screen parts arrive one by one through `Entrance` (give each an
 stacks of shadows, which were slow. Wrap anything that animates forever in a
 `RepaintBoundary`. The splash screen preloads the category pictures and SVGs.
 
+Game hub: `GameCatalog.games` lists every game with its name, tagline,
+devices and card picture (3:4, `assets/images/games/<id>.webp`). A game
+becomes playable by giving it a `route`. The middle card wears a bobbing
+crown and has two star sparkles (a glow was tried and dropped); side cards shrink,
+fade and turn inward like a fan. All of it follows the swipe, and the crown
+keeps still with reduced motion. To replace the pictures, run
+`py -3 tool/import_game_pictures.py "<folder of PNGs>"`; files are named like
+`01_word_battle.png`, and the number is dropped.
+
 The bundled fonts are variable fonts, so a weight must be set through
 `AppText` (which sets `fontVariations`). Setting only `fontWeight` won't
 reliably change how heavy the text looks.
+
+Logo: two smiling tile pals, coral and mint, high-fiving under a star
+(`assets/images/logo.svg`). It is the app icon, the splash and the start of
+the in-app splash, where "PlayPals" sits below it as a `RainbowTitle`.
 
 Characters: Tilo is the mascot, a round mint letter tile with a face.
 Categories use Fox (Animal), Penguin (Place), Owl (Person Name), Cat (Movie),
@@ -105,14 +124,15 @@ These settle conflicts and gaps in the briefs.
 | Matching answers | Ignore capitals and extra spaces only |
 | Timer runs out | Lock what was typed; blank fields count as empty |
 | Skipped vote | Abstains and scores 0 |
-| Letter picker | Host first, then rotating; used letters are greyed out |
-| Next Round | Next round in the same room, with running totals |
-| Return Home | Clears the room and scores |
+| Letter picker | Host first, then rotating; used letters are greyed out. Only the picker sees the letter tiles; everyone else sees the picker's avatar, "<name> is choosing the letter..." and a mystery tile flicking through the letters still in play (a "?" with reduced motion) |
+| Next Round | Next round in the same room, with running totals. Every round must be played, so results before the final round have no Return Home: everyone presses Next Round, and faces show who is ready or waiting. The round starts once all are ready, or after 60 seconds (`GameRules.nextRoundWait`) with only the ready players; the rest leave the room and go home. With fewer than 2 left, the room closes. A host who leaves hands over to the first player still there. Bots press it in 1-4 seconds |
+| Return Home | Only after the final round (or Leave Game from the back button); clears the room and scores, and goes back to the hub |
 | Simulation | 1 human and 1-7 bots, with some deliberately wrong bot answers |
 | Join Room | Any valid code joins a room labelled Practice mode, with a bot as host |
 | Host ready status | The host is always ready, and starts once everyone else is |
 | Bot speed | Bots take 25-80 seconds, or 1-5 seconds once the player locks in |
 | Blank answers | Locking in early with blanks asks for confirmation first |
+| Answer screen | One category per step, with a progress row of category pictures (tap to jump), Next and Previous, and Lock In on the last step; the keyboard's Next key also moves on; after locking in, all answers show together |
 | Hidden answers | `Round.answers` stays empty until results; voters only receive `BallotItem`s, which carry no authors |
 | Voting words | Players see Correct and Incorrect (not Valid and Invalid), and results show "Votes" points; code names stay `valid` and `invalid` |
 | Voting screen | One answer at a time, so each takes one choice; players can skip; each card ignores taps for 350ms to catch double taps |
@@ -128,13 +148,17 @@ These settle conflicts and gaps in the briefs.
 | Confetti | Only when the local player is in first place, and never with reduced motion |
 | Orientation | Portrait only, set in the Android manifest and in `main.dart` |
 | Room settings | The host picks 1, 3, 5 or 10 rounds (default 3), a 30, 60 or 90 second timer (default 90) and any of the six categories (at least 1, default all) on Create Room; `GameSettings` validates them |
-| Sound effects | Original tones made by `tool/generate_sounds.py`; on by default with a switch in Settings; they mix with other audio instead of pausing it; votes and Lock In play their own sound instead of the button pop |
+| Sound effects | Original tones made by `tool/generate_sounds.py`; on by default with a switch in Settings; they mix with other audio instead of pausing it; votes and Lock In play their own sound instead of the button pop; a card flick plays as each game slides into the middle of the hub |
 | Shorter timers | Bot answer times scale with the timer, and the ring turns yellow at a third and red at a ninth of the time left |
 | Joined rooms | Guests play by the host's settings; the practice bot host uses the standard 3 rounds and all categories |
 | Between rounds | Results shows Next Round, or New Game after the final round; New Game keeps players and settings but clears scores and letters |
 | Final round | The banner names the game winner, and confetti only plays for winning the whole game |
 | Player name | 2-12 letters, numbers or spaces |
 | Room code | 6 characters from A-Z and 2-9, without I, O, 0 or 1 |
+| App name | PlayPals; Word Battle is one game inside it |
+| Rooms | One game per room. Play on a card opens that game's own start screen with Create and Join |
+| One-phone games | Truth or Dare, Dumb Charades, Complete the Lyrics and Who Am I? share one phone and skip rooms |
+| Trademarked games | Our UNO-style game is Colour Rush (a placeholder name) and Heads Up is Who Am I?; never use UNO or Heads Up names or looks |
 
 ## Phase status
 

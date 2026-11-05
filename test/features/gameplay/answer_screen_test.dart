@@ -35,6 +35,26 @@ Future<FakeGameService> _open(
   return service;
 }
 
+/// Moves to the next category, as the Next button does.
+Future<void> _next(WidgetTester tester) async {
+  await tester.tap(find.text('Next'));
+  await pumpFrames(tester);
+}
+
+/// Types [text] into every category in turn, pressing Next between them.
+Future<void> _answerAll(WidgetTester tester, String text) async {
+  for (final category in Category.values) {
+    await tester.enterText(_field(category), text);
+    if (category != Category.values.last) await _next(tester);
+  }
+}
+
+/// Goes to the last category, where the Lock In button is.
+Future<void> _toLastStep(WidgetTester tester) async {
+  await tester.tap(find.byKey(ValueKey('step-${Category.values.last.name}')));
+  await pumpFrames(tester);
+}
+
 /// Taps the Lock In button without waiting to settle, because the running
 /// countdown never settles.
 Future<void> _tapLockIn(WidgetTester tester) async {
@@ -49,7 +69,7 @@ Future<void> _tapLockIn(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('shows the letter, the timer and all six categories', (
+  testWidgets('shows the letter, the timer and one category at a time', (
     tester,
   ) async {
     await _open(tester);
@@ -57,10 +77,72 @@ void main() {
     expect(find.byType(LetterBadge), findsOneWidget);
     expect(find.text('Find M words!'), findsOneWidget);
     expect(find.byType(CountdownRing), findsOneWidget);
-    expect(find.byType(GameTextField), findsNWidgets(6));
+    expect(find.byType(GameTextField), findsOneWidget);
+    expect(find.text('Animal'), findsOneWidget);
+    expect(find.text('1 of 6'), findsOneWidget);
+    expect(find.text('Next'), findsOneWidget);
+    expect(find.text('Lock In Answers'), findsNothing);
     for (final category in Category.values) {
-      expect(find.text(category.label), findsOneWidget);
+      expect(find.byKey(ValueKey('step-${category.name}')), findsOneWidget);
     }
+  });
+
+  testWidgets('Next moves on, and Previous keeps what was typed', (
+    tester,
+  ) async {
+    await _open(tester);
+
+    await tester.enterText(_field(Category.animal), 'Monkey');
+    await _next(tester);
+    expect(find.text('Place'), findsOneWidget);
+    expect(find.text('2 of 6'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Previous'));
+    await pumpFrames(tester);
+    expect(find.text('Animal'), findsOneWidget);
+    expect(find.text('Monkey'), findsOneWidget);
+  });
+
+  testWidgets('the keyboard Next key moves to the next category', (
+    tester,
+  ) async {
+    await _open(tester);
+
+    await tester.enterText(_field(Category.animal), 'Monkey');
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await pumpFrames(tester);
+
+    expect(find.text('Place'), findsOneWidget);
+  });
+
+  testWidgets('tapping a category picture jumps to it', (tester) async {
+    await _open(tester);
+
+    await tester.tap(find.byKey(const ValueKey('step-movie')));
+    await pumpFrames(tester);
+
+    expect(find.text('Movie'), findsOneWidget);
+    expect(find.text('4 of 6'), findsOneWidget);
+  });
+
+  testWidgets('the last category has Lock In instead of Next', (tester) async {
+    await _open(tester);
+    await _toLastStep(tester);
+
+    expect(find.text('Lock In Answers'), findsOneWidget);
+    expect(find.text('Next'), findsNothing);
+  });
+
+  testWidgets('answered categories are ticked in the progress row', (
+    tester,
+  ) async {
+    await _open(tester);
+
+    await tester.enterText(_field(Category.animal), 'Monkey');
+    await pumpFrames(tester);
+
+    expect(find.bySemanticsLabel('Animal, answered'), findsOneWidget);
+    expect(find.bySemanticsLabel('Place'), findsOneWidget);
   });
 
   testWidgets('the ring counts down from the deadline', (tester) async {
@@ -105,9 +187,7 @@ void main() {
   testWidgets('a full form locks in straight away', (tester) async {
     final service = await _open(tester);
 
-    for (final category in Category.values) {
-      await tester.enterText(_field(category), 'Mango');
-    }
+    await _answerAll(tester, 'Mango');
     await _tapLockIn(tester);
 
     expect(service.calls, contains('submitAnswers'));
@@ -120,6 +200,7 @@ void main() {
     final service = await _open(tester);
 
     await tester.enterText(_field(Category.animal), 'Monkey');
+    await _toLastStep(tester);
     await _tapLockIn(tester);
     expect(find.text('5 answers are blank'), findsOneWidget);
 
@@ -132,6 +213,7 @@ void main() {
   testWidgets('blank answers can still be locked in', (tester) async {
     final service = await _open(tester);
 
+    await _toLastStep(tester);
     await _tapLockIn(tester);
     await tester.tap(find.text('Lock In'));
     await pumpFrames(tester);
@@ -207,9 +289,11 @@ void main() {
   testWidgets('fits on a small phone', (tester) async {
     await _open(tester, size: const Size(320, 568));
 
+    await tester.tap(find.byKey(const ValueKey('step-person')));
+    await pumpFrames(tester);
     await tester.enterText(_field(Category.person), 'Xavier Long Answer Here');
     await pumpFrames(tester);
 
-    expect(find.byType(GameTextField), findsNWidgets(6));
+    expect(find.byType(GameTextField), findsOneWidget);
   });
 }

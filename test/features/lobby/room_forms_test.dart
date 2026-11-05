@@ -17,7 +17,7 @@ void main() {
   group('Create Room', () {
     Future<void> openCreateRoom(WidgetTester tester) async {
       await pumpGame(tester);
-      await goToHome(tester);
+      await goToWordBattle(tester);
       await tapAndSettle(tester, buttonLabelled('Create Room'));
     }
 
@@ -75,7 +75,7 @@ void main() {
   group('Join Room', () {
     Future<void> openJoinRoom(WidgetTester tester) async {
       await pumpGame(tester);
-      await goToHome(tester);
+      await goToWordBattle(tester);
       await tapAndSettle(tester, buttonLabelled('Join Room'));
     }
 

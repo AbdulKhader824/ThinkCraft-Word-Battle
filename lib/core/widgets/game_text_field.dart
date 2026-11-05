@@ -19,6 +19,7 @@ class GameTextField extends StatelessWidget {
     this.enabled = true,
     this.onChanged,
     this.onSubmitted,
+    this.autofocus = false,
   });
 
   /// Extra room kept below a field when the keyboard scrolls it into view,
@@ -35,6 +36,9 @@ class GameTextField extends StatelessWidget {
   final bool enabled;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
+
+  /// Takes the keyboard as soon as the field appears.
+  final bool autofocus;
 
   OutlineInputBorder _border(Color color) {
     return OutlineInputBorder(
@@ -61,6 +65,7 @@ class GameTextField extends StatelessWidget {
           textInputAction: textInputAction,
           onChanged: onChanged,
           onFieldSubmitted: onSubmitted,
+          autofocus: autofocus,
           scrollPadding: _keyboardPadding,
           autocorrect: false,
           enableSuggestions: false,

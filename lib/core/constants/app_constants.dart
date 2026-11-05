@@ -1,9 +1,8 @@
 /// Fixed text used across the app.
 abstract final class AppStrings {
-  static const appName = 'ThinkCraft Word Battle';
-  static const brandLine = 'ThinkCraft';
-  static const gameLine = 'Word Battle';
-  static const tagline = 'Think fast. Find unique words.';
+  static const appName = 'PlayPals';
+  static const tagline = 'Play together. Anywhere.';
+  static const wordBattleTagline = 'Think fast. Find unique words.';
 }
 
 /// Paths to bundled artwork.

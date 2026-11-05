@@ -16,7 +16,7 @@ Future<MemoryProfileStore> _openSettings(
   final store = MemoryProfileStore(saved);
   await pumpGame(tester, profiles: store);
   await goToHome(tester);
-  await tapAndSettle(tester, buttonLabelled('Settings'));
+  await tapAndSettle(tester, find.byTooltip('Settings'));
   return store;
 }
 
@@ -89,7 +89,7 @@ void main() {
       tester,
       profiles: MemoryProfileStore(const PlayerProfile(name: 'Sam')),
     );
-    await goToHome(tester);
+    await goToWordBattle(tester);
 
     await tapAndSettle(tester, buttonLabelled('Create Room'));
 
@@ -101,7 +101,7 @@ void main() {
       tester,
       profiles: MemoryProfileStore(const PlayerProfile(name: 'Sam')),
     );
-    await goToHome(tester);
+    await goToWordBattle(tester);
 
     await tapAndSettle(tester, buttonLabelled('Join Room'));
 
@@ -113,7 +113,7 @@ void main() {
   ) async {
     final store = MemoryProfileStore(const PlayerProfile(avatarIndex: 6));
     await pumpGame(tester, profiles: store);
-    await goToHome(tester);
+    await goToWordBattle(tester);
 
     await tapAndSettle(tester, buttonLabelled('Create Room'));
     await tester.enterText(find.byType(TextFormField).first, 'Kai');

@@ -2,6 +2,7 @@ import '../models/category.dart';
 import '../models/game_settings.dart';
 import '../models/room.dart';
 import '../models/vote.dart';
+import 'rules/game_rules.dart';
 
 /// Everything the screens can ask of a game.
 ///
@@ -54,8 +55,10 @@ abstract interface class GameService {
   /// one choice only.
   Future<void> castVote(String ballotItemId, VoteChoice choice);
 
-  /// Starts the next round, keeping the running totals. Not allowed after
-  /// the final round.
+  /// Says the local player is ready for the next round. The round starts,
+  /// keeping the running totals, once everyone is ready, or when
+  /// [GameRules.nextRoundWait] runs out, with only the players who are
+  /// ready; the others leave the room. Not allowed after the final round.
   Future<void> nextRound();
 
   /// Starts again from round 1 with the same players and settings, clearing

@@ -41,7 +41,8 @@ void main() {
     testWidgets('a button pops when pressed', (tester) async {
       final sounds = FakeSoundPlayer();
       await pumpGame(tester, sounds: sounds);
-      await goToHome(tester);
+      await goToWordBattle(tester);
+      sounds.played.clear();
 
       await tapAndSettle(tester, buttonLabelled('Create Room'));
 
@@ -51,7 +52,7 @@ void main() {
     testWidgets('choosing a tile blips', (tester) async {
       final sounds = FakeSoundPlayer();
       await pumpGame(tester, sounds: sounds);
-      await goToHome(tester);
+      await goToWordBattle(tester);
       await tapAndSettle(tester, buttonLabelled('Create Room'));
       sounds.played.clear();
 
@@ -94,7 +95,7 @@ void main() {
         sounds: sounds,
         profiles: MemoryProfileStore(const PlayerProfile(soundOn: false)),
       );
-      await goToHome(tester);
+      await goToWordBattle(tester);
 
       await tapAndSettle(tester, buttonLabelled('Create Room'));
       await tapAndSettle(tester, find.byKey(const ValueKey('player-count-6')));
@@ -108,7 +109,7 @@ void main() {
       );
       await pumpGame(tester, profiles: store);
       await goToHome(tester);
-      await tapAndSettle(tester, buttonLabelled('Settings'));
+      await tapAndSettle(tester, find.byTooltip('Settings'));
 
       await tapAndSettle(tester, find.byKey(const ValueKey('sound-switch')));
       await tapAndSettle(tester, find.text('Save'));
@@ -122,7 +123,7 @@ void main() {
       final store = MemoryProfileStore(const PlayerProfile(soundOn: false));
       await pumpGame(tester, profiles: store);
       await goToHome(tester);
-      await tapAndSettle(tester, buttonLabelled('Settings'));
+      await tapAndSettle(tester, find.byTooltip('Settings'));
 
       await tester.enterText(find.byType(TextFormField).first, 'Luna');
       await tapAndSettle(tester, find.text('Save'));
@@ -139,7 +140,7 @@ void main() {
         profiles: MemoryProfileStore(const PlayerProfile(soundOn: false)),
       );
       await goToHome(tester);
-      await tapAndSettle(tester, buttonLabelled('Settings'));
+      await tapAndSettle(tester, find.byTooltip('Settings'));
 
       await tapAndSettle(tester, find.byKey(const ValueKey('sound-switch')));
 

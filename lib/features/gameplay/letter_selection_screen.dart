@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,6 +10,7 @@ import '../../core/widgets/candy_tile.dart';
 import '../../core/widgets/entrance.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/letter_badge.dart';
+import '../../core/widgets/player_avatar.dart';
 import '../../models/room.dart';
 import '../../services/game_providers.dart';
 import '../../services/rules/game_rules.dart';
@@ -34,14 +37,133 @@ class LetterSelectionScreen extends ConsumerWidget {
         onBack: () => confirmLeaveGame(context, ref),
         child: letter != null
             ? _LetterReveal(letter: letter)
-            : _LetterChoice(room: room, isPicker: isPicker),
+            : isPicker
+            ? _LetterChoice(room: room)
+            : _WaitingForPicker(room: room),
+      ),
+    );
+  }
+}
+
+/// What everyone else sees while the picker chooses: who is choosing, and a
+/// mystery tile flicking through letters, instead of tiles they can't tap.
+class _WaitingForPicker extends StatelessWidget {
+  const _WaitingForPicker({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    final picker = room.playerById(room.round!.pickerId);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          roundLabel(room),
+          textAlign: TextAlign.center,
+          style: AppText.label,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Center(child: PlayerAvatar(index: picker.avatarIndex, size: 112)),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          '${picker.name} is choosing the letter...',
+          textAlign: TextAlign.center,
+          style: AppText.heading,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Center(child: _MysteryTile(usedLetters: room.usedLetters)),
+        const SizedBox(height: AppSpacing.lg),
+        Text(
+          'Get ready to think fast!',
+          textAlign: TextAlign.center,
+          style: AppText.body,
+        ),
+      ],
+    );
+  }
+}
+
+/// A big candy tile that flicks through the letters still in play, like a
+/// slot machine. With reduced motion it simply shows a question mark.
+class _MysteryTile extends StatefulWidget {
+  const _MysteryTile({required this.usedLetters});
+
+  final Set<String> usedLetters;
+
+  @override
+  State<_MysteryTile> createState() => _MysteryTileState();
+}
+
+class _MysteryTileState extends State<_MysteryTile> {
+  static const _size = 120.0;
+  static const _flick = Duration(milliseconds: 220);
+
+  /// Steps through the alphabet 7 letters at a time, which looks random
+  /// but visits every letter, so no random numbers are needed.
+  static const _jump = 7;
+
+  Timer? _timer;
+  int _position = 0;
+
+  List<String> get _letters {
+    final left = GameRules.letters
+        .where((letter) => !widget.usedLetters.contains(letter))
+        .toList();
+    return left.isEmpty ? GameRules.letters : left;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _timer?.cancel();
+      _timer = null;
+    } else {
+      _timer ??= Timer.periodic(_flick, (_) {
+        setState(() => _position += _jump);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final letters = _letters;
+    final shuffling = _timer != null;
+    final label = shuffling ? letters[_position % letters.length] : '?';
+    final color = AppColors.candy[_position % AppColors.candy.length];
+
+    // Changes five times a second, so it repaints on its own.
+    // A normal-sized tile scaled up as a whole, so the letter grows with it.
+    return RepaintBoundary(
+      child: ExcludeSemantics(
+        child: SizedBox.square(
+          dimension: _size,
+          child: FittedBox(
+            child: CandyTile(
+              label: label,
+              color: color,
+              width: AppSizes.minTapTarget,
+              height: AppSizes.minTapTarget,
+              semanticsLabel: 'Mystery letter',
+              onTap: null,
+            ),
+          ),
+        ),
       ),
     );
   }
 }
 
 class _LetterChoice extends ConsumerWidget {
-  const _LetterChoice({required this.room, required this.isPicker});
+  const _LetterChoice({required this.room});
 
   static const _colors = AppColors.candy;
   static const _minTile = AppSizes.minTapTarget;
@@ -49,11 +171,9 @@ class _LetterChoice extends ConsumerWidget {
   static const _wave = Duration(milliseconds: 18);
 
   final Room room;
-  final bool isPicker;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final picker = room.playerById(room.round!.pickerId);
     final service = ref.read(gameServiceProvider);
 
     return Column(
@@ -65,9 +185,7 @@ class _LetterChoice extends ConsumerWidget {
           style: AppText.label,
         ),
         Text(
-          isPicker
-              ? 'Choose the letter for everyone!'
-              : '${picker.name} is choosing the letter...',
+          'Choose the letter for everyone!',
           textAlign: TextAlign.center,
           style: AppText.body,
         ),
@@ -97,7 +215,7 @@ class _LetterChoice extends ConsumerWidget {
                       size: tile,
                       color: _colors[index % _colors.length],
                       isUsed: room.usedLetters.contains(letter),
-                      onTap: isPicker && !room.usedLetters.contains(letter)
+                      onTap: !room.usedLetters.contains(letter)
                           ? () {
                               playSound(ref, GameSound.select);
                               service.selectLetter(letter);

@@ -18,7 +18,7 @@ Finder _category(Category category) {
 Future<FakeGameService> _openCreateRoom(WidgetTester tester) async {
   final service = FakeGameService(null);
   await pumpGame(tester, service: service);
-  await goToHome(tester);
+  await goToWordBattle(tester);
   await tapAndSettle(tester, buttonLabelled('Create Room'));
   await tester.enterText(find.byType(TextFormField).first, 'Sam');
   return service;
@@ -188,10 +188,12 @@ void main() {
       );
       await pumpFrames(tester);
 
-      expect(find.byType(GameTextField), findsNWidgets(2));
+      expect(find.byType(GameTextField), findsOneWidget);
       expect(find.text('Place'), findsOneWidget);
-      expect(find.text('Brand'), findsOneWidget);
-      expect(find.text('Animal'), findsNothing);
+      expect(find.text('1 of 2'), findsOneWidget);
+      expect(find.byKey(const ValueKey('step-place')), findsOneWidget);
+      expect(find.byKey(const ValueKey('step-brand')), findsOneWidget);
+      expect(find.byKey(const ValueKey('step-animal')), findsNothing);
       expect(find.text('Round 1 of 3'), findsOneWidget);
     });
 
@@ -209,9 +211,10 @@ void main() {
       await pumpGame(tester, service: service);
       await pumpFrames(tester);
 
-      final fields = find.byType(TextFormField);
-      await tester.enterText(fields.at(0), 'Malaysia');
-      await tester.enterText(fields.at(1), 'Microsoft');
+      await tester.enterText(find.byType(TextFormField), 'Malaysia');
+      await tester.tap(find.text('Next'));
+      await pumpFrames(tester);
+      await tester.enterText(find.byType(TextFormField), 'Microsoft');
       FocusManager.instance.primaryFocus?.unfocus();
       await pumpFrames(tester);
       await tester.ensureVisible(find.text('Lock In Answers'));
@@ -236,6 +239,7 @@ void main() {
       await pumpFrames(tester);
 
       await tester.enterText(find.byType(TextFormField).first, 'Malaysia');
+      await tester.tap(find.text('Next'));
       FocusManager.instance.primaryFocus?.unfocus();
       await pumpFrames(tester);
       await tester.ensureVisible(find.text('Lock In Answers'));

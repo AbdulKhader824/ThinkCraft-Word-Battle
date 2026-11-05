@@ -1,10 +1,13 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:thinkcraft_word_battle/app/router.dart';
 import 'package:thinkcraft_word_battle/core/theme/app_colors.dart';
+import 'package:thinkcraft_word_battle/core/widgets/countdown_ring.dart';
 import 'package:thinkcraft_word_battle/models/answer_group.dart';
 import 'package:thinkcraft_word_battle/models/category.dart';
 import 'package:thinkcraft_word_battle/models/round_results.dart';
+import 'package:thinkcraft_word_battle/services/rules/game_rules.dart';
 
 import '../../fakes.dart';
 import '../../helpers.dart';
@@ -43,11 +46,13 @@ Future<FakeGameService> _open(
   int roundNumber = 1,
   int rounds = 1,
   Size size = const Size(360, 800),
+  Set<String> nextRoundReady = const {},
 }) async {
   final service = FakeGameService(
     fakeResultsRoom(
       roundNumber: roundNumber,
       rounds: rounds,
+      nextRoundReady: nextRoundReady,
       lines: {localId: _lines},
       scores:
           scores ??
@@ -191,6 +196,44 @@ void main() {
     await tapAndSettle(tester, find.text('New Game'));
 
     expect(service.calls, contains('newGame'));
+  });
+
+  testWidgets('before the last round, there is no way home', (tester) async {
+    await _open(tester, roundNumber: 2, rounds: 5);
+
+    expect(find.text('Return Home'), findsNothing);
+  });
+
+  testWidgets('shows who is ready for the next round', (tester) async {
+    await _open(tester, roundNumber: 1, rounds: 3, nextRoundReady: {'bot'});
+
+    expect(find.bySemanticsLabel('Luna, ready'), findsOneWidget);
+    expect(find.bySemanticsLabel('Kai, waiting'), findsOneWidget);
+    expect(find.bySemanticsLabel('You, waiting'), findsOneWidget);
+    expect(find.text('Press Next Round when you are ready!'), findsOneWidget);
+  });
+
+  testWidgets('once ready, waits for the others', (tester) async {
+    await _open(tester, roundNumber: 1, rounds: 3, nextRoundReady: {localId});
+
+    expect(find.text('Waiting for 2 more players...'), findsOneWidget);
+    final button = tester.widget<InkWell>(buttonLabelled('Waiting...'));
+    expect(button.onTap, isNull, reason: 'Next Round is pressed only once');
+  });
+
+  testWidgets('counts down the wait for the next round', (tester) async {
+    final service = FakeGameService(
+      fakeResultsRoom(
+        scores: const {},
+        rounds: 3,
+        nextRoundDeadline: clock.now().add(GameRules.nextRoundWait),
+      ),
+    );
+    await pumpGame(tester, service: service);
+    await pumpFrames(tester);
+
+    expect(find.byType(CountdownRing), findsOneWidget);
+    expect(find.text('60'), findsOneWidget);
   });
 
   testWidgets('Return Home leaves the game', (tester) async {

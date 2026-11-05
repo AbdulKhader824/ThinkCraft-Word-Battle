@@ -71,6 +71,7 @@ flutter:
     - assets/images/animals/
     - assets/images/stickers/
     - assets/images/categories/
+    - assets/images/games/
     - assets/sounds/
 
   # assets/branding/ is deliberately not listed: those PNGs only feed the

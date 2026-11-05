@@ -16,12 +16,12 @@ class Player {
   final bool isBot;
   final bool isReady;
 
-  Player copyWith({bool? isReady}) {
+  Player copyWith({bool? isReady, bool? isHost}) {
     return Player(
       id: id,
       name: name,
       avatarIndex: avatarIndex,
-      isHost: isHost,
+      isHost: isHost ?? this.isHost,
       isBot: isBot,
       isReady: isReady ?? this.isReady,
     );

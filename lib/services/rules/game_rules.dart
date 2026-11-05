@@ -4,6 +4,10 @@ abstract final class GameRules {
   /// in `GameSettings.answerTime`.
   static const answerTime = Duration(seconds: 90);
 
+  /// How long the results wait for everyone to press Next Round. Players
+  /// who haven't by then leave the room.
+  static const nextRoundWait = Duration(seconds: 60);
+
   static final letters = List<String>.unmodifiable(
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
   );

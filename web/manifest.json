@@ -1,11 +1,11 @@
 {
-    "name": "ThinkCraft Word Battle",
-    "short_name": "Word Battle",
+    "name": "PlayPals",
+    "short_name": "PlayPals",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#F4FBFF",
     "theme_color": "#1B2A5B",
-    "description": "ThinkCraft Word Battle. Think fast. Find unique words.",
+    "description": "PlayPals. Play together. Anywhere.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

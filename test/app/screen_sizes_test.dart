@@ -135,6 +135,7 @@ void main() {
 
       for (final route in [
         AppRoutes.home,
+        AppRoutes.wordBattle,
         AppRoutes.createRoom,
         AppRoutes.joinRoom,
         AppRoutes.settings,

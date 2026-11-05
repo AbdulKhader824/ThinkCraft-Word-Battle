@@ -197,6 +197,8 @@ Room fakeResultsRoom({
   Map<String, List<AnswerLine>> lines = const {},
   int roundNumber = 1,
   int rounds = 1,
+  Set<String> nextRoundReady = const {},
+  DateTime? nextRoundDeadline,
 }) {
   final ids = [localId, 'bot', 'bot2'];
   return Room(
@@ -217,6 +219,8 @@ Room fakeResultsRoom({
         scores: {for (final id in ids) id: scores[id] ?? const ScoreLine()},
         lines: {for (final id in ids) id: lines[id] ?? const []},
       ),
+      nextRoundReadyIds: nextRoundReady,
+      nextRoundDeadline: nextRoundDeadline,
     ),
   );
 }

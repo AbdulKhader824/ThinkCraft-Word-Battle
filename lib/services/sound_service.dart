@@ -11,6 +11,7 @@ import 'profile_store.dart';
 enum GameSound {
   tap,
   select,
+  swipe,
   ready,
   reveal,
   tick,
@@ -39,6 +40,12 @@ class AudioSoundPlayer implements SoundPlayer {
     _context = AudioContextConfig(focus: AudioContextConfigFocus.mixWithOthers)
         .build();
     unawaited(_quietly(() => AudioPlayer.global.setAudioContext(_context)));
+
+    // Load every sound straight away. Loading on first use meant the first
+    // play of each sound, such as the first swipe in the hub, was silent.
+    for (final sound in GameSound.values) {
+      _pool(sound);
+    }
   }
 
   /// Up to this many copies of one sound can overlap, as with fast ticks.
@@ -47,17 +54,23 @@ class AudioSoundPlayer implements SoundPlayer {
   late final AudioContext _context;
   final _pools = <GameSound, Future<AudioPool>>{};
 
-  @override
-  void play(GameSound sound) {
-    final pool = _pools.putIfAbsent(
-      sound,
-      () => AudioPool.create(
+  Future<AudioPool> _pool(GameSound sound) {
+    return _pools.putIfAbsent(sound, () {
+      final pool = AudioPool.create(
         source: AssetSource(sound.asset),
         maxPlayers: _maxOverlap,
         playerMode: PlayerMode.lowLatency,
         audioContext: _context,
-      ),
-    );
+      );
+      // A sound that fails to load is reported when it's played instead.
+      pool.ignore();
+      return pool;
+    });
+  }
+
+  @override
+  void play(GameSound sound) {
+    final pool = _pool(sound);
     unawaited(_quietly(() async => (await pool).start()));
   }
 

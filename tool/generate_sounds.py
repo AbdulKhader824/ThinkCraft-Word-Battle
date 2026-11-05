@@ -107,6 +107,12 @@ def main():
         tone(note("E6"), 0.09, release=0.6),
     ))
 
+    # A light card flick when a new game slides into the middle of the hub.
+    save("swipe", mix(
+        tone(520, 0.16, wave_shape="triangle", glide_to=1250, release=0.45),
+        offset(tone(note("E6"), 0.12, volume=0.7, release=0.5), 0.06),
+    ))
+
     # A bubbly pop when another player gets ready.
     save("ready", tone(380, 0.12, glide_to=760, wave_shape="triangle",
                        release=0.45))

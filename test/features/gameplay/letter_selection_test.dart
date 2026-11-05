@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:thinkcraft_word_battle/core/widgets/player_avatar.dart';
 
 import '../../fakes.dart';
 import '../../helpers.dart';
@@ -50,11 +51,35 @@ void main() {
     expect(service.calls, contains('selectLetter M'));
   });
 
-  testWidgets('other players can only watch', (tester) async {
+  testWidgets('other players see who is choosing, not the letters', (
+    tester,
+  ) async {
     await _open(tester, FakeGameService(fakeLetterRoom(pickerId: 'bot')));
 
     expect(find.text('Luna is choosing the letter...'), findsOneWidget);
-    expect(_tileWidget(tester, 'M').onTap, isNull);
+    expect(find.byType(PlayerAvatar), findsOneWidget);
+    expect(find.text('Get ready to think fast!'), findsOneWidget);
+    expect(_tile('M'), findsNothing);
+  });
+
+  testWidgets('the mystery tile shows a question mark with reduced motion', (
+    tester,
+  ) async {
+    await _open(tester, FakeGameService(fakeLetterRoom(pickerId: 'bot')));
+
+    expect(find.text('?'), findsOneWidget);
+  });
+
+  testWidgets('the mystery tile flicks through letters', (tester) async {
+    await pumpGame(
+      tester,
+      service: FakeGameService(fakeLetterRoom(pickerId: 'bot')),
+      reduceMotion: false,
+    );
+    await tester.pump(const Duration(seconds: 2));
+
+    expect(find.text('?'), findsNothing);
+    expect(find.text('Luna is choosing the letter...'), findsOneWidget);
   });
 
   testWidgets('used letters cannot be chosen', (tester) async {

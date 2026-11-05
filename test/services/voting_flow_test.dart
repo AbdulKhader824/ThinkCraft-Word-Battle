@@ -12,6 +12,12 @@ import 'package:thinkcraft_word_battle/services/rules/game_rules.dart';
 
 const _timing = BotTiming();
 
+/// Presses Next Round, then waits for the bots to press it too.
+void _nextRound(FakeAsync time, LocalGameService service) {
+  service.nextRound();
+  time.elapse(_timing.nextRound.$2);
+}
+
 void _game(void Function(FakeAsync time, LocalGameService service) body) {
   fakeAsync((time) {
     final service = LocalGameService(random: Random(3));
@@ -259,7 +265,7 @@ void main() {
         playFullRound(time, service);
         final firstPicker = _room(service).round!.pickerId;
 
-        service.nextRound();
+        _nextRound(time, service);
 
         final room = _room(service);
         expect(room.phase, GamePhase.letterSelection);
@@ -274,7 +280,7 @@ void main() {
         _playToVoting(time, service);
         playFullRound(time, service);
 
-        service.nextRound();
+        _nextRound(time, service);
 
         expect(_room(service).usedLetters, {'M'});
       });
@@ -285,7 +291,7 @@ void main() {
         _playToVoting(time, service);
         playFullRound(time, service);
 
-        service.nextRound();
+        _nextRound(time, service);
         time.elapse(_timing.pickLetter);
 
         expect(_room(service).round!.letter, isNot('M'));
@@ -298,11 +304,11 @@ void main() {
         _playToVoting(time, service, playerCount: 2);
         playFullRound(time, service);
 
-        service.nextRound();
+        _nextRound(time, service);
         time.elapse(_timing.pickLetter + _timing.letterReveal);
         time.elapse(GameRules.answerTime);
         playFullRound(time, service);
-        service.nextRound();
+        _nextRound(time, service);
 
         expect(_room(service).round!.pickerId, service.localPlayerId);
       });
@@ -317,7 +323,7 @@ void main() {
         final firstRound = _room(service).round!.results!.scores[botId]!;
         expect(firstTotals[botId]!.total, firstRound.total);
 
-        service.nextRound();
+        _nextRound(time, service);
         time.elapse(_timing.pickLetter + _timing.letterReveal);
         time.elapse(GameRules.answerTime);
         playFullRound(time, service);
@@ -335,7 +341,7 @@ void main() {
         _playToVoting(time, service);
         playFullRound(time, service);
 
-        service.nextRound();
+        _nextRound(time, service);
 
         final round = _room(service).round!;
         expect(round.answers, isEmpty);

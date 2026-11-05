@@ -12,6 +12,13 @@ import 'package:thinkcraft_word_battle/services/local_game_service.dart';
 import 'package:thinkcraft_word_battle/services/rules/game_rules.dart';
 
 const _timing = BotTiming();
+
+/// Presses Next Round, then waits for the bots to press it too.
+void _nextRound(FakeAsync time, LocalGameService service) {
+  service.nextRound();
+  time.elapse(_timing.nextRound.$2);
+}
+
 const _twoCategories = [Category.animal, Category.food];
 
 void _game(void Function(FakeAsync time, LocalGameService service) body) {
@@ -222,11 +229,11 @@ void main() {
         expect(_room(service).isFinalRound, isFalse);
 
         _playRound(time, service);
-        service.nextRound();
+        _nextRound(time, service);
         _playRound(time, service);
         expect(_room(service).isFinalRound, isFalse);
 
-        service.nextRound();
+        _nextRound(time, service);
         _playRound(time, service);
         expect(_room(service).round!.number, 3);
         expect(_room(service).isFinalRound, isTrue);
@@ -260,7 +267,7 @@ void main() {
         for (var round = 1; round <= 10; round++) {
           _playRound(time, service);
           letters.add(_room(service).round!.letter!);
-          if (round < 10) service.nextRound();
+          if (round < 10) _nextRound(time, service);
         }
 
         expect(letters.toSet(), hasLength(10));

@@ -6,16 +6,18 @@ import '../../helpers.dart';
 void main() {
   Future<void> openHowToPlay(WidgetTester tester) async {
     await pumpGame(tester);
-    await goToHome(tester);
+    await goToWordBattle(tester);
     await tapAndSettle(tester, buttonLabelled('How to Play'));
   }
 
-  testWidgets('Home opens How to Play, and Back returns', (tester) async {
+  testWidgets('Word Battle opens How to Play, and Back returns', (
+    tester,
+  ) async {
     await openHowToPlay(tester);
     expect(currentRoute(tester), AppRoutes.howToPlay);
 
     await tapAndSettle(tester, find.byTooltip('Back'));
-    expect(currentRoute(tester), AppRoutes.home);
+    expect(currentRoute(tester), AppRoutes.wordBattle);
   });
 
   testWidgets('explains all five steps', (tester) async {
