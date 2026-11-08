@@ -20,7 +20,11 @@ class Round {
     this.results,
     Set<String> nextRoundReadyIds = const {},
     this.nextRoundDeadline,
+    this.voteDeadline,
+    this.voteTime,
+    Set<String> votedPlayerIds = const {},
   }) : nextRoundReadyIds = Set.unmodifiable(nextRoundReadyIds),
+       votedPlayerIds = Set.unmodifiable(votedPlayerIds),
        submittedPlayerIds = Set.unmodifiable(submittedPlayerIds),
        answers = List.unmodifiable(answers),
        ballot = List.unmodifiable(ballot),
@@ -59,6 +63,17 @@ class Round {
   /// final round, which has no next round.
   final DateTime? nextRoundDeadline;
 
+  /// When voting closes. Answers not voted on by then are skipped. Null
+  /// outside voting, or when there is nothing to vote on.
+  final DateTime? voteDeadline;
+
+  /// How long voting lasts in all, for drawing the timer.
+  final Duration? voteTime;
+
+  /// Players who have finished voting, or whom voting doesn't wait for.
+  /// The rest are shown as still voting.
+  final Set<String> votedPlayerIds;
+
   /// The next answer to vote on, or null when finished.
   BallotItem? get nextBallotItem {
     for (final item in ballot) {
@@ -77,6 +92,9 @@ class Round {
     RoundResults? results,
     Set<String>? nextRoundReadyIds,
     DateTime? nextRoundDeadline,
+    DateTime? voteDeadline,
+    Duration? voteTime,
+    Set<String>? votedPlayerIds,
   }) {
     return Round(
       number: number,
@@ -90,6 +108,9 @@ class Round {
       results: results ?? this.results,
       nextRoundReadyIds: nextRoundReadyIds ?? this.nextRoundReadyIds,
       nextRoundDeadline: nextRoundDeadline ?? this.nextRoundDeadline,
+      voteDeadline: voteDeadline ?? this.voteDeadline,
+      voteTime: voteTime ?? this.voteTime,
+      votedPlayerIds: votedPlayerIds ?? this.votedPlayerIds,
     );
   }
 }

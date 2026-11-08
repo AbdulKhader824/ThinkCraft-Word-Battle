@@ -30,15 +30,15 @@ Future<void> _create(WidgetTester tester) async {
 
 void main() {
   group('Create Room settings', () {
-    testWidgets('starts with 3 rounds and every category', (tester) async {
+    testWidgets('starts with 3 rounds and four categories', (tester) async {
       final service = await _openCreateRoom(tester);
 
       await _create(tester);
 
       final settings = service.createdWith!;
       expect(settings.rounds, 3);
-      expect(settings.usesEveryCategory, isTrue);
-      expect(find.text('Categories (6 of 6)'), findsOneWidget);
+      expect(settings.categories, Category.startingPicks);
+      expect(find.text('Categories (4 of 15)'), findsOneWidget);
     });
 
     testWidgets('starts the timer at 90 seconds', (tester) async {
@@ -86,9 +86,9 @@ void main() {
       final service = await _openCreateRoom(tester);
 
       await tapAndSettle(tester, _rounds(5));
-      await tapAndSettle(tester, _category(Category.movie));
-      await tapAndSettle(tester, _category(Category.brand));
-      expect(find.text('Categories (4 of 6)'), findsOneWidget);
+      await tapAndSettle(tester, _category(Category.bird));
+      await tapAndSettle(tester, _category(Category.food));
+      expect(find.text('Categories (4 of 15)'), findsOneWidget);
       await _create(tester);
 
       final settings = service.createdWith!;
@@ -108,19 +108,19 @@ void main() {
       await tapAndSettle(tester, _category(Category.food));
       await _create(tester);
 
-      expect(service.createdWith!.usesEveryCategory, isTrue);
+      expect(service.createdWith!.categories, Category.startingPicks);
     });
 
     testWidgets('the last category cannot be removed', (tester) async {
       final service = await _openCreateRoom(tester);
 
-      for (final category in Category.values) {
+      for (final category in Category.startingPicks) {
         await tapAndSettle(tester, _category(category));
       }
-      expect(find.text('Categories (1 of 6)'), findsOneWidget);
+      expect(find.text('Categories (1 of 15)'), findsOneWidget);
       await _create(tester);
 
-      expect(service.createdWith!.categories, [Category.brand]);
+      expect(service.createdWith!.categories, [Category.person]);
     });
 
     testWidgets('categories show as selected to screen readers', (
@@ -169,7 +169,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('3 rounds · 90s each · All categories'), findsOneWidget);
+      expect(find.text('3 rounds · 90s each · 6 categories'), findsOneWidget);
     });
 
     testWidgets('the answer screen only has the chosen categories', (
@@ -195,6 +195,37 @@ void main() {
       expect(find.byKey(const ValueKey('step-brand')), findsOneWidget);
       expect(find.byKey(const ValueKey('step-animal')), findsNothing);
       expect(find.text('Round 1 of 3'), findsOneWidget);
+    });
+
+    testWidgets('with every category, the step row scrolls to keep up', (
+      tester,
+    ) async {
+      await pumpGame(
+        tester,
+        service: FakeGameService(
+          fakeAnsweringRoom(
+            deadline: clock.now().add(GameRules.answerTime),
+            settings: GameSettings(categories: Category.values),
+          ),
+        ),
+        size: const Size(360, 740),
+      );
+      await pumpFrames(tester);
+
+      expect(find.text('1 of 15'), findsOneWidget);
+      // The last step starts off the edge of the screen...
+      final last = find.byKey(const ValueKey('step-brand'));
+      expect(tester.getRect(last).left, greaterThan(360));
+
+      // ...and comes into view when it's the current one.
+      await tester.tap(find.byKey(const ValueKey('step-animal')));
+      for (var step = 0; step < Category.values.length - 1; step++) {
+        await tester.tap(find.text('Next'));
+        await tester.pumpAndSettle();
+      }
+      expect(find.text('15 of 15'), findsOneWidget);
+      expect(tester.getRect(last).right, lessThanOrEqualTo(360));
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('locking in only counts blanks in the chosen categories', (
@@ -262,7 +293,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('1 round · 30s each · All categories'), findsOneWidget);
+      expect(find.text('1 round · 30s each · 6 categories'), findsOneWidget);
     });
 
     testWidgets('the countdown starts from the chosen timer', (tester) async {

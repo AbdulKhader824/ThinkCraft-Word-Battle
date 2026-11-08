@@ -6,11 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
+import '../../core/widgets/countdown_ring.dart';
 import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_card.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/mascot.dart';
+import '../../core/widgets/player_avatar.dart';
 import '../../models/answer_group.dart';
+import '../../models/player.dart';
 import '../../models/round.dart';
 import '../../models/vote.dart';
 import '../../services/game_providers.dart';
@@ -36,9 +39,22 @@ class ValidationScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final round = ref.watch(gameRoomProvider)?.round;
+    final room = ref.watch(gameRoomProvider);
+    final round = room?.round;
     final letter = round?.letter;
-    if (round == null || letter == null) return const SizedBox.shrink();
+    if (room == null || round == null || letter == null) {
+      return const SizedBox.shrink();
+    }
+    final voteDeadline = round.voteDeadline;
+    final voteTime = round.voteTime;
+    final myId = ref.read(gameServiceProvider).localPlayerId;
+    final stillVoting = [
+      for (final player in room.players)
+        if (player.id != myId &&
+            !player.isBot &&
+            !round.votedPlayerIds.contains(player.id))
+          player,
+    ];
 
     final item = round.nextBallotItem;
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
@@ -47,36 +63,92 @@ class ValidationScreen extends ConsumerWidget {
       child: GameScreen(
         title: item == null ? 'Votes are in!' : 'Vote!',
         onBack: () => confirmLeaveGame(context, ref),
-        // Answers are dealt like cards: the next one slides in from the
-        // right as the last one slides away to the left.
-        child: AnimatedSwitcher(
-          duration: reduceMotion ? Duration.zero : _deal,
-          switchInCurve: Curves.easeOutCubic,
-          switchOutCurve: Curves.easeInCubic,
-          layoutBuilder: (current, previous) => Stack(
-            alignment: Alignment.topCenter,
-            children: [...previous, ?current],
-          ),
-          transitionBuilder: (child, animation) {
-            final incoming = child.key == _keyFor(item);
-            return SlideTransition(
-              position: Tween(
-                begin: Offset(incoming ? 1 : -1, 0),
-                end: Offset.zero,
-              ).animate(animation),
-              child: FadeTransition(opacity: animation, child: child),
-            );
-          },
-          child: item == null
-              ? const _CountingVotes(key: _countingKey)
-              : _BallotCard(
-                  key: _keyFor(item),
-                  item: item,
-                  letter: letter,
-                  round: round,
-                ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (voteDeadline != null && voteTime != null) ...[
+              _VoteTimer(
+                deadline: voteDeadline,
+                total: voteTime,
+                finished: item == null,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
+            _dealt(item, letter, round, stillVoting, reduceMotion),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _dealt(
+    BallotItem? item,
+    String letter,
+    Round round,
+    List<Player> stillVoting,
+    bool reduceMotion,
+  ) {
+    // Answers are dealt like cards: the next one slides in from the
+    // right as the last one slides away to the left.
+    return AnimatedSwitcher(
+      duration: reduceMotion ? Duration.zero : _deal,
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      layoutBuilder: (current, previous) => Stack(
+        alignment: Alignment.topCenter,
+        children: [...previous, ?current],
+      ),
+      transitionBuilder: (child, animation) {
+        final incoming = child.key == _keyFor(item);
+        return SlideTransition(
+          position: Tween(
+            begin: Offset(incoming ? 1 : -1, 0),
+            end: Offset.zero,
+          ).animate(animation),
+          child: FadeTransition(opacity: animation, child: child),
+        );
+      },
+      child: item == null
+          ? _CountingVotes(key: _countingKey, stillVoting: stillVoting)
+          : _BallotCard(
+              key: _keyFor(item),
+              item: item,
+              letter: letter,
+              round: round,
+            ),
+    );
+  }
+}
+
+/// One timer for the whole ballot. Answers not voted on in time are
+/// skipped, so nobody waits long for a slow phone.
+class _VoteTimer extends StatelessWidget {
+  const _VoteTimer({
+    required this.deadline,
+    required this.total,
+    required this.finished,
+  });
+
+  final DateTime deadline;
+  final Duration total;
+  final bool finished;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        CountdownRing(deadline: deadline, total: total, size: 56),
+        const SizedBox(width: AppSpacing.sm),
+        Flexible(
+          child: Text(
+            finished
+                ? 'Voting ends when the time runs out.'
+                : 'Answers left when time runs out are skipped.',
+            style: AppText.bodySmall,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -150,7 +222,7 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
             children: [
               // The picture says the category at a glance.
               Center(
-                child: CategoryPicture(category: item.category, height: 96),
+                child: CategoryPicture(category: item.category, height: 130),
               ),
               const SizedBox(height: AppSpacing.xs),
               Row(
@@ -215,7 +287,17 @@ class _BallotCardState extends ConsumerState<_BallotCard> {
 }
 
 class _CountingVotes extends StatelessWidget {
-  const _CountingVotes({super.key});
+  const _CountingVotes({super.key, required this.stillVoting});
+
+  /// Players voting is still waiting for.
+  final List<Player> stillVoting;
+
+  String get _waitingText => switch (stillVoting) {
+    [] => 'Almost done!',
+    [final one] => 'Waiting for ${one.name}...',
+    [final one, final two] => 'Waiting for ${one.name} and ${two.name}...',
+    _ => 'Waiting for ${stillVoting.length} players...',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -230,11 +312,29 @@ class _CountingVotes extends StatelessWidget {
           style: AppText.title,
         ),
         const SizedBox(height: AppSpacing.xs),
-        Text(
-          'Waiting for the other players.',
-          textAlign: TextAlign.center,
-          style: AppText.body,
-        ),
+        Text(_waitingText, textAlign: TextAlign.center, style: AppText.body),
+        if (stillVoting.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.xs,
+            children: [
+              for (final player in stillVoting)
+                Semantics(
+                  label: '${player.name} is still voting',
+                  excludeSemantics: true,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      PlayerAvatar(index: player.avatarIndex, size: 44),
+                      Text(player.name, style: AppText.bodySmall),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ],
       ],
     );
   }

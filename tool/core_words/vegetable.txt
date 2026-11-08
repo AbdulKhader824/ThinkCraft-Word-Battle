@@ -1,0 +1,85 @@
+# Everyday vegetables, written by hand, including Indian names. One per
+# line; lines starting with # are notes.
+Amaranth
+Ash gourd
+Asparagus
+Artichoke
+Aubergine
+Baby corn
+Beans
+Beetroot
+Bell pepper
+Bhindi
+Bitter gourd
+Bok choy
+Bottle gourd
+Brinjal
+Broad beans
+Broccoli
+Brussels sprouts
+Butternut squash
+Cabbage
+Capsicum
+Carrot
+Cauliflower
+Celery
+Chilli
+Cluster beans
+Colocasia
+Coriander
+Corn
+Cucumber
+Curry leaves
+Drumstick
+Eggplant
+Elephant foot yam
+Fenugreek
+French beans
+Garlic
+Ginger
+Gourd
+Green beans
+Green chilli
+Green peas
+Ivy gourd
+Jalapeno
+Kale
+Karela
+Kohlrabi
+Ladies finger
+Leek
+Lettuce
+Lotus root
+Methi
+Mint
+Mushroom
+Mustard greens
+Okra
+Onion
+Palak
+Parsley
+Parsnip
+Peas
+Plantain
+Potato
+Pumpkin
+Radish
+Raw banana
+Raw mango
+Red cabbage
+Ridge gourd
+Shallot
+Snake gourd
+Spinach
+Spring onion
+Squash
+Sweet corn
+Sweet potato
+Tapioca
+Taro
+Tomato
+Turnip
+Water chestnut
+Watercress
+Yam
+Zucchini

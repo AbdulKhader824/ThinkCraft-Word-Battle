@@ -135,10 +135,31 @@ void main() {
       expect(results.scores['a']!.answerPoints, 0);
     });
 
-    test('an answer nobody voted on is disputed and scores 0', () {
+    test('an answer nobody voted on scores full points', () {
       final results = _score({'a': 'Mango'}, players: ['a', 'b', 'c']);
 
-      expect(results.scores['a']!.answerPoints, 0);
+      expect(results.scores['a']!.answerPoints, 1000);
+      final line = results.lines['a']!.firstWhere((l) => l.text == 'Mango');
+      expect(line.verdict, AnswerVerdict.valid);
+      expect(line.noVotes, isTrue);
+      expect(
+        results.scores['b']!.validationPoints,
+        0,
+        reason: 'nobody voted, so nobody earns vote points',
+      );
+    });
+
+    test('an answer with votes is not marked as unvoted', () {
+      final results = _score(
+        {'a': 'Mango'},
+        players: ['a', 'b', 'c'],
+        ballots: {
+          'Mango': {'b': true},
+        },
+      );
+
+      final line = results.lines['a']!.firstWhere((l) => l.text == 'Mango');
+      expect(line.noVotes, isFalse);
     });
   });
 

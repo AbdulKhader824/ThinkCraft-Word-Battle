@@ -1,0 +1,47 @@
+# Games children play, written by hand: board, card, outdoor and video
+# games. One per line; lines starting with # are notes.
+Angry Birds
+Antakshari
+Badminton
+Bingo
+Business
+Candy Crush
+Carrom
+Charades
+Checkers
+Chess
+Chor police
+Dog and the bone
+Dominoes
+Dumb charades
+Free Fire
+Gilli danda
+Hide and seek
+Hopscotch
+Hangman
+Jenga
+Kho kho
+Lagori
+Ludo
+Marbles
+Minecraft
+Monopoly
+Musical chairs
+Pac-Man
+Passing the parcel
+Pictionary
+Pokemon Go
+Roblox
+Rubik's Cube
+Scrabble
+Seven stones
+Snakes and ladders
+Sudoku
+Super Mario
+Tag
+Temple Run
+Tetris
+Tic-tac-toe
+Treasure hunt
+Tug of war
+Word search

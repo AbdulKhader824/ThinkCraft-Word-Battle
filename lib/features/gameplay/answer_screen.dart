@@ -244,7 +244,7 @@ class _AnswerSteps extends StatelessWidget {
                   controller: controllers[category]!,
                   locked: false,
                   isLast: isLast,
-                  pictureHeight: keyboardUp ? 56 : 110,
+                  pictureHeight: keyboardUp ? 56 : 140,
                   autofocus: true,
                   onChanged: (text) => onChanged(category, text),
                   onSubmitted: isLast ? null : (_) => onStep(step + 1),
@@ -310,7 +310,7 @@ class _AnswerSteps extends StatelessWidget {
 
 /// A small picture for each category. The current one is outlined, answered
 /// ones get a green tick, and tapping one jumps straight to it.
-class _StepProgress extends StatelessWidget {
+class _StepProgress extends StatefulWidget {
   const _StepProgress({
     required this.categories,
     required this.step,
@@ -324,33 +324,91 @@ class _StepProgress extends StatelessWidget {
   final ValueChanged<int> onTap;
 
   @override
+  State<_StepProgress> createState() => _StepProgressState();
+}
+
+class _StepProgressState extends State<_StepProgress> {
+  /// Up to this many categories share the row's width.
+  static const _sharedWidthLimit = 7;
+  static const _scrollingChipWidth = 60.0;
+
+  final _currentChip = GlobalKey();
+
+  @override
+  void didUpdateWidget(_StepProgress oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.step != widget.step) _showCurrentStep();
+  }
+
+  /// Scrolls the current step's chip into view, once it has been drawn.
+  void _showCurrentStep() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final chip = _currentChip.currentContext;
+      if (chip == null || !mounted) return;
+      Scrollable.ensureVisible(
+        chip,
+        alignment: 0.5,
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : AppDurations.fast,
+      );
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final categories = widget.categories;
+    final step = widget.step;
+    final controllers = widget.controllers;
+    final onTap = widget.onTap;
+
+    Widget chip(int index, Category category) => Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 2),
+      child: _ProgressChip(
+        // Lets the row scroll to the current step.
+        key: index == step ? _currentChip : null,
+        category: category,
+        current: index == step,
+        answered: controllers[category]!.text.trim().isNotEmpty,
+        reduceMotion: reduceMotion,
+        onTap: () {
+          if (index != step) {
+            playSoundFrom(context, GameSound.select);
+          }
+          onTap(index);
+        },
+      ),
+    );
 
     return Column(
       children: [
-        Row(
-          children: [
-            for (final (index, category) in categories.indexed)
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: _ProgressChip(
-                    category: category,
-                    current: index == step,
-                    answered: controllers[category]!.text.trim().isNotEmpty,
-                    reduceMotion: reduceMotion,
-                    onTap: () {
-                      if (index != step) {
-                        playSoundFrom(context, GameSound.select);
-                      }
-                      onTap(index);
-                    },
-                  ),
-                ),
+        // Up to seven share the width. More would be too small to tap, so
+        // they keep a fixed size and the row scrolls, following the step.
+        if (categories.length <= _sharedWidthLimit)
+          Row(
+            children: [
+              for (final (index, category) in categories.indexed)
+                Expanded(child: chip(index, category)),
+            ],
+          )
+        else
+          SizedBox(
+            height: _scrollingChipWidth / CategoryPicture.aspectRatio + 12,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              clipBehavior: Clip.none,
+              child: Row(
+                children: [
+                  for (final (index, category) in categories.indexed)
+                    SizedBox(
+                      width: _scrollingChipWidth,
+                      child: chip(index, category),
+                    ),
+                ],
               ),
-          ],
-        ),
+            ),
+          ),
         const SizedBox(height: AppSpacing.xxs),
         Text('${step + 1} of ${categories.length}', style: AppText.bodySmall),
       ],
@@ -360,6 +418,7 @@ class _StepProgress extends StatelessWidget {
 
 class _ProgressChip extends StatelessWidget {
   const _ProgressChip({
+    super.key,
     required this.category,
     required this.current,
     required this.answered,

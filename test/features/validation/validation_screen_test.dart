@@ -1,12 +1,15 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:thinkcraft_word_battle/app/router.dart';
 import 'package:thinkcraft_word_battle/core/theme/app_colors.dart';
+import 'package:thinkcraft_word_battle/core/widgets/countdown_ring.dart';
 import 'package:thinkcraft_word_battle/core/widgets/game_button.dart';
 import 'package:thinkcraft_word_battle/core/widgets/player_avatar.dart';
 import 'package:thinkcraft_word_battle/features/validation/validation_screen.dart';
 import 'package:thinkcraft_word_battle/models/answer_group.dart';
 import 'package:thinkcraft_word_battle/models/category.dart';
+import 'package:thinkcraft_word_battle/models/player.dart';
 import 'package:thinkcraft_word_battle/models/vote.dart';
 
 import '../../fakes.dart';
@@ -158,6 +161,66 @@ void main() {
     await _open(tester, ballot: const []);
 
     expect(find.text('Counting the votes...'), findsOneWidget);
+  });
+
+  group('with friends nearby', () {
+    final friends = [
+      fakePlayer(localId, name: 'Sam', isHost: true),
+      const Player(id: 'guest-1', name: 'Riya', avatarIndex: 2),
+      const Player(id: 'guest-2', name: 'Kai', avatarIndex: 5),
+    ];
+
+    Future<void> openNearby(
+      WidgetTester tester, {
+      Map<String, VoteChoice> myVotes = const {},
+      Set<String> voted = const {},
+    }) async {
+      final service = FakeGameService(
+        fakeVotingRoom(
+          ballot: const [_mango, _moose],
+          myVotes: myVotes,
+          players: friends,
+          votedPlayerIds: voted,
+          voteDeadline: clock.now().add(const Duration(seconds: 6)),
+          voteTime: const Duration(seconds: 6),
+        ),
+      );
+      await pumpGame(tester, service: service);
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+
+    testWidgets('shows one timer for all the answers', (tester) async {
+      await openNearby(tester);
+
+      expect(find.byType(CountdownRing), findsOneWidget);
+      expect(find.textContaining('are skipped'), findsOneWidget);
+    });
+
+    testWidgets('shows the faces of players still voting', (tester) async {
+      await openNearby(
+        tester,
+        myVotes: {_mango.id: VoteChoice.valid, _moose.id: VoteChoice.skip},
+        voted: {localId, 'guest-2'},
+      );
+
+      expect(find.text('Waiting for Riya...'), findsOneWidget);
+      expect(find.bySemanticsLabel('Riya is still voting'), findsOneWidget);
+      expect(find.bySemanticsLabel('Kai is still voting'), findsNothing);
+    });
+
+    testWidgets('names two players, then counts', (tester) async {
+      await openNearby(
+        tester,
+        myVotes: {_mango.id: VoteChoice.valid, _moose.id: VoteChoice.skip},
+      );
+
+      expect(find.text('Waiting for Riya and Kai...'), findsOneWidget);
+      expect(
+        find.bySemanticsLabel('Sam is still voting'),
+        findsNothing,
+        reason: 'never lists yourself',
+      );
+    });
   });
 
   testWidgets('fits on a small phone', (tester) async {

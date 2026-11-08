@@ -4,6 +4,16 @@ import '../models/room.dart';
 import '../models/vote.dart';
 import 'rules/game_rules.dart';
 
+/// Why a player couldn't join a room, in words to show them.
+class JoinRefused implements Exception {
+  const JoinRefused(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 /// Everything the screens can ask of a game.
 ///
 /// Screens depend only on this interface. [LocalGameService] simulates the
@@ -22,17 +32,25 @@ abstract interface class GameService {
 
   /// [avatarIndex] is the player's chosen character; bots get the others.
   /// [settings] are the rounds and categories, chosen by the host.
+  /// [mode] says where the friends are. [playerCount] only counts in
+  /// practice, where it sets how many bots play.
   Future<void> createRoom({
     required String playerName,
     required int playerCount,
     int avatarIndex = 0,
     GameSettings? settings,
+    RoomMode mode = RoomMode.practice,
+    bool fillWithBots = false,
   });
 
+  /// Joins a friend's room by its code. [hostAddress] is the host phone's
+  /// network address, for when the room can't be found automatically.
+  /// Throws [JoinRefused] when the room can't be joined.
   Future<void> joinRoom({
     required String playerName,
     required String roomCode,
     int avatarIndex = 0,
+    String? hostAddress,
   });
 
   /// Marks the local player as ready or not. Hosts are always ready.

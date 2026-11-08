@@ -37,7 +37,7 @@ void _create(
   LocalGameService service, {
   int rounds = 3,
   int answerSeconds = 90,
-  List<Category> categories = Category.values,
+  List<Category> categories = Category.defaults,
   int playerCount = 3,
 }) {
   service.createRoom(
@@ -91,7 +91,7 @@ void main() {
         service.createRoom(playerName: 'Sam', playerCount: 2);
 
         expect(_room(service).settings.rounds, 3);
-        expect(_room(service).settings.usesEveryCategory, isTrue);
+        expect(_room(service).settings.categories, Category.defaults);
       });
     });
 
@@ -100,7 +100,7 @@ void main() {
         service.joinRoom(playerName: 'Sam', roomCode: 'ABC234');
 
         expect(_room(service).settings.rounds, 3);
-        expect(_room(service).settings.usesEveryCategory, isTrue);
+        expect(_room(service).settings.categories, Category.defaults);
       });
     });
 

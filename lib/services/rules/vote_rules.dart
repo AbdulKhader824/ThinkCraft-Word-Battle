@@ -23,8 +23,10 @@ abstract final class VoteRules {
     return [...votes, vote];
   }
 
-  /// The outcome for [group]. An automatic verdict always wins; otherwise
-  /// the majority decides, and a tie (including no votes) is disputed.
+  /// The outcome for [group]. An automatic verdict always wins. An answer
+  /// nobody voted on counts as correct: nobody said it was wrong, and the
+  /// player shouldn't lose points because others skipped it or ran out of
+  /// time. Otherwise the majority decides, and a tie is disputed.
   static AnswerVerdict verdictFor(AnswerGroup group, List<Vote> votes) {
     final automatic = group.autoVerdict;
     if (automatic != null) return automatic;
@@ -33,6 +35,7 @@ abstract final class VoteRules {
     final valid = counted.where((vote) => vote.isValid).length;
     final invalid = counted.length - valid;
 
+    if (counted.isEmpty) return AnswerVerdict.valid;
     if (valid == invalid) return AnswerVerdict.disputed;
     return valid > invalid ? AnswerVerdict.valid : AnswerVerdict.invalid;
   }

@@ -4,12 +4,12 @@ import 'package:thinkcraft_word_battle/models/game_settings.dart';
 import 'package:thinkcraft_word_battle/services/rules/game_rules.dart';
 
 void main() {
-  test('the standard game is 3 rounds of 90 seconds, every category', () {
+  test('the standard game is 3 rounds of 90 seconds, the classic six', () {
     final settings = GameSettings.standard;
 
     expect(settings.rounds, 3);
-    expect(settings.categories, Category.values);
-    expect(settings.usesEveryCategory, isTrue);
+    expect(settings.categories, Category.defaults);
+    expect(settings.usesEveryCategory, isFalse);
   });
 
   test('offers 1, 3, 5 and 10 rounds', () {

@@ -1,0 +1,37 @@
+# Everyday sports, written by hand, including Indian ones. One per line;
+# lines starting with # are notes.
+Archery
+Athletics
+Badminton
+Baseball
+Basketball
+Boxing
+Chess
+Cricket
+Cycling
+Diving
+Football
+Golf
+Gymnastics
+Hockey
+Javelin
+Judo
+Kabaddi
+Kalaripayattu
+Karate
+Kho kho
+Long jump
+Marathon
+Running
+Shot put
+Skating
+Snooker
+Soccer
+Swimming
+Table tennis
+Taekwondo
+Tennis
+Volleyball
+Weightlifting
+Wrestling
+Yoga

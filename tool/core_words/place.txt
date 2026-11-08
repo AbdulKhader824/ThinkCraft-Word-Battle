@@ -1,0 +1,64 @@
+# Famous places, written by hand: landmarks, rivers, mountains and places
+# the queries can miss. One per line; lines starting with # are notes.
+# tool/build_word_list.py adds these to the word list.
+Africa
+Alappuzha
+Alps
+Amazon
+Amazon rainforest
+America
+Andaman
+Antarctica
+Arabian Sea
+Arctic
+Asia
+Atlantic Ocean
+Australia
+Bay of Bengal
+Brahmaputra
+Charminar
+Cochin
+Eiffel Tower
+England
+Europe
+Everest
+Ganga
+Ganges
+Gateway of India
+Godavari
+Great Wall of China
+Himalayas
+India Gate
+Indian Ocean
+Kanyakumari
+Kaveri
+Kilimanjaro
+Kovalam
+Ladakh
+Lakshadweep
+Mount Everest
+Munnar
+Mysore
+Niagara Falls
+Nilgiris
+North America
+North Pole
+Ooty
+Pacific Ocean
+Periyar
+Qutub Minar
+Red Fort
+Sabarimala
+Sahara
+Sahara Desert
+South America
+South Pole
+Statue of Liberty
+Taj Mahal
+Thar Desert
+Trivandrum
+UK
+USA
+Vembanad
+Wayanad
+Yamuna

@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../models/category.dart';
 import 'category_style.dart';
 
-/// A category's illustrated picture, framed in its own colour.
+/// A category's illustrated picture, with its own rounded frame drawn in
+/// and see-through corners.
 ///
 /// Pictures are 3:2. Give a [height]; the width follows.
 class CategoryPicture extends StatelessWidget {

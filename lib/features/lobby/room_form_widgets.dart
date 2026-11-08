@@ -10,6 +10,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/widgets/game_card.dart';
 import '../../models/category.dart';
 import '../../models/game_settings.dart';
+import '../../models/room.dart';
 import '../../services/rules/room_input_rules.dart';
 import '../../services/sound_service.dart';
 import '../gameplay/category_style.dart';
@@ -33,59 +34,293 @@ class RoomCodeFormatter extends TextInputFormatter {
   }
 }
 
-/// Makes it clear that these rooms are simulated, not online.
+/// Makes it clear that a practice room is simulated players only.
 class PracticeModeNote extends StatelessWidget {
   const PracticeModeNote({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GameCard(
+    return const _ModeNote(
+      icon: Icons.smart_toy_rounded,
       color: AppColors.sunshine,
+      text: 'Practice: you play against simulated players on this phone.',
+    );
+  }
+}
+
+/// Tells the host how friends get into a nearby room.
+class NearbyModeNote extends StatelessWidget {
+  const NearbyModeNote({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const _ModeNote(
+      icon: Icons.wifi_rounded,
+      color: AppColors.sky,
+      text:
+          'Friends join on the same Wi-Fi, or turn on your hotspot and '
+          'let them connect to it. Then they tap Join Room.',
+    );
+  }
+}
+
+class _ModeNote extends StatelessWidget {
+  const _ModeNote({
+    required this.icon,
+    required this.color,
+    required this.text,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return GameCard(
+      color: color,
       padding: const EdgeInsets.all(AppSpacing.md),
       child: Row(
         children: [
-          const Icon(Icons.smart_toy_rounded, color: AppColors.navy, size: 32),
+          Icon(icon, color: AppColors.navy, size: 32),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Text(
-              'Practice mode: you play against simulated players on this '
-              'device. Online play comes later.',
-              style: AppText.bodySmall,
-            ),
-          ),
+          Expanded(child: Text(text, style: AppText.bodySmall)),
         ],
       ),
     );
   }
 }
 
-/// A small label for the Lobby, where space is tight.
-class PracticeModeChip extends StatelessWidget {
-  const PracticeModeChip({super.key});
+/// A small label for the Lobby saying what kind of room this is.
+class RoomModeChip extends StatelessWidget {
+  const RoomModeChip({super.key, required this.mode});
+
+  final RoomMode mode;
 
   @override
   Widget build(BuildContext context) {
+    final (icon, label, color) = switch (mode) {
+      RoomMode.practice => (
+        Icons.smart_toy_rounded,
+        'Practice mode: simulated players',
+        AppColors.sunshine,
+      ),
+      RoomMode.nearby => (
+        Icons.wifi_rounded,
+        'Nearby room: same Wi-Fi or hotspot',
+        AppColors.sky,
+      ),
+      RoomMode.online => (Icons.public_rounded, 'Online room', AppColors.mint),
+    };
+
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: AppSpacing.xxs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.sunshine,
+        color: color,
         borderRadius: BorderRadius.circular(AppRadius.pill),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.smart_toy_rounded, color: AppColors.navy, size: 18),
+          Icon(icon, color: AppColors.navy, size: 18),
           const SizedBox(width: AppSpacing.xxs),
-          Flexible(
-            child: Text(
-              'Practice mode: simulated players',
-              style: AppText.bodySmall,
+          Flexible(child: Text(label, style: AppText.bodySmall)),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Who are you playing with?": friends nearby, friends online (coming
+/// soon) or practice with bots.
+class RoomModePicker extends StatelessWidget {
+  const RoomModePicker({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final RoomMode selected;
+  final ValueChanged<RoomMode> onChanged;
+
+  static const _options = [
+    (
+      RoomMode.nearby,
+      Icons.wifi_rounded,
+      'Friends nearby',
+      'Same Wi-Fi or your hotspot',
+    ),
+    (
+      RoomMode.online,
+      Icons.public_rounded,
+      'Friends online',
+      'Anywhere, with internet',
+    ),
+    (
+      RoomMode.practice,
+      Icons.smart_toy_rounded,
+      'Practice',
+      'Just you and bots',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('Who are you playing with?', style: AppText.label),
+        const SizedBox(height: AppSpacing.xs),
+        for (final (mode, icon, title, detail) in _options) ...[
+          _ModeOption(
+            key: ValueKey('mode-${mode.name}'),
+            icon: icon,
+            title: title,
+            detail: detail,
+            selected: selected == mode,
+            // Online play needs the server, which comes later.
+            comingSoon: mode == RoomMode.online,
+            onTap: () {
+              if (mode == selected) return;
+              playSoundFrom(context, GameSound.select);
+              onChanged(mode);
+            },
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+      ],
+    );
+  }
+}
+
+/// How answers are judged: by vote, by the word list, or both.
+class AnswerCheckPicker extends StatelessWidget {
+  const AnswerCheckPicker({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final AnswerCheck selected;
+  final ValueChanged<AnswerCheck> onChanged;
+
+  static const _icons = {
+    AnswerCheck.smart: Icons.auto_awesome_rounded,
+    AnswerCheck.vote: Icons.how_to_vote_rounded,
+    AnswerCheck.auto: Icons.menu_book_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('How are answers checked?', style: AppText.label),
+        const SizedBox(height: AppSpacing.xs),
+        for (final check in _icons.keys) ...[
+          _ModeOption(
+            key: ValueKey('check-${check.name}'),
+            icon: _icons[check]!,
+            title: check.label,
+            detail: check.detail,
+            selected: selected == check,
+            comingSoon: false,
+            onTap: () {
+              if (check == selected) return;
+              playSoundFrom(context, GameSound.select);
+              onChanged(check);
+            },
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+      ],
+    );
+  }
+}
+
+class _ModeOption extends StatelessWidget {
+  const _ModeOption({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.detail,
+    required this.selected,
+    required this.comingSoon,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String detail;
+  final bool selected;
+  final bool comingSoon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final reduceMotion = MediaQuery.disableAnimationsOf(context);
+    final radius = BorderRadius.circular(AppRadius.small);
+
+    return Semantics(
+      button: true,
+      selected: selected,
+      enabled: !comingSoon,
+      label: comingSoon ? '$title, coming soon' : '$title. $detail',
+      excludeSemantics: true,
+      child: Opacity(
+        opacity: comingSoon ? 0.6 : 1,
+        child: Material(
+          color: selected ? AppColors.mint : AppColors.background,
+          borderRadius: radius,
+          child: InkWell(
+            borderRadius: radius,
+            onTap: comingSoon ? null : onTap,
+            child: AnimatedContainer(
+              duration: reduceMotion ? Duration.zero : AppDurations.fast,
+              constraints: const BoxConstraints(
+                minHeight: AppSizes.minTapTarget,
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.xs,
+              ),
+              decoration: BoxDecoration(
+                borderRadius: radius,
+                border: Border.all(
+                  color: selected ? AppColors.navy : AppColors.outline,
+                  width: selected ? 3 : 2,
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(icon, color: AppColors.navy, size: 28),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(title, style: AppText.label),
+                        Text(
+                          comingSoon ? 'Coming soon' : detail,
+                          style: AppText.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (selected)
+                    const Icon(
+                      Icons.check_circle_rounded,
+                      color: AppColors.navy,
+                      size: 28,
+                    ),
+                ],
+              ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -118,6 +353,44 @@ class PlayerCountPicker extends StatelessWidget {
       onChanged: onChanged,
       keyPrefix: 'player-count',
       unit: 'players',
+    );
+  }
+}
+
+/// For a nearby room: whether bots take the seats no friend has taken
+/// when the game starts.
+class FillWithBotsSwitch extends StatelessWidget {
+  const FillWithBotsSwitch({
+    super.key,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: SwitchListTile(
+        key: const ValueKey('fill-with-bots'),
+        value: value,
+        onChanged: onChanged,
+        contentPadding: EdgeInsets.zero,
+        secondary: const Icon(
+          Icons.smart_toy_rounded,
+          color: AppColors.navy,
+          size: 28,
+        ),
+        title: Text('Fill empty seats with bots', style: AppText.label),
+        subtitle: Text(
+          value
+              ? 'Seats nobody takes get a bot when you start.'
+              : 'Play with just the friends who join.',
+          style: AppText.bodySmall,
+        ),
+      ),
     );
   }
 }
@@ -264,6 +537,7 @@ class CategoryPicker extends StatelessWidget {
         const SizedBox(height: AppSpacing.md),
         LayoutBuilder(
           builder: (context, constraints) {
+            // Two across, with wide pictures.
             final width = (constraints.maxWidth - AppSpacing.xs) / 2;
             return Wrap(
               spacing: AppSpacing.xs,
@@ -352,7 +626,8 @@ class _CategoryToggle extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // A solid strip keeps the name readable.
+                        // A solid strip keeps the name readable. Long
+                        // names shrink to fit rather than wrap.
                         Padding(
                           padding: const EdgeInsets.symmetric(
                             horizontal: AppSpacing.xxs,
@@ -361,9 +636,14 @@ class _CategoryToggle extends StatelessWidget {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Text(
-                                  category.label,
-                                  style: AppText.label,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown,
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    category.label,
+                                    maxLines: 1,
+                                    style: AppText.label,
+                                  ),
                                 ),
                               ),
                               Icon(

@@ -14,6 +14,7 @@ import '../../core/widgets/player_avatar.dart';
 import '../../models/game_settings.dart';
 import '../../models/player.dart';
 import '../../models/room.dart';
+import '../../services/app_game_service.dart';
 import '../../services/game_providers.dart';
 import '../../services/sound_service.dart';
 import '../gameplay/category_picture.dart';
@@ -45,10 +46,19 @@ class LobbyScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _RoomCodeCard(code: room.code),
+            _RoomCodeCard(code: room.code, mode: room.mode),
+            if (room.mode == RoomMode.nearby &&
+                room.playerById(myId).isHost) ...[
+              const SizedBox(height: AppSpacing.sm),
+              _InviteCard(address: _hostAddress(ref)),
+            ],
             const SizedBox(height: AppSpacing.sm),
             _SettingsSummary(settings: room.settings),
             const SizedBox(height: AppSpacing.md),
+            if (room.mode == RoomMode.nearby) ...[
+              _SeatsLine(room: room),
+              const SizedBox(height: AppSpacing.xs),
+            ],
             _PlayerGrid(players: room.players, myId: myId),
             const SizedBox(height: AppSpacing.lg),
             _LobbyAction(room: room, me: room.playerById(myId)),
@@ -59,10 +69,54 @@ class LobbyScreen extends ConsumerWidget {
   }
 }
 
+/// Where friends can reach this phone's nearby room, if it's hosting one.
+String? _hostAddress(WidgetRef ref) {
+  final service = ref.read(gameServiceProvider);
+  return service is AppGameService ? service.hostAddress : null;
+}
+
+/// Tells friends how to join this phone's nearby room.
+class _InviteCard extends StatelessWidget {
+  const _InviteCard({required this.address});
+
+  final String? address;
+
+  @override
+  Widget build(BuildContext context) {
+    return GameCard(
+      color: AppColors.sky,
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      child: Row(
+        children: [
+          const Icon(Icons.wifi_rounded, color: AppColors.navy, size: 32),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Friends: join this Wi-Fi or hotspot, then tap Join Room.',
+                  style: AppText.bodySmall,
+                ),
+                if (address != null)
+                  Text(
+                    "Can't find it? Host address: $address",
+                    style: AppText.bodySmall,
+                  ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _RoomCodeCard extends StatelessWidget {
-  const _RoomCodeCard({required this.code});
+  const _RoomCodeCard({required this.code, required this.mode});
 
   final String code;
+  final RoomMode mode;
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +136,7 @@ class _RoomCodeCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.xs),
-          const PracticeModeChip(),
+          RoomModeChip(mode: mode),
         ],
       ),
     );
@@ -113,6 +167,10 @@ class _SettingsSummary extends StatelessWidget {
             '$rounds · ${settings.answerSeconds}s each · $categories',
             style: AppText.label,
           ),
+          Text(
+            'Answers: ${settings.answerCheck.label}',
+            style: AppText.bodySmall,
+          ),
           const SizedBox(height: AppSpacing.xs),
           Wrap(
             spacing: AppSpacing.xs,
@@ -128,6 +186,30 @@ class _SettingsSummary extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// How full a nearby room is, and what happens to the empty seats.
+class _SeatsLine extends StatelessWidget {
+  const _SeatsLine({required this.room});
+
+  final Room room;
+
+  @override
+  Widget build(BuildContext context) {
+    final empty = room.emptySeats;
+    final seats = '${room.players.length} of ${room.capacity} players';
+    final note = empty == 0
+        ? 'Room full'
+        : room.fillWithBots
+        ? (empty == 1 ? '1 bot joins at start' : '$empty bots join at start')
+        : 'No bots';
+
+    return Text(
+      '$seats · $note',
+      textAlign: TextAlign.center,
+      style: AppText.label,
     );
   }
 }
@@ -269,8 +351,16 @@ class _LobbyAction extends ConsumerWidget {
 
   String get _hint {
     if (!me.isHost) return 'The host starts when everyone is ready.';
+    if (room.players.length < 2 && !room.fillWithBots) {
+      return 'Waiting for friends to join...';
+    }
 
     final waiting = room.players.where((player) => !player.isReady).length;
+    if (waiting == 0 && room.mode == RoomMode.nearby && room.fillWithBots) {
+      return room.players.length < 2
+          ? 'Start now to play with bots, or wait for friends.'
+          : 'Everyone is ready! Bots fill the empty seats.';
+    }
     if (waiting == 0) return 'Everyone is ready!';
     return waiting == 1
         ? 'Waiting for 1 player to get ready.'

@@ -18,6 +18,7 @@ const _lines = [
     text: 'Monkey',
     verdict: AnswerVerdict.valid,
     points: 1000,
+    byWordList: true,
   ),
   AnswerLine(
     category: Category.place,
@@ -37,6 +38,7 @@ const _lines = [
     text: 'Melon',
     verdict: AnswerVerdict.valid,
     points: 333,
+    noVotes: true,
   ),
 ];
 
@@ -69,6 +71,15 @@ Future<FakeGameService> _open(
 }
 
 void main() {
+  testWidgets('says which answers the word list checked', (tester) async {
+    await _open(tester);
+    await tapAndSettle(tester, find.text('Sam (you)'));
+
+    expect(find.text('In the word list'), findsOneWidget);
+    expect(find.text('Not in the word list'), findsNothing);
+    expect(find.text('No votes, so it counts'), findsOneWidget);
+  });
+
   testWidgets('announces the winner and lists every player', (tester) async {
     await _open(tester);
 
@@ -249,6 +260,29 @@ void main() {
     await _open(tester, size: const Size(320, 568));
 
     expect(find.text('New Game'), findsOneWidget);
+    expect(find.text('Return Home'), findsOneWidget);
+  });
+
+  testWidgets('after the last round, only the host starts a new game', (
+    tester,
+  ) async {
+    final room = fakeResultsRoom(scores: const {}, rounds: 1);
+    // Luna hosts, and this player is a guest.
+    final service = FakeGameService(
+      room.copyWith(
+        players: [
+          for (final player in room.players)
+            player.copyWith(isHost: player.id == 'bot'),
+        ],
+      ),
+    );
+    await pumpGame(tester, service: service);
+    await tester.pumpAndSettle();
+
+    final newGame = tester.widget<InkWell>(
+      buttonLabelled('Host can start a New Game'),
+    );
+    expect(newGame.onTap, isNull);
     expect(find.text('Return Home'), findsOneWidget);
   });
 }

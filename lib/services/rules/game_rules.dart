@@ -8,6 +8,14 @@ abstract final class GameRules {
   /// who haven't by then leave the room.
   static const nextRoundWait = Duration(seconds: 60);
 
+  /// Voting time for each answer card. Voting has one timer for all the
+  /// cards together, not one per card, so a quick player can spend longer
+  /// on a hard one.
+  static const voteTimePerCard = Duration(seconds: 5);
+
+  /// The whole voting time for a ballot of [cards] answers.
+  static Duration voteTimeFor(int cards) => voteTimePerCard * cards;
+
   static final letters = List<String>.unmodifiable(
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''),
   );

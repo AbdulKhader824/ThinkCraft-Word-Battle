@@ -120,8 +120,8 @@ void main() {
       );
     });
 
-    test('no votes at all is disputed', () {
-      expect(VoteRules.verdictFor(_group(), []), AnswerVerdict.disputed);
+    test('an answer nobody voted on counts as correct', () {
+      expect(VoteRules.verdictFor(_group(), []), AnswerVerdict.valid);
     });
 
     test('in a 2-player game the only voter decides', () {

@@ -45,3 +45,37 @@ Future<bool> showGameConfirm(
   );
   return confirmed ?? false;
 }
+
+/// Tells the player something, such as why a room couldn't be joined,
+/// with a single OK button.
+Future<void> showGameMessage(
+  BuildContext context, {
+  required String title,
+  required String message,
+}) {
+  return showDialog<void>(
+    context: context,
+    builder: (dialogContext) => Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(title, textAlign: TextAlign.center, style: AppText.heading),
+            const SizedBox(height: AppSpacing.xs),
+            Text(message, textAlign: TextAlign.center, style: AppText.body),
+            const SizedBox(height: AppSpacing.lg),
+            GameButton(
+              label: 'OK',
+              onPressed: () => Navigator.of(dialogContext).pop(),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}

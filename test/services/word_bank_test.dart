@@ -4,9 +4,9 @@ import 'package:thinkcraft_word_battle/services/rules/game_rules.dart';
 import 'package:thinkcraft_word_battle/services/word_bank.dart';
 
 void main() {
-  test('every letter has at least two words in every category', () {
+  test('every letter has at least two words in the classic six', () {
     for (final letter in GameRules.letters) {
-      for (final category in Category.values) {
+      for (final category in Category.defaults) {
         final words = WordBank.wordsFor(letter, category);
         expect(
           words.length,
@@ -14,6 +14,15 @@ void main() {
           reason: '$letter ${category.label}',
         );
       }
+    }
+  });
+
+  test('newer categories have words for nearly every letter', () {
+    for (final category in Category.values) {
+      final letters = GameRules.letters.where(
+        (letter) => WordBank.wordsFor(letter, category).isNotEmpty,
+      );
+      expect(letters.length, greaterThanOrEqualTo(22), reason: category.label);
     }
   });
 

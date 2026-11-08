@@ -1,6 +1,5 @@
 import 'dart:ui' show Color;
 
-import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../models/category.dart';
 import '../../models/room.dart';
@@ -13,24 +12,16 @@ String roundLabel(Room room) {
 /// How each category looks. This lives with the UI so the [Category] model
 /// stays free of Flutter.
 extension CategoryStyle on Category {
+  /// The six candy colours take turns, so neighbours never match.
   Color get color => switch (this) {
-    Category.animal => AppColors.mint,
-    Category.place => AppColors.sky,
-    Category.person => AppColors.coral,
-    Category.movie => AppColors.lavender,
-    Category.food => AppColors.sunshine,
-    Category.brand => AppColors.peach,
+    Category.animal || Category.cartoon || Category.vehicle => AppColors.mint,
+    Category.bird || Category.food || Category.sport => AppColors.sky,
+    Category.place || Category.vegetable || Category.game => AppColors.coral,
+    Category.person || Category.flower => AppColors.lavender,
+    Category.celebrity || Category.thing => AppColors.sunshine,
+    Category.movie || Category.brand => AppColors.peach,
   };
 
   /// The illustrated picture, from `tool/import_category_pictures.py`.
   String get picture => 'assets/images/categories/$name.webp';
-
-  String get character => switch (this) {
-    Category.animal => AppAssets.fox,
-    Category.place => AppAssets.penguin,
-    Category.person => AppAssets.owl,
-    Category.movie => AppAssets.cat,
-    Category.food => AppAssets.bear,
-    Category.brand => AppAssets.parrot,
-  };
 }

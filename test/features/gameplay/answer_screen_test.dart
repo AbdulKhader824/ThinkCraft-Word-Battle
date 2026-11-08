@@ -43,15 +43,15 @@ Future<void> _next(WidgetTester tester) async {
 
 /// Types [text] into every category in turn, pressing Next between them.
 Future<void> _answerAll(WidgetTester tester, String text) async {
-  for (final category in Category.values) {
+  for (final category in Category.defaults) {
     await tester.enterText(_field(category), text);
-    if (category != Category.values.last) await _next(tester);
+    if (category != Category.defaults.last) await _next(tester);
   }
 }
 
 /// Goes to the last category, where the Lock In button is.
 Future<void> _toLastStep(WidgetTester tester) async {
-  await tester.tap(find.byKey(ValueKey('step-${Category.values.last.name}')));
+  await tester.tap(find.byKey(ValueKey('step-${Category.defaults.last.name}')));
   await pumpFrames(tester);
 }
 
@@ -82,7 +82,7 @@ void main() {
     expect(find.text('1 of 6'), findsOneWidget);
     expect(find.text('Next'), findsOneWidget);
     expect(find.text('Lock In Answers'), findsNothing);
-    for (final category in Category.values) {
+    for (final category in Category.defaults) {
       expect(find.byKey(ValueKey('step-${category.name}')), findsOneWidget);
     }
   });
@@ -224,7 +224,7 @@ void main() {
   testWidgets('locked answers cannot be edited', (tester) async {
     await _open(tester, submitted: {localId});
 
-    for (final category in Category.values) {
+    for (final category in Category.defaults) {
       expect(tester.widget<TextFormField>(_field(category)).enabled, isFalse);
     }
     expect(find.text('Lock In Answers'), findsNothing);

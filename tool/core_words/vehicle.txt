@@ -1,0 +1,53 @@
+# Everyday vehicles, written by hand. One per line; lines starting with #
+# are notes.
+Aeroplane
+Airplane
+Ambulance
+Auto
+Auto rickshaw
+Bicycle
+Bike
+Boat
+Bullock cart
+Bulldozer
+Bus
+Cable car
+Canoe
+Car
+Cart
+Crane
+Cruise ship
+Cycle
+Excavator
+Ferry
+Fire engine
+Fire truck
+Helicopter
+Houseboat
+Jeep
+Jet
+JCB
+Lorry
+Metro
+Minibus
+Moped
+Motorbike
+Motorcycle
+Police car
+Rickshaw
+Rocket
+Sailboat
+Scooter
+Ship
+Skateboard
+Spaceship
+Submarine
+Tanker
+Taxi
+Tempo
+Tractor
+Train
+Tram
+Truck
+Van
+Yacht

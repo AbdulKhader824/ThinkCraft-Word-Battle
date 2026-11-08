@@ -156,8 +156,13 @@ class _ResultsScreenState extends ConsumerState<ResultsScreen>
                   // Round, and the panel shows who has.
                   child: room.isFinalRound
                       ? _ResultActions(
-                          nextLabel: 'New Game',
-                          onNext: service.newGame,
+                          // Only the host can start everyone on a new game.
+                          nextLabel: room.host.id == service.localPlayerId
+                              ? 'New Game'
+                              : 'Host can start a New Game',
+                          onNext: room.host.id == service.localPlayerId
+                              ? service.newGame
+                              : null,
                           onReturnHome: service.leaveRoom,
                         )
                       : _NextRoundPanel(
@@ -369,7 +374,7 @@ class _ResultActions extends StatelessWidget {
   static const _maxSideBySideTextScale = 1.2;
 
   final String nextLabel;
-  final VoidCallback onNext;
+  final VoidCallback? onNext;
   final VoidCallback onReturnHome;
 
   @override
@@ -728,6 +733,20 @@ class _AnswerRow extends StatelessWidget {
                   line.isEmpty ? 'No answer' : line.text,
                   style: AppText.label,
                 ),
+                if (line.byWordList)
+                  _AnswerNote(
+                    icon: line.verdict == AnswerVerdict.valid
+                        ? Icons.check_circle_rounded
+                        : Icons.help_rounded,
+                    text: line.verdict == AnswerVerdict.valid
+                        ? 'In the word list'
+                        : 'Not in the word list',
+                  )
+                else if (line.noVotes)
+                  const _AnswerNote(
+                    icon: Icons.how_to_vote_rounded,
+                    text: 'No votes, so it counts',
+                  ),
               ],
             ),
           ),
@@ -743,6 +762,27 @@ class _AnswerRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// Says how an answer was decided when it wasn't by votes: the word
+/// list, or nobody voting on it.
+class _AnswerNote extends StatelessWidget {
+  const _AnswerNote({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: AppColors.navy),
+        const SizedBox(width: AppSpacing.xxs),
+        Flexible(child: Text(text, style: AppText.bodySmall)),
+      ],
     );
   }
 }

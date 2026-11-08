@@ -1,0 +1,60 @@
+# Famous people children know, written by hand, including Indian film,
+# music and sports stars. One per line; lines starting with # are notes.
+A. R. Rahman
+Abdul Kalam
+Akshay Kumar
+Alia Bhatt
+Allu Arjun
+Amitabh Bachchan
+APJ Abdul Kalam
+Bill Gates
+Cristiano Ronaldo
+Deepika Padukone
+Dhoni
+Dulquer Salmaan
+Elon Musk
+Fahadh Faasil
+Hrithik Roshan
+Jasprit Bumrah
+K. S. Chithra
+Kalam
+Kapil Dev
+Katrina Kaif
+KS Chithra
+Lata Mangeshkar
+Lionel Messi
+Mahatma Gandhi
+Mammootty
+Mary Kom
+Messi
+Mohanlal
+MS Dhoni
+Nayanthara
+Neeraj Chopra
+Neymar
+Nivin Pauly
+PT Usha
+PV Sindhu
+Prabhas
+Prithviraj
+Prithviraj Sukumaran
+Priyanka Chopra
+Rajinikanth
+Ram Charan
+Ranbir Kapoor
+Ronaldo
+Rohit Sharma
+Sachin
+Sachin Tendulkar
+Salman Khan
+Sanju Samson
+Shah Rukh Khan
+Shreya Ghoshal
+Sunil Chhetri
+Surya
+Suriya
+Taylor Swift
+Tovino Thomas
+Vijay
+Virat Kohli
+Yesudas

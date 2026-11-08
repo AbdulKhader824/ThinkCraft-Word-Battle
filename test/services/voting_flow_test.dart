@@ -1,3 +1,5 @@
+import 'package:clock/clock.dart';
+
 import 'dart:math';
 
 import 'package:fake_async/fake_async.dart';
@@ -154,13 +156,43 @@ void main() {
       });
     });
 
-    test('stays in voting until the player finishes', () {
+    test('gives 5 seconds for each answer, as one timer', () {
       _game((time, service) {
         _playToVoting(time, service, playerCount: 8);
 
-        time.elapse(const Duration(minutes: 5));
+        final round = _room(service).round!;
+        expect(round.ballot, isNotEmpty);
+        expect(round.voteTime, GameRules.voteTimePerCard * round.ballot.length);
+        expect(round.voteDeadline!.difference(clock.now()), round.voteTime);
+      });
+    });
 
+    test('waits for the player until the time runs out', () {
+      _game((time, service) {
+        _playToVoting(time, service, playerCount: 8);
+        final round = _room(service).round!;
+        service.castVote(round.ballot.first.id, VoteChoice.valid);
+
+        time.elapse(round.voteTime! - const Duration(milliseconds: 100));
         expect(_room(service).phase, GamePhase.validating);
+
+        time.elapse(const Duration(milliseconds: 100));
+        expect(_room(service).phase, GamePhase.results);
+        expect(
+          _room(service).round!.myVotes.values.skip(1),
+          everyElement(VoteChoice.skip),
+          reason: 'answers not voted on in time are skipped',
+        );
+      });
+    });
+
+    test('finishing early does not wait for the timer', () {
+      _game((time, service) {
+        _playToVoting(time, service, playerCount: 8);
+
+        _finishVoting(time, service);
+
+        expect(_room(service).phase, GamePhase.results);
       });
     });
 
@@ -199,13 +231,13 @@ void main() {
           time,
           service,
           playerCount: 2,
-          typed: {for (final category in Category.values) category: 'mango'},
+          typed: {for (final category in Category.defaults) category: 'mango'},
         );
         expect(_room(service).round!.ballot, isEmpty);
         time.elapse(_timing.voting.$2);
 
         final score = _room(service).scores[service.localPlayerId]!;
-        expect(score.answerPoints, 500 * Category.values.length);
+        expect(score.answerPoints, 500 * Category.defaults.length);
         expect(score.validationPoints, 0);
         service.dispose();
         time.flushMicrotasks();

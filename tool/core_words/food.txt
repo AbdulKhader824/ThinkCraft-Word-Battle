@@ -1,0 +1,177 @@
+# Everyday foods, written by hand. One per line; lines starting with # are
+# notes. tool/build_word_list.py adds these to the word list.
+Aloo paratha
+Aloo tikki
+Appam
+Apple
+Apricot
+Avial
+Avocado
+Bajji
+Banana
+Banana chips
+Barfi
+Beans
+Beetroot
+Bhaji
+Bhatura
+Bhel puri
+Biryani
+Biscuit
+Bonda
+Bread
+Brinjal
+Broccoli
+Brownie
+Burger
+Butter
+Butter chicken
+Cabbage
+Cake
+Candy
+Carrot
+Cashew
+Cauliflower
+Chaat
+Chapati
+Cheese
+Cherry
+Chicken curry
+Chickpea
+Chikki
+Chilli
+Chips
+Chocolate
+Chole
+Chutney
+Coconut
+Cookie
+Corn
+Cornflakes
+Crab curry
+Croissant
+Cucumber
+Cupcake
+Curd
+Custard
+Dal
+Dates
+Dhokla
+Donut
+Dosa
+Dragon fruit
+Dumpling
+Egg
+Fish curry
+Fish fry
+French fries
+Fried rice
+Fruit salad
+Garlic
+Ghee
+Ginger
+Grapes
+Guava
+Gulab jamun
+Halwa
+Honey
+Hot dog
+Ice cream
+Idiyappam
+Idli
+Jackfruit
+Jalebi
+Jam
+Jelly
+Kachori
+Kesari
+Ketchup
+Khichdi
+Kheer
+Kiwi
+Kozhukatta
+Kulfi
+Laddoo
+Lassi
+Lemon
+Lettuce
+Lime
+Lychee
+Macaroni
+Maggi
+Mango
+Masala dosa
+Meatball
+Milk
+Milkshake
+Momo
+Muffin
+Mushroom
+Mutton curry
+Naan
+Nachos
+Noodles
+Oats
+Okra
+Omelette
+Onion
+Orange
+Pakora
+Pancake
+Paneer
+Paneer tikka
+Papad
+Papaya
+Paratha
+Pasta
+Pastry
+Payasam
+Peanut
+Peanut butter
+Pear
+Peas
+Pineapple
+Pizza
+Plum
+Pomegranate
+Popcorn
+Porotta
+Parotta
+Potato
+Pudding
+Pulao
+Pumpkin
+Puri
+Puttu
+Raisin
+Rajma
+Rasgulla
+Rasam
+Rice
+Roti
+Salad
+Samosa
+Sandwich
+Sambar
+Sausage
+Soup
+Spaghetti
+Spinach
+Spring roll
+Strawberry
+Sugarcane
+Sushi
+Sweet potato
+Taco
+Tandoori chicken
+Toast
+Tomato
+Unniyappam
+Upma
+Uttapam
+Vada
+Vada pav
+Waffle
+Walnut
+Watermelon
+Yogurt

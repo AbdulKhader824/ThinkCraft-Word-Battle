@@ -1,12 +1,31 @@
 import 'category.dart';
 
+/// How answers are judged.
+enum AnswerCheck {
+  /// Players vote on every answer.
+  vote('Players vote', 'Everyone votes on every answer'),
+
+  /// Answers in the word list are correct; players vote on the rest.
+  smart('Smart check', 'Known words count at once; vote on the rest'),
+
+  /// Answers in the word list are correct and the rest are wrong, with no
+  /// voting at all.
+  auto('Auto only', 'No voting: the word list decides');
+
+  const AnswerCheck(this.label, this.detail);
+
+  final String label;
+  final String detail;
+}
+
 /// How a room is played: how many rounds, how long each round's timer runs,
 /// and which categories. The host chooses these when creating the room.
 class GameSettings {
   GameSettings({
     this.rounds = defaultRounds,
     this.answerSeconds = defaultAnswerSeconds,
-    Iterable<Category> categories = Category.values,
+    Iterable<Category> categories = Category.defaults,
+    this.answerCheck = AnswerCheck.smart,
   }) : categories = List.unmodifiable(
          // Always in the standard order, whatever order they were picked in.
          Category.values.where(categories.contains),
@@ -34,12 +53,15 @@ class GameSettings {
   static const answerSecondsOptions = [30, 60, 90];
   static const defaultAnswerSeconds = 90;
 
-  /// 3 rounds of 90 seconds with all six categories.
+  /// 3 rounds of 90 seconds with the classic six categories.
   static final standard = GameSettings();
 
   final int rounds;
   final int answerSeconds;
   final List<Category> categories;
+
+  /// How answers are judged. Smart check by default, so voting is short.
+  final AnswerCheck answerCheck;
 
   Duration get answerTime => Duration(seconds: answerSeconds);
 

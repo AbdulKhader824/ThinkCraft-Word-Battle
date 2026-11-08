@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:thinkcraft_word_battle/models/game_settings.dart';
 import 'package:thinkcraft_word_battle/app/router.dart';
+import 'package:thinkcraft_word_battle/models/room.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
+import 'package:thinkcraft_word_battle/services/nearby/nearby_discovery.dart';
 
+import '../../fakes.dart';
 import '../../helpers.dart';
 
 final _fields = find.byType(TextFormField);
@@ -21,9 +25,114 @@ void main() {
       await tapAndSettle(tester, buttonLabelled('Create Room'));
     }
 
-    testWidgets('shows the practice mode note', (tester) async {
+    testWidgets('answers are checked with smart check by default', (
+      tester,
+    ) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(find.text('How are answers checked?'), findsOneWidget);
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(service.createdWith!.answerCheck, AnswerCheck.smart);
+    });
+
+    testWidgets('the host can choose how answers are checked', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      final auto = find.byKey(const ValueKey('check-auto'));
+      await tester.ensureVisible(auto);
+      await tester.pumpAndSettle();
+      await tapAndSettle(tester, auto);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(service.createdWith!.answerCheck, AnswerCheck.auto);
+    });
+
+    testWidgets('starts on practice, with the practice note', (tester) async {
       await openCreateRoom(tester);
-      expect(find.textContaining('Practice mode'), findsOneWidget);
+      expect(find.textContaining('Practice:'), findsOneWidget);
+      expect(find.text('How many players?'), findsOneWidget);
+    });
+
+    testWidgets('friends nearby asks the room size and about bots', (
+      tester,
+    ) async {
+      await openCreateRoom(tester);
+
+      await tapAndSettle(tester, find.byKey(const ValueKey('mode-nearby')));
+
+      expect(find.text('How many players?'), findsOneWidget);
+      expect(find.text('Fill empty seats with bots'), findsOneWidget);
+      expect(find.text('Play with just the friends who join.'), findsOneWidget);
+      expect(find.textContaining('same Wi-Fi'), findsWidgets);
+    });
+
+    testWidgets('a nearby room keeps its size and bot choice', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      await tapAndSettle(tester, find.byKey(const ValueKey('mode-nearby')));
+      await tester.ensureVisible(find.byKey(const ValueKey('player-count-6')));
+      await tapAndSettle(tester, find.byKey(const ValueKey('player-count-6')));
+      await tester.ensureVisible(find.byKey(const ValueKey('fill-with-bots')));
+      await tapAndSettle(tester, find.byKey(const ValueKey('fill-with-bots')));
+      expect(
+        find.text('Seats nobody takes get a bot when you start.'),
+        findsOneWidget,
+      );
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(service.createdPlayerCount, 6);
+      expect(service.createdFillWithBots, isTrue);
+    });
+
+    testWidgets('practice never passes the bot switch on', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(find.text('Fill empty seats with bots'), findsNothing);
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(service.createdFillWithBots, isFalse);
+    });
+
+    testWidgets('online is shown but cannot be chosen yet', (tester) async {
+      await openCreateRoom(tester);
+
+      final online = find.byKey(const ValueKey('mode-online'));
+      expect(
+        find.descendant(of: online, matching: find.text('Coming soon')),
+        findsOneWidget,
+      );
+      await tapAndSettle(tester, online);
+      expect(find.textContaining('Practice:'), findsOneWidget);
+    });
+
+    testWidgets('a nearby room is created as nearby', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      await tapAndSettle(tester, find.byKey(const ValueKey('mode-nearby')));
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(service.createdMode, RoomMode.nearby);
     });
 
     testWidgets('an empty name shows an error and creates nothing', (
@@ -79,9 +188,97 @@ void main() {
       await tapAndSettle(tester, buttonLabelled('Join Room'));
     }
 
-    testWidgets('shows the practice mode note', (tester) async {
-      await openJoinRoom(tester);
-      expect(find.textContaining('Practice mode'), findsOneWidget);
+    testWidgets('looks for rooms nearby', (tester) async {
+      final finder = FakeRoomFinder();
+      await pumpGame(tester, finder: finder);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      expect(find.text('Rooms nearby'), findsOneWidget);
+      expect(find.textContaining('Looking for rooms'), findsOneWidget);
+      expect(finder.listening, isTrue);
+
+      await tapAndSettle(tester, find.byTooltip('Back'));
+      expect(finder.listening, isFalse, reason: 'stops when the screen closes');
+    });
+
+    testWidgets('a room found nearby joins with one tap', (tester) async {
+      final service = FakeGameService(null);
+      final finder = FakeRoomFinder();
+      await pumpGame(tester, service: service, finder: finder);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      finder.show(const [
+        NearbyRoomInfo(
+          code: 'K7PQ2M',
+          hostName: 'Ammu',
+          hostAvatar: 2,
+          playerCount: 3,
+          address: '192.168.43.1',
+          port: 47530,
+        ),
+      ]);
+      await tester.pumpAndSettle();
+      expect(find.text("Ammu's room"), findsOneWidget);
+      expect(find.text('K7PQ2M · 3 players'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      await tapAndSettle(tester, find.byKey(const ValueKey('nearby-K7PQ2M')));
+
+      expect(service.calls, contains('joinRoom K7PQ2M'));
+      expect(service.joinedAddress, '192.168.43.1');
+    });
+
+    testWidgets('the host address can be typed in', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      await tapAndSettle(tester, find.textContaining("Can't see the room?"));
+      final fields = find.byType(TextFormField);
+      await tester.enterText(fields.at(0), 'Sam');
+      await tester.enterText(fields.at(1), 'ABC234');
+      await tester.enterText(fields.at(2), '192.168.43.1');
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      expect(service.joinedAddress, '192.168.43.1');
+    });
+
+    testWidgets('a wrong address is caught before joining', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      await tapAndSettle(tester, find.textContaining("Can't see the room?"));
+      final fields = find.byType(TextFormField);
+      await tester.enterText(fields.at(0), 'Sam');
+      await tester.enterText(fields.at(1), 'ABC234');
+      await tester.enterText(fields.at(2), '192.168');
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      expect(find.textContaining('should look like'), findsOneWidget);
+      expect(service.calls, isEmpty);
+    });
+
+    testWidgets('a refused join explains why', (tester) async {
+      final service = FakeGameService(null)
+        ..refuseJoin = const JoinRefused('That room is full.');
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      final fields = find.byType(TextFormField);
+      await tester.enterText(fields.at(0), 'Sam');
+      await tester.enterText(fields.at(1), 'ABC234');
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      expect(find.text("Couldn't join"), findsOneWidget);
+      expect(find.text('That room is full.'), findsOneWidget);
+      await tapAndSettle(tester, buttonLabelled('OK'));
+      expect(find.text("Couldn't join"), findsNothing);
     });
 
     testWidgets('empty fields show errors and join nothing', (tester) async {

@@ -1,13 +1,33 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/room.dart';
+import 'app_game_service.dart';
 import 'game_service.dart';
 import 'local_game_service.dart';
+import 'nearby/nearby_discovery.dart';
+import 'nearby/nearby_platform.dart';
+import 'word_list_loader.dart';
 
-/// The game service for the whole app. This is the one line to change when
-/// a real online service exists, and tests replace it with a fake.
+/// Finds nearby rooms announced on the same Wi-Fi or hotspot. Tests
+/// replace it with a fake, so they never open real network sockets.
+final roomFinderProvider = Provider<RoomFinder>((ref) {
+  final finder = createRoomFinder();
+  ref.onDispose(finder.stop);
+  return finder;
+});
+
+/// The game service for the whole app: practice with bots, hosting a
+/// nearby room, or joining one. Tests replace it with a fake.
 final gameServiceProvider = Provider<GameService>((ref) {
-  final service = LocalGameService();
+  final service = AppGameService(
+    engine: LocalGameService(loadWords: () => loadWordList(rootBundle)),
+    finder: ref.watch(roomFinderProvider),
+    beacon: createRoomBeacon(),
+    startServer: startNearbyServer,
+    connect: connectNearby,
+    findAddress: localNetworkAddress,
+  );
   ref.onDispose(service.dispose);
   return service;
 });

@@ -1,0 +1,68 @@
+# Everyday flowers, written by hand. One per line; lines starting with #
+# are notes.
+Allamanda
+Anthurium
+Aster
+Azalea
+Begonia
+Bluebell
+Bougainvillea
+Buttercup
+Camellia
+Carnation
+Champa
+Cherry blossom
+Chrysanthemum
+Crocus
+Daffodil
+Dahlia
+Daisy
+Dandelion
+Edelweiss
+Forget-me-not
+Frangipani
+Freesia
+Gardenia
+Gerbera
+Gladiolus
+Gulmohar
+Hibiscus
+Hollyhock
+Honeysuckle
+Hyacinth
+Hydrangea
+Iris
+Ixora
+Jasmine
+Kanakambaram
+Kurinji
+Lavender
+Lilac
+Lily
+Lotus
+Magnolia
+Marigold
+Mogra
+Morning glory
+Narcissus
+Neelakurinji
+Night jasmine
+Oleander
+Orchid
+Pansy
+Parijat
+Peony
+Periwinkle
+Petunia
+Poppy
+Rajnigandha
+Rose
+Snapdragon
+Sunflower
+Thumba
+Tuberose
+Tulip
+Violet
+Water lily
+Wisteria
+Zinnia

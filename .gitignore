@@ -46,3 +46,8 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Original picture files (large PNGs). The app uses the WebP copies the
+# import scripts in tool/ make from them.
+/games/
+/word battle/

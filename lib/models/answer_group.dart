@@ -14,6 +14,7 @@ class AnswerGroup {
     required this.text,
     required Set<String> authorIds,
     this.autoVerdict,
+    this.checkedByWordList = false,
   }) : authorIds = Set.unmodifiable(authorIds);
 
   final String id;
@@ -24,7 +25,20 @@ class AnswerGroup {
   /// Set when the outcome is known without a vote.
   final AnswerVerdict? autoVerdict;
 
+  /// True when the word list decided [autoVerdict].
+  final bool checkedByWordList;
+
   bool get needsVote => autoVerdict == null;
+
+  /// This group, decided by the word list instead of a vote.
+  AnswerGroup settledByWordList(AnswerVerdict verdict) => AnswerGroup(
+    id: id,
+    category: category,
+    text: text,
+    authorIds: authorIds,
+    autoVerdict: verdict,
+    checkedByWordList: true,
+  );
 }
 
 /// An answer as voters see it: no player identities at all.

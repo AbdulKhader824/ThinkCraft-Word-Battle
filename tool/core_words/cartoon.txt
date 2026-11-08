@@ -1,0 +1,42 @@
+# Cartoon characters and shows children know, written by hand. One per
+# line; lines starting with # are notes.
+Ben 10
+Bugs Bunny
+Chhota Bheem
+Chutki
+Daffy Duck
+Donald Duck
+Dora
+Doraemon
+Elsa
+Garfield
+Gian
+Goofy
+Hanuman
+Jerry
+Mickey Mouse
+Minnie Mouse
+Motu Patlu
+Ninja Hattori
+Nobita
+Oggy
+Olaf
+Peppa Pig
+Pikachu
+Pink Panther
+Pokemon
+Popeye
+Power Rangers
+Raju
+Road Runner
+Scooby-Doo
+Shin Chan
+Shinchan
+Shizuka
+SpongeBob
+Suneo
+Tom
+Tom and Jerry
+Tweety
+Winnie the Pooh
+Woody

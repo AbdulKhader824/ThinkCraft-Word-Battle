@@ -29,10 +29,19 @@ class AnswerLine {
     required this.text,
     required this.verdict,
     required this.points,
+    this.byWordList = false,
+    this.noVotes = false,
   });
 
   final Category category;
   final String text;
+
+  /// True when the word list decided [verdict], not a vote.
+  final bool byWordList;
+
+  /// True when the answer went to the vote but nobody voted on it, so it
+  /// counts as correct.
+  final bool noVotes;
 
   /// Null for an empty answer.
   final AnswerVerdict? verdict;

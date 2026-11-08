@@ -1,0 +1,304 @@
+air conditioner
+alarm clock
+album
+anchor
+apron
+armchair
+backpack
+bag
+ball
+balloon
+bandage
+bangle
+basket
+bat
+bathtub
+battery
+bead
+bed
+bedsheet
+bell
+belt
+bench
+bicycle bell
+binoculars
+blanket
+blender
+board
+bolt
+book
+bookmark
+bookshelf
+boot
+bottle
+bowl
+box
+bracelet
+brick
+broom
+brush
+bucket
+bulb
+button
+cable
+cake tin
+calculator
+calendar
+camera
+candle
+cap
+card
+carpet
+chain
+chair
+chalk
+charger
+chopsticks
+clip
+clock
+cloth
+coat
+coin
+comb
+compass
+computer
+cooker
+cot
+crayon
+cup
+cupboard
+curtain
+cushion
+desk
+diary
+dice
+dish
+doll
+door
+doormat
+drawer
+dress
+drill
+drum
+dustbin
+duster
+earphones
+earring
+easel
+envelope
+eraser
+fan
+feather
+file
+flag
+flashlight
+flask
+flower pot
+flute
+folder
+fork
+fridge
+frying pan
+funnel
+game board
+gate
+glass
+glasses
+globe
+glove
+glue
+grater
+guitar
+hair band
+hair clip
+hammer
+handkerchief
+hanger
+harmonium
+hat
+headphones
+helmet
+hook
+hose
+ice tray
+ink
+iron
+jacket
+jar
+jeans
+jigsaw
+jug
+kettle
+key
+keyboard
+keychain
+kite
+knife
+ladder
+ladle
+lamp
+lantern
+laptop
+leash
+letter
+light bulb
+lipstick
+lock
+locker
+lunch box
+magnet
+magnifying glass
+map
+marble
+marker
+mask
+mat
+matchbox
+medal
+microphone
+microwave
+mirror
+mitten
+mixer
+mobile phone
+mop
+mouse pad
+mug
+nail
+napkin
+necklace
+needle
+net
+newspaper
+notebook
+nut
+oar
+oven
+padlock
+paint
+paintbrush
+pan
+paper
+paper clip
+pen
+pencil
+pencil box
+pencil case
+perfume
+phone
+photo frame
+piano
+pillow
+pin
+plate
+pliers
+plug
+pot
+pressure cooker
+printer
+purse
+puzzle
+quilt
+racket
+radio
+raincoat
+razor
+remote
+ribbon
+ring
+robot
+rope
+rubber band
+rug
+ruler
+sack
+safety pin
+sandal
+saree
+saucer
+saw
+scale
+scarf
+school bag
+scissors
+screw
+screwdriver
+sharpener
+shawl
+sheet
+shelf
+shirt
+shoe
+shorts
+shovel
+sieve
+sink
+skateboard
+skipping rope
+skirt
+slipper
+soap
+sock
+sofa
+spatula
+speaker
+sponge
+spoon
+stapler
+stethoscope
+sticker
+stool
+stove
+straw
+string
+suitcase
+sweater
+swing
+switch
+table
+tablet
+tape
+teapot
+teddy bear
+telephone
+telescope
+television
+tent
+thermometer
+thread
+tie
+tiffin box
+tissue
+toaster
+toothbrush
+toothpaste
+top
+torch
+towel
+toy
+toy car
+tray
+trophy
+trousers
+trumpet
+tumbler
+tyre
+umbrella
+uniform
+vacuum cleaner
+vase
+violin
+wallet
+wardrobe
+washing machine
+watch
+water bottle
+whistle
+window
+wire
+wristwatch
+xylophone
+yarn
+yo yo
+zip
+zipper

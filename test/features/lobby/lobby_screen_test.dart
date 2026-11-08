@@ -4,6 +4,7 @@ import 'package:thinkcraft_word_battle/app/router.dart';
 import 'package:thinkcraft_word_battle/core/widgets/game_button.dart';
 import 'package:thinkcraft_word_battle/core/widgets/player_avatar.dart';
 import 'package:thinkcraft_word_battle/features/lobby/ready_badge.dart';
+import 'package:thinkcraft_word_battle/models/room.dart';
 
 import '../../fakes.dart';
 import '../../helpers.dart';
@@ -146,5 +147,22 @@ void main() {
       expect(service.calls, contains('leaveRoom'));
       expect(currentRoute(tester), AppRoutes.home);
     });
+  });
+
+  testWidgets('a nearby room says so, and waits for friends', (tester) async {
+    final service = FakeGameService(
+      Room(
+        code: 'K7PQ2M',
+        mode: RoomMode.nearby,
+        players: [fakePlayer(localId, name: 'Sam', isHost: true)],
+      ),
+    );
+    await pumpGame(tester, service: service);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Nearby room'), findsOneWidget);
+    expect(find.textContaining('Practice mode'), findsNothing);
+    expect(find.text('Waiting for friends to join...'), findsOneWidget);
+    expect(_button(tester, 'Start Game').onPressed, isNull);
   });
 }

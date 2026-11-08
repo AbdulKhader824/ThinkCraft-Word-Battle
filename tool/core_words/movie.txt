@@ -1,0 +1,100 @@
+# Films children and families know, written by hand, including the short
+# names people use for long titles. One per line; lines starting with # are
+# notes. tool/build_word_list.py adds these to the word list.
+3 Idiots
+Aladdin
+Avatar
+Avengers
+Avengers Endgame
+Baahubali
+Baahubali 2
+Bajrangi Bhaijaan
+Bambi
+Barbie
+Batman
+Beauty and the Beast
+Bheeshma Parvam
+Big Hero 6
+Black Panther
+Bolt
+Brave
+Cars
+Charlie
+Chhota Bheem
+Cinderella
+Coco
+Despicable Me
+Dhoom
+Dil Chahta Hai
+Drishyam
+Dumbo
+Encanto
+Finding Dory
+Finding Nemo
+Frozen
+Frozen 2
+Ghajini
+Godzilla
+Guardians of the Galaxy
+Harry Potter
+Home Alone
+Hotel Transylvania
+How to Train Your Dragon
+Ice Age
+Incredibles
+Inside Out
+Iron Man
+Jailer
+Jawan
+Jumanji
+Jungle Book
+Jurassic Park
+Jurassic World
+KGF
+KGF Chapter 2
+Kantara
+Koi Mil Gaya
+Krrish
+Kung Fu Panda
+Lagaan
+Leo
+Lilo and Stitch
+Luca
+Madagascar
+Manjummel Boys
+Matilda
+Minions
+Minnal Murali
+Moana
+Mulan
+My Dear Kuttichathan
+Ne Zha
+Pathaan
+Peter Pan
+Pinocchio
+Premam
+Pushpa
+Ratatouille
+RRR
+Shrek
+Sing
+Sita Ramam
+Sooryavanshi
+Soul
+Spider-Man
+Spirited Away
+Superman
+Taare Zameen Par
+Tangled
+The Lion King
+The Little Mermaid
+Thor
+Titanic
+Toy Story
+Trolls
+Turning Red
+Up
+Vikram
+Wall-E
+Wonder Woman
+Zootopia

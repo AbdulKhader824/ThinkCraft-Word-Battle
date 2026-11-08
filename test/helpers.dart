@@ -26,6 +26,7 @@ Future<void> pumpGame(
   GameService? service,
   ProfileStore? profiles,
   FakeSoundPlayer? sounds,
+  FakeRoomFinder? finder,
   double textScale = 1,
   bool reduceMotion = true,
 }) async {
@@ -51,6 +52,8 @@ Future<void> pumpGame(
         ),
         // Tests never play real audio; they record what would have played.
         soundPlayerProvider.overrideWithValue(sounds ?? FakeSoundPlayer()),
+        // Nor do they open network sockets to look for nearby rooms.
+        roomFinderProvider.overrideWithValue(finder ?? FakeRoomFinder()),
       ],
       child: const ThinkCraftApp(),
     ),

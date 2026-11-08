@@ -11,6 +11,7 @@ import 'package:thinkcraft_word_battle/models/round.dart';
 import 'package:thinkcraft_word_battle/models/round_results.dart';
 import 'package:thinkcraft_word_battle/models/vote.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
+import 'package:thinkcraft_word_battle/services/nearby/nearby_discovery.dart';
 import 'package:thinkcraft_word_battle/services/profile_store.dart';
 import 'package:thinkcraft_word_battle/services/sound_service.dart';
 
@@ -89,10 +90,28 @@ class FakeGameService implements GameService {
     required int playerCount,
     int avatarIndex = 0,
     GameSettings? settings,
+    RoomMode mode = RoomMode.practice,
+    bool fillWithBots = false,
   }) async {
     calls.add('createRoom');
     createdWith = settings;
+    createdMode = mode;
+    createdPlayerCount = playerCount;
+    createdFillWithBots = fillWithBots;
   }
+
+  /// The player count and bot choice passed to the last [createRoom].
+  int? createdPlayerCount;
+  bool? createdFillWithBots;
+
+  /// The room type passed to the last [createRoom].
+  RoomMode? createdMode;
+
+  /// When set, [joinRoom] fails with this, as a refused join would.
+  JoinRefused? refuseJoin;
+
+  /// The host address passed to the last [joinRoom].
+  String? joinedAddress;
 
   /// The settings passed to the last [createRoom].
   GameSettings? createdWith;
@@ -102,7 +121,13 @@ class FakeGameService implements GameService {
     required String playerName,
     required String roomCode,
     int avatarIndex = 0,
-  }) async => calls.add('joinRoom');
+    String? hostAddress,
+  }) async {
+    calls.add('joinRoom $roomCode');
+    joinedAddress = hostAddress;
+    final refusal = refuseJoin;
+    if (refusal != null) throw refusal;
+  }
 
   @override
   Future<void> setReady(bool isReady) async => calls.add('setReady $isReady');
@@ -171,21 +196,30 @@ Room fakeLetterRoom({
 Room fakeVotingRoom({
   List<BallotItem> ballot = const [],
   Map<String, VoteChoice> myVotes = const {},
+  DateTime? voteDeadline,
+  Duration? voteTime,
+  Set<String> votedPlayerIds = const {},
+  List<Player>? players,
 }) {
   return Room(
     code: 'ABC234',
     phase: GamePhase.validating,
-    players: [
-      fakePlayer(localId, name: 'Sam', isHost: true),
-      fakePlayer('bot', name: 'Luna'),
-      fakePlayer('bot2', name: 'Kai'),
-    ],
+    players:
+        players ??
+        [
+          fakePlayer(localId, name: 'Sam', isHost: true),
+          fakePlayer('bot', name: 'Luna'),
+          fakePlayer('bot2', name: 'Kai'),
+        ],
     round: Round(
       number: 1,
       pickerId: localId,
       letter: 'M',
       ballot: ballot,
       myVotes: myVotes,
+      voteDeadline: voteDeadline,
+      voteTime: voteTime,
+      votedPlayerIds: votedPlayerIds,
     ),
   );
 }
@@ -247,4 +281,47 @@ Room fakeAnsweringRoom({
       submittedPlayerIds: submitted,
     ),
   );
+}
+
+/// A room finder that "finds" whatever rooms a test gives it, without
+/// touching the network.
+class FakeRoomFinder implements RoomFinder {
+  FakeRoomFinder([this._found = const []]);
+
+  final _changes = StreamController<List<NearbyRoomInfo>>.broadcast();
+  List<NearbyRoomInfo> _found;
+  bool listening = false;
+
+  /// Pretends these rooms were just heard on the network.
+  void show(List<NearbyRoomInfo> rooms) {
+    _found = rooms;
+    _changes.add(rooms);
+  }
+
+  @override
+  Stream<List<NearbyRoomInfo>> get rooms => _changes.stream;
+
+  @override
+  List<NearbyRoomInfo> get current => _found;
+
+  @override
+  Future<void> start() async => listening = true;
+
+  @override
+  Future<void> stop() async => listening = false;
+}
+
+/// Records what a room beacon would announce.
+class FakeRoomBeacon implements RoomBeacon {
+  NearbyRoomInfo Function()? describe;
+
+  bool get announcing => describe != null;
+
+  @override
+  Future<void> start(NearbyRoomInfo Function() describe) async {
+    this.describe = describe;
+  }
+
+  @override
+  Future<void> stop() async => describe = null;
 }

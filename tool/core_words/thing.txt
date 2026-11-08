@@ -1,0 +1,308 @@
+# Everyday things, written by hand: objects at home, at school, in the
+# kitchen, toys, clothes and tools. Wikidata has no good way to ask for
+# "things", so this is the whole Thing list, together with the bots' own
+# words. One per line; lines starting with # are notes.
+Air conditioner
+Alarm clock
+Album
+Anchor
+Apron
+Armchair
+Backpack
+Bag
+Ball
+Balloon
+Bandage
+Bangle
+Basket
+Bat
+Bathtub
+Battery
+Bead
+Bed
+Bedsheet
+Bell
+Belt
+Bench
+Bicycle bell
+Binoculars
+Blanket
+Blender
+Board
+Bolt
+Book
+Bookmark
+Bookshelf
+Boot
+Bottle
+Bowl
+Box
+Bracelet
+Brick
+Broom
+Brush
+Bucket
+Bulb
+Button
+Cable
+Cake tin
+Calculator
+Calendar
+Camera
+Candle
+Cap
+Card
+Carpet
+Chain
+Chair
+Chalk
+Charger
+Chopsticks
+Clip
+Clock
+Cloth
+Coat
+Coin
+Comb
+Compass
+Computer
+Cooker
+Cot
+Crayon
+Cup
+Cupboard
+Curtain
+Cushion
+Desk
+Diary
+Dice
+Dish
+Doll
+Door
+Doormat
+Drawer
+Dress
+Drill
+Drum
+Dustbin
+Duster
+Earphones
+Earring
+Easel
+Envelope
+Eraser
+Fan
+Feather
+File
+Flag
+Flashlight
+Flask
+Flower pot
+Flute
+Folder
+Fork
+Fridge
+Frying pan
+Funnel
+Game board
+Gate
+Glass
+Glasses
+Globe
+Glove
+Glue
+Grater
+Guitar
+Hair band
+Hair clip
+Hammer
+Handkerchief
+Hanger
+Harmonium
+Hat
+Headphones
+Helmet
+Hook
+Hose
+Ice tray
+Ink
+Iron
+Jacket
+Jar
+Jeans
+Jigsaw
+Jug
+Kettle
+Key
+Keyboard
+Keychain
+Kite
+Knife
+Ladder
+Ladle
+Lamp
+Lantern
+Laptop
+Leash
+Letter
+Light bulb
+Lipstick
+Lock
+Locker
+Lunch box
+Magnet
+Magnifying glass
+Map
+Marble
+Marker
+Mask
+Mat
+Matchbox
+Medal
+Microphone
+Microwave
+Mirror
+Mitten
+Mixer
+Mobile phone
+Mop
+Mouse pad
+Mug
+Nail
+Napkin
+Necklace
+Needle
+Net
+Newspaper
+Notebook
+Nut
+Oar
+Oven
+Padlock
+Paint
+Paintbrush
+Pan
+Paper
+Paper clip
+Pen
+Pencil
+Pencil box
+Pencil case
+Perfume
+Phone
+Photo frame
+Piano
+Pillow
+Pin
+Plate
+Pliers
+Plug
+Pot
+Pressure cooker
+Printer
+Purse
+Puzzle
+Quilt
+Racket
+Radio
+Raincoat
+Razor
+Remote
+Ribbon
+Ring
+Robot
+Rope
+Rubber band
+Rug
+Ruler
+Sack
+Safety pin
+Sandal
+Saree
+Saucer
+Saw
+Scale
+Scarf
+School bag
+Scissors
+Screw
+Screwdriver
+Sharpener
+Shawl
+Sheet
+Shelf
+Shirt
+Shoe
+Shorts
+Shovel
+Sieve
+Sink
+Skateboard
+Skipping rope
+Skirt
+Slipper
+Soap
+Sock
+Sofa
+Spatula
+Speaker
+Sponge
+Spoon
+Stapler
+Stethoscope
+Sticker
+Stool
+Stove
+Straw
+String
+Suitcase
+Sweater
+Swing
+Switch
+Table
+Tablet
+Tape
+Teapot
+Teddy bear
+Telephone
+Telescope
+Television
+Tent
+Thermometer
+Thread
+Tie
+Tiffin box
+Tissue
+Toaster
+Toothbrush
+Toothpaste
+Top
+Torch
+Towel
+Toy
+Toy car
+Tray
+Trophy
+Trousers
+Trumpet
+Tumbler
+Tyre
+Umbrella
+Uniform
+Vacuum cleaner
+Vase
+Violin
+Wallet
+Wardrobe
+Washing machine
+Watch
+Water bottle
+Whistle
+Window
+Wire
+Wristwatch
+Xylophone
+Yarn
+Yo-yo
+Zip
+Zipper

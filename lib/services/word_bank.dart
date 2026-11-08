@@ -1,11 +1,30 @@
 import '../models/category.dart';
+import 'word_bank_more.dart';
 
 /// Family-friendly words the bots answer with, by letter and category.
 abstract final class WordBank {
-  /// Words for [letter] in [category]. Every letter has at least two.
+  /// Every letter the bank has words for.
+  static Iterable<String> get letters => _words.keys;
+
+  /// Words for [letter] in [category]. The classic six have at least two
+  /// for every letter; the newer categories may have none for a hard
+  /// letter, such as a vegetable starting with X.
   static List<String> wordsFor(String letter, Category category) {
-    return _words[letter.toUpperCase()]![category.index];
+    final upper = letter.toUpperCase();
+    final classic = _classicOrder.indexOf(category);
+    if (classic >= 0) return _words[upper]![classic];
+    return moreBotWords[category]?[upper] ?? const [];
   }
+
+  /// The order of each letter's lists below.
+  static const _classicOrder = [
+    Category.animal,
+    Category.place,
+    Category.person,
+    Category.movie,
+    Category.food,
+    Category.brand,
+  ];
 
   // Each letter lists: animal, place, person, movie, food, brand.
   static const Map<String, List<List<String>>> _words = {

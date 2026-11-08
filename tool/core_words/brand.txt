@@ -1,0 +1,134 @@
+# Everyday brands, written by hand. One per line; lines starting with # are
+# notes. tool/build_word_list.py adds these to the word list. Brands of
+# alcohol, tobacco and gambling are never added.
+Acer
+Adidas
+Airtel
+Amazon
+Amul
+Android
+Apple
+Asian Paints
+Asus
+Audi
+Bajaj
+Barbie
+Bata
+Bisleri
+BMW
+Boat
+Bournvita
+Britannia
+BSNL
+Burger King
+Cadbury
+Canon
+Casio
+Coca-Cola
+Colgate
+Complan
+Dairy Milk
+Dell
+Disney
+Domino's
+Dove
+Facebook
+Fanta
+Ferrari
+Fevicol
+Flipkart
+Ford
+Frooti
+Gillette
+Google
+Haldiram's
+Hero
+Hide & Seek
+HP
+Honda
+Horlicks
+Hot Wheels
+Hyundai
+IKEA
+Instagram
+Jio
+KFC
+Kia
+KitKat
+Kinder Joy
+Lakme
+Lays
+Lego
+Lenovo
+LG
+Lifebuoy
+Limca
+Mahindra
+Maggi
+Marvel
+Maruti Suzuki
+McDonald's
+Milton
+Mirinda
+Monaco
+Mountain Dew
+MRF
+Myntra
+Nestle
+Netflix
+Nike
+Nintendo
+Nivea
+Nokia
+OnePlus
+Oppo
+Oreo
+Paper Boat
+Parachute
+Parle
+Parle-G
+Paytm
+Pears
+Pepsi
+Pepsodent
+Philips
+PlayStation
+Pizza Hut
+Puma
+Ray-Ban
+Realme
+Red Bull
+Reebok
+Reliance
+Rolex
+Samsung
+Santoor
+Skoda
+Snapchat
+Sony
+Spotify
+Sprite
+Starbucks
+Subway
+Sunfeast
+Surf Excel
+Suzuki
+Swiggy
+Tata
+Tesla
+Thums Up
+Titan
+Toyota
+TVS
+Twitter
+Uber
+Vivo
+Volkswagen
+Whatsapp
+Wipro
+Xbox
+Xiaomi
+Yamaha
+YouTube
+Zara
+Zomato

@@ -47,6 +47,11 @@ abstract final class ScoringRules {
           text: group?.text ?? '',
           verdict: verdicts[id],
           points: points,
+          byWordList: group?.checkedByWordList ?? false,
+          noVotes:
+              group != null &&
+              group.needsVote &&
+              !votes.any((vote) => vote.groupId == id),
         ),
       );
     }

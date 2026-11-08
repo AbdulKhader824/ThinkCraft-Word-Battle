@@ -43,7 +43,8 @@ class BotPlayer {
       return random.nextDouble() < accuracy;
     }
     final isOtherCategory = Category.values.any(
-      (other) => other != category && _isListed(text, letter, other),
+      (other) =>
+          !category.related.contains(other) && _isListed(text, letter, other),
     );
     if (isOtherCategory) return random.nextDouble() >= accuracy;
 
@@ -67,10 +68,16 @@ class BotPlayer {
     return _pick(WordBank.wordsFor(letter, category));
   }
 
+  /// A category whose words are wrong for [category]. Related ones, such
+  /// as Bird for Animal, are skipped: an eagle is an animal too.
   Category _otherCategory(Category category) {
-    final others = Category.values.where((other) => other != category).toList();
+    final others = Category.values
+        .where((other) => !category.related.contains(other))
+        .toList();
     return others[random.nextInt(others.length)];
   }
 
-  String _pick(List<String> words) => words[random.nextInt(words.length)];
+  /// A random word, or a blank when there is none for this letter.
+  String _pick(List<String> words) =>
+      words.isEmpty ? '' : words[random.nextInt(words.length)];
 }
