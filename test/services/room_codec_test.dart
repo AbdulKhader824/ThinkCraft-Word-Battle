@@ -37,6 +37,7 @@ void main() {
           answerSeconds: 60,
           categories: const [Category.food, Category.animal],
           answerCheck: AnswerCheck.auto,
+          botLevel: BotLevel.hard,
         ),
         players: const [
           Player(id: 'a', name: 'Sam', avatarIndex: 1, isHost: true),
@@ -91,6 +92,7 @@ void main() {
       expect(copy.settings.rounds, 5);
       expect(copy.settings.categories, [Category.animal, Category.food]);
       expect(copy.settings.answerCheck, AnswerCheck.auto);
+      expect(copy.settings.botLevel, BotLevel.hard);
       expect(copy.round!.results!.lines['a']!.first.byWordList, isTrue);
       expect(copy.round!.results!.lines['a']!.first.noVotes, isTrue);
       expect(copy.players.map((p) => p.name), ['Sam', 'Luna']);
@@ -139,11 +141,14 @@ void main() {
 
   test('a room from an older app version is voted on', () {
     final json = RoomCodec.encode(Room(code: 'K7PQ2M', players: const []));
-    (json['settings']! as Map<String, Object?>).remove('answerCheck');
+    (json['settings']! as Map<String, Object?>)
+      ..remove('answerCheck')
+      ..remove('botLevel');
 
     final copy = RoomCodec.decode(json);
 
     expect(copy.settings.answerCheck, AnswerCheck.vote);
+    expect(copy.settings.botLevel, BotLevel.medium);
   });
 
   test('the voting timer and who has voted travel too', () {

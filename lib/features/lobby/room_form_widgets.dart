@@ -241,6 +241,51 @@ class AnswerCheckPicker extends StatelessWidget {
   }
 }
 
+/// How well the room's bots play.
+class BotLevelPicker extends StatelessWidget {
+  const BotLevelPicker({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final BotLevel selected;
+  final ValueChanged<BotLevel> onChanged;
+
+  static const _icons = {
+    BotLevel.easy: Icons.sentiment_satisfied_alt_rounded,
+    BotLevel.medium: Icons.psychology_rounded,
+    BotLevel.hard: Icons.local_fire_department_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('How smart are the bots?', style: AppText.label),
+        const SizedBox(height: AppSpacing.xs),
+        for (final level in BotLevel.values) ...[
+          _ModeOption(
+            key: ValueKey('bot-level-${level.name}'),
+            icon: _icons[level]!,
+            title: level.label,
+            detail: level.detail,
+            selected: selected == level,
+            comingSoon: false,
+            onTap: () {
+              if (level == selected) return;
+              playSoundFrom(context, GameSound.select);
+              onChanged(level);
+            },
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+      ],
+    );
+  }
+}
+
 class _ModeOption extends StatelessWidget {
   const _ModeOption({
     super.key,

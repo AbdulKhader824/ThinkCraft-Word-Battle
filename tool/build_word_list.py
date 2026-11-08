@@ -63,6 +63,42 @@ ANIMAL_TEMPLATES = [
                 }""",
 ]
 
+# Famous people by full name: actors, singers, sports stars, comedians,
+# presenters and the like. Celebrity uses them, and so does Person Name,
+# since "Virat Kohli" is a person's name too.
+FAMOUS_JOBS = ('wd:Q33999 wd:Q10800557 wd:Q177220 wd:Q2643890 '
+               'wd:Q12299841 wd:Q937857 wd:Q3665646 wd:Q10833314 '
+               'wd:Q17125263')
+MORE_FAMOUS_JOBS = ('wd:Q245068 wd:Q5716684 wd:Q947873 wd:Q2252262 '
+                    'wd:Q2526255 wd:Q2405480 wd:Q13141064 wd:Q10873124 '
+                    'wd:Q11513337 wd:Q639669 wd:Q753110 wd:Q4610556')
+FAMOUS_PEOPLE = [
+    # Well known around the world.
+    *chunked("""SELECT DISTINCT ?name WHERE {
+      VALUES ?job { %s }
+      ?item wdt:P106 ?job ; wikibase:sitelinks ?links .
+      FILTER(?links >= 25)
+      #CHUNK
+      ?item rdfs:label ?name . FILTER(lang(?name) = "en")
+    }""" % FAMOUS_JOBS),
+    # More kinds of famous people, a little better known.
+    *chunked("""SELECT DISTINCT ?name WHERE {
+      VALUES ?job { %s }
+      ?item wdt:P106 ?job ; wikibase:sitelinks ?links .
+      FILTER(?links >= 30)
+      #CHUNK
+      ?item rdfs:label ?name . FILTER(lang(?name) = "en")
+    }""" % MORE_FAMOUS_JOBS),
+    # Indian stars, who have fewer Wikipedia articles abroad.
+    *chunked("""SELECT DISTINCT ?name WHERE {
+      VALUES ?job { %s %s }
+      ?item wdt:P27 wd:Q668 ; wdt:P106 ?job ; wikibase:sitelinks ?links .
+      FILTER(?links >= 6)
+      #CHUNK
+      ?item rdfs:label ?name . FILTER(lang(?name) = "en")
+    }""" % (FAMOUS_JOBS, MORE_FAMOUS_JOBS)),
+]
+
 QUERIES = {
     'animal': [
         # Animals, one group at a time, because all animals at once is too
@@ -71,10 +107,13 @@ QUERIES = {
             query % group
             for query in ANIMAL_TEMPLATES
             # Mammals, birds, reptiles, amphibians, ray-finned fish,
-            # sharks and rays, insects, arachnids, molluscs, crustaceans,
-            # jellyfish and kin, starfish and kin, worms.
+            # sharks and rays, arachnids, molluscs, crustaceans,
+            # jellyfish and kin, starfish and kin, worms. Insects are left
+            # out: their family tree has millions of species, too many for
+            # the free service even split up, so they come from the
+            # hand-written list in tool/core_words/animal.txt.
             for group in ['Q7377', 'Q5113', 'Q10811', 'Q10908', 'Q127282',
-                          'Q25371', 'Q1390', 'Q1358', 'Q25326', 'Q25364',
+                          'Q25371', 'Q1358', 'Q25326', 'Q25364',
                           'Q25441', 'Q44631', 'Q47253']
         ],
         # Breeds of dogs, cats, horses and the like.
@@ -93,18 +132,7 @@ QUERIES = {
           FILTER(lang(?name) = "en")
         }""",
     ],
-    'celebrity': [
-        # Well-known actors, singers and sports stars, by full name.
-        *chunked("""SELECT DISTINCT ?name WHERE {
-          VALUES ?job { wd:Q33999 wd:Q10800557 wd:Q177220 wd:Q2643890
-                        wd:Q12299841 wd:Q937857 wd:Q3665646 wd:Q10833314
-                        wd:Q17125263 }
-          ?item wdt:P106 ?job ; wikibase:sitelinks ?links .
-          FILTER(?links >= 25)
-          #CHUNK
-          ?item rdfs:label ?name . FILTER(lang(?name) = "en")
-        }"""),
-    ],
+    'celebrity': FAMOUS_PEOPLE,
     'cartoon': [
         # Animated and comic characters, and animated series.
         *chunked("""SELECT DISTINCT ?name ?about WHERE {
@@ -226,9 +254,12 @@ QUERIES = {
           #CHUNK
           ?item rdfs:label ?name . FILTER(lang(?name) = "en")
         }"""),
-        # Famous people by full name were tried, but searching every person
-        # on Wikidata is too slow for the free service. First and family
-        # names cover what players type.
+        # Famous people by full name. Searching every person on Wikidata is
+        # too slow for the free service, so these are the same well-known
+        # people Celebrity uses. Other full names, such as "Priya Sharma",
+        # match because each part is a known first or family name (see
+        # word_check.dart).
+        *FAMOUS_PEOPLE,
     ],
     'movie': [
         # Well-known films, with their descriptions for filtering.

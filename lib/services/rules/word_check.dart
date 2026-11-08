@@ -7,6 +7,10 @@ abstract interface class WordList {
   /// True when [answer] is a known [category], allowing for capitals,
   /// accents, plurals, "the" and British or American spelling.
   bool contains(Category category, String answer);
+
+  /// The known [category] answers starting with [letter], in their match
+  /// form: lower case, with only letters, digits and single spaces.
+  List<String> wordsStartingWith(Category category, String letter);
 }
 
 /// A [WordList] held in memory.
@@ -23,6 +27,10 @@ class SetWordList implements WordList {
 
   final Map<Category, Set<String>> _words;
 
+  /// [wordsStartingWith], worked out the first time each category is
+  /// asked for.
+  final _byLetter = <Category, Map<String, List<String>>>{};
+
   /// How many answers [category] knows.
   int sizeOf(Category category) => _words[category]?.length ?? 0;
 
@@ -30,7 +38,29 @@ class SetWordList implements WordList {
   bool contains(Category category, String answer) {
     final words = _words[category];
     if (words == null) return false;
-    return WordCheck.lookupKeysFor(answer).any(words.contains);
+    if (WordCheck.lookupKeysFor(answer).any(words.contains)) return true;
+
+    // A person's full name, such as "Priya Sharma", counts when every part
+    // is a known first or family name.
+    if (category == Category.person) {
+      final parts = WordCheck.keyFor(answer).split(' ');
+      return parts.length >= 2 &&
+          parts.length <= 3 &&
+          parts.every((part) => part.length > 1 && words.contains(part));
+    }
+    return false;
+  }
+
+  @override
+  List<String> wordsStartingWith(Category category, String letter) {
+    final index = _byLetter.putIfAbsent(category, () {
+      final byLetter = <String, List<String>>{};
+      for (final word in _words[category] ?? const <String>{}) {
+        byLetter.putIfAbsent(word[0], () => []).add(word);
+      }
+      return byLetter;
+    });
+    return index[letter.toLowerCase()] ?? const [];
   }
 }
 

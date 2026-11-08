@@ -56,6 +56,50 @@ void main() {
       expect(service.createdWith!.answerCheck, AnswerCheck.auto);
     });
 
+    testWidgets('practice asks how smart the bots are, Medium first', (
+      tester,
+    ) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(find.text('How smart are the bots?'), findsOneWidget);
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(service.createdWith!.botLevel, BotLevel.medium);
+    });
+
+    testWidgets('the host can choose hard bots', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      final hard = find.byKey(const ValueKey('bot-level-hard'));
+      await tester.ensureVisible(hard);
+      await tester.pumpAndSettle();
+      await tapAndSettle(tester, hard);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(service.createdWith!.botLevel, BotLevel.hard);
+    });
+
+    testWidgets('a nearby room only asks about bots when it has them', (
+      tester,
+    ) async {
+      await openCreateRoom(tester);
+
+      await tapAndSettle(tester, find.byKey(const ValueKey('mode-nearby')));
+      expect(find.text('How smart are the bots?'), findsNothing);
+
+      await tester.ensureVisible(find.byKey(const ValueKey('fill-with-bots')));
+      await tapAndSettle(tester, find.byKey(const ValueKey('fill-with-bots')));
+      expect(find.text('How smart are the bots?'), findsOneWidget);
+    });
+
     testWidgets('starts on practice, with the practice note', (tester) async {
       await openCreateRoom(tester);
       expect(find.textContaining('Practice:'), findsOneWidget);

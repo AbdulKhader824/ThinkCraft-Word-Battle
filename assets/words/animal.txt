@@ -1543,6 +1543,7 @@ antipodes green parakeet
 antipodes island parakeet
 antipodes parakeet
 antler dragonet
+antlion
 antmimics and ground sac spiders
 antpittas
 antsingy leaf chameleon
@@ -1571,6 +1572,7 @@ apennine brown bear
 apennine chamois
 apennine hare
 apennine shrew
+aphid
 aphrodites giant
 api dwarf toad
 apical flycatcher
@@ -1895,6 +1897,7 @@ armoured harvestmen
 armoured mistfrog
 armours anole
 armstrongs robber frog
+army ant
 arnham tomb bat
 arnhem coast fine lined slider
 arnhem land rock rat
@@ -2162,6 +2165,7 @@ assamese kingfish
 assamese macaque
 assamese mole
 assarius butterflyfish
+assassin bug
 assendelfter
 assumption day gecko
 assyrian mastiff
@@ -2302,6 +2306,7 @@ atlas brunette
 atlas day gecko
 atlas dwarf lizard
 atlas dwarf viper
+atlas moth
 atlas pied flycatcher
 atlas wheatear
 atoll butterflyfish
@@ -2597,6 +2602,7 @@ bachmans warbler
 bachmat
 back striped weasel
 back swimming congo catfish
+backswimmer
 backwater butterfly ray
 backwater darter
 bactrian camel
@@ -3607,6 +3613,7 @@ bechsteins myotis
 becker
 becks petrel
 becks tree frog
+bed bug
 beddards olingo
 beddomes black earth snake
 beddomes black shieldtail
@@ -5637,6 +5644,7 @@ blotched upsidedown catfish
 blotcheye soldierfish
 blotchside logperch
 blotchwing flyingfish
+blowfly
 blownose
 blubber jellyfish
 blue albion
@@ -5888,6 +5896,7 @@ blue mbuna
 blue mockingbird
 blue monkey
 blue mori cod
+blue morpho
 blue mountain vireo
 blue mountain water skink
 blue mountains tree frog
@@ -6075,6 +6084,7 @@ blueblotch butterflyfish
 bluebone
 bluebone groper
 bluebonnet
+bluebottle
 bluebreast darter
 bluebuck
 bluecheek butterflyfish
@@ -6304,6 +6314,7 @@ bocourts snake eater
 bocourts terrific skink
 bocourts treefrog
 boddarts goggle eyed goby
+body louse
 boe drum
 boehms bush squirrel
 boehms gerbil
@@ -6439,6 +6450,7 @@ bolonka franzuska
 bolson night lizard
 bolson pupfish
 bolson tortoise
+bombardier beetle
 bombay
 bombay caecilian
 bombay earth snake
@@ -6496,6 +6508,7 @@ bonytail chub
 boo liats kukri snake
 booby
 boodie
+booklouse
 boomerang triggerfish
 boomslang
 boongary
@@ -6620,6 +6633,7 @@ boston terrier
 bot river klipfish
 botaurus
 botel gecko
+botfly
 bothas lark
 boto
 botswana long eared bat
@@ -7812,6 +7826,7 @@ bullers chipmunk
 bullers mollymawk
 bullers pocket gopher
 bullers shearwater
+bullet ant
 bullet mackerel
 bullet tuna
 bullethead parrotfish
@@ -7841,6 +7856,7 @@ bulu barb
 bulwers petrel
 bulwers pheasant
 bumble bee catfish
+bumblebee
 bumblebee bat
 bumblebee catfishes
 bumblebee cichlid
@@ -8121,6 +8137,7 @@ cactus coral
 cactus mouse
 cactus parakeet
 cactus wren
+caddisfly
 caddo madtom
 caddo mountain salamander
 cadenats chromis
@@ -8749,6 +8766,8 @@ carpentarian grasswren
 carpentarian pseudantechinus
 carpentarian rock rat
 carpenter
+carpenter ant
+carpenter bee
 carpenter bream
 carpenter seabream
 carpet chameleon
@@ -10015,6 +10034,7 @@ chusquea tapaculo
 chuuk flying fox
 chuuk monarch
 chyanta
+cicada
 cichlid
 cichlidae
 ciconia
@@ -10210,6 +10230,7 @@ clebers arboreal rice rat
 clebers oecomys
 cleft headed juliomys
 cleveland bay
+click beetle
 clicking froglet
 clicking rainforest frog
 clicking shieldbill
@@ -10370,6 +10391,7 @@ cocinero
 cockabully
 cockatiel
 cockatoos
+cockchafer
 cocker spaniel
 cockerel wrasse
 cockerells fantail
@@ -10558,6 +10580,7 @@ colorado checkered whiptail
 colorado chipmunk
 colorado grouper
 colorado pikeminnow
+colorado potato beetle
 colorado ranger
 colorado river cotton rat
 colorado river squawfish
@@ -10646,6 +10669,7 @@ common bladder snail
 common blanket octopus
 common blossom bat
 common blowfish
+common blue
 common bobtail
 common bobtail squid
 common bottlenose dolphin
@@ -11549,6 +11573,7 @@ crag chilia
 crampfish
 crandalls saddleback tamarin
 crane
+crane fly
 crane hawk
 cranes skink
 cranwells tree iguana
@@ -12012,6 +12037,7 @@ cubby yew
 cubbyu
 cubera snapper
 cuckoo
+cuckoo bee
 cuckoo catfish
 cuckoo finch
 cuckoo roller
@@ -12276,6 +12302,7 @@ damchi
 damsel fish
 damselfish
 damselfishes
+damselfly
 dana viperfish
 danchietas fruit bat
 dancing frogs
@@ -12432,6 +12459,7 @@ darkfin hind
 darkflank pipefish
 darkhad
 darkie charlie
+darkling beetle
 darksnout hound shark
 darktail parrotfish
 darkwinged flyingfish
@@ -12606,6 +12634,7 @@ deepwater stingray
 deepwater stingrays
 deepwater wrasse
 deer
+deer fly
 deer hog
 deer mice
 deer mouse
@@ -12937,6 +12966,7 @@ distinguished oldfield mouse
 diurnal sulawesian shrew rat
 divided wrasse
 divine conch
+diving beetle
 diving bell spider
 diwata sphenomorphus
 dixons leaf toed gecko
@@ -13203,6 +13233,7 @@ dromaeosauridae
 dromedary
 dromedary naiad
 dromedary pearly mussel
+drone fly
 drongo
 drongo cuckoo
 drongo fantail
@@ -13297,6 +13328,7 @@ dune hairy footed gerbil
 dune lark
 dune squeaker
 dunes sagebrush lizard
+dung beetle
 dungat grouper
 dungeness crab
 dunker
@@ -13682,6 +13714,7 @@ eartheater cichlid
 earthworm
 earthworm eels
 earthworm mice
+earwig
 east african arvicanthis
 east african black mud turtle
 east african egg eater
@@ -14402,6 +14435,7 @@ emperor cichlid
 emperor fairywren
 emperor flat lizard
 emperor goose
+emperor moth
 emperor newt
 emperor of germanys bird of paradise
 emperor penguin
@@ -15318,6 +15352,7 @@ finspot wrasse
 fintooth shark
 fiordland penguin
 fiordland skink
+fire ant
 fire bellied brush furred rat
 fire bellied toad
 fire bellied woodpecker
@@ -15579,6 +15614,7 @@ flavescent flycatcher
 flavescent peacock
 flavescent rice rat
 flavescent warbler
+flea
 flea cone
 flea frog
 fleays barred frog
@@ -16142,6 +16178,7 @@ frosts arboreal alligator lizard
 frosty tail wrasse
 fruhstorfers mountain snake
 fruit bats
+fruit fly
 fruit hunter
 fruithunter
 fry dry
@@ -16323,6 +16360,7 @@ galician blond
 galician pony
 galictis
 galilean loach
+gall wasp
 gallaghers free tailed bat
 gallaghers gecko
 gallaghers leaf toed gecko
@@ -16796,6 +16834,7 @@ giant tun
 giant vinegaroon
 giant visayan frog
 giant wall gecko
+giant water bug
 giant weaver
 giant white eye
 giant white tailed rat
@@ -16966,12 +17005,14 @@ glovers hardyhead
 glovers pika
 glow light carplet
 glow throated hummingbird
+glow worm
 glowing puffleg
 gloyds hump nosed viper
 glutinous caecilia
 glutinous snail
 gmelins white toothed shrew
 gmelins woolly lemur
+gnat
 gnu goat
 go home fish
 goa
@@ -17399,6 +17440,7 @@ golfito robber frog
 golfodulcean poison arrow frog
 golfodulcean poison frog
 goliath
+goliath beetle
 goliath bird eating spider
 goliath birdeater
 goliath coucal
@@ -18353,6 +18395,7 @@ green keel bellied lizard
 green keelback
 green kingfisher
 green labeo
+green lacewing
 green lanternshark
 green leek parrot
 green legged partridge
@@ -18992,6 +19035,7 @@ grosbeak weaver
 grotto goby
 grotto salamander
 ground babblers
+ground beetle
 ground cuckoo shrike
 ground cuckooshrike
 ground cuscus
@@ -19784,6 +19828,7 @@ hawaiian wild cattle
 hawequa flat gecko
 hawfinch
 hawk
+hawk moth
 hawk owl
 hawkinss rail
 hawkray
@@ -19942,6 +19987,7 @@ herbert river ringtail
 herbert river ringtail possum
 herberts rock wallaby
 herbsts nurse shark
+hercules beetle
 heredia robber frog
 heredia treefrog
 hereford
@@ -20372,6 +20418,7 @@ honduran white bat
 honduras spikethumb frog
 honduras white lipped frog
 honey badger
+honey bee
 honey bee mite
 honey blue eye
 honey buzzard
@@ -20521,6 +20568,7 @@ horned sungem
 horned toad
 horned triplefin
 horned whiff
+hornet
 hornyhead chub
 hornyhead turbot
 horrible bug eyed frog
@@ -20541,6 +20589,7 @@ horseface loach
 horseface unicornfish
 horsefields fruit bat
 horsefields shrew
+horsefly
 horsehead tilefish
 horsemackerel
 horses hoof clam
@@ -20617,6 +20666,7 @@ houting
 hova mole tenrec
 hova rice tenrec
 hovawart
+hoverfly
 hovering zebra loach
 howells forest shrew
 howells shrew
@@ -21956,6 +22006,7 @@ jet manakin
 jew fish
 jew lizard
 jewel anemone
+jewel beetle
 jewel chameleon
 jewel cichlid
 jewel fish
@@ -22089,6 +22140,7 @@ jumping salamander
 jumping spider
 jumping tetra
 junaluska salamander
+june bug
 june sucker
 jungle babbler
 jungle boobook
@@ -22325,6 +22377,7 @@ katli
 katrana
 kattai dog
 katy
+katydid
 kaua i elepaio
 kauai akialoa
 kauai amakihi
@@ -23003,6 +23056,7 @@ lacerta
 lacerta viridis
 lacertidae
 lacertilia
+lacewing
 lachaises climbing mouse
 laconian
 laconian hound
@@ -23578,6 +23632,7 @@ leaf frogs
 leaf frogs tree frogs
 leaf green river tree frog
 leaf green tree frog
+leaf insect
 leaf lorikeet
 leaf love
 leaf muntjac
@@ -23590,6 +23645,8 @@ leaf veined slugs
 leaf winged bat
 leaf wrasse
 leafbird
+leafcutter ant
+leafhopper
 leafletted leaf nosed bat
 leaflove
 leafnose legskate
@@ -24702,6 +24759,7 @@ long head pipefish
 long headed caecilian
 long headed hill rat
 long horn unicornfish
+long horned beetle
 long horned bison
 long horned orb weaver spider
 long jaw threefin
@@ -25156,6 +25214,7 @@ louisiana pipefish
 louisiana slimy salamander
 louisiana waterthrush
 louiss yellow shouldered bat
+louse
 louse eating wrasse
 louse fish
 lousefish
@@ -25285,6 +25344,7 @@ lumpfish
 lumphead
 lumpsucker
 luna lion fish
+luna moth
 lunar tail cod
 lunar tailed coral trout
 lunar tailed grouper
@@ -25699,6 +25759,7 @@ magenta throated woodstar
 magenta wrasse
 maggie taylors leaf nosed bat
 maggie taylors roundleaf bat
+maggot
 maghreb garden dormouse
 maghreb green woodpecker
 maghreb lark
@@ -26149,6 +26210,7 @@ mantequera leonesa
 mantipus robber frog
 mantiqueira atlantic tree rat
 mantiqueira shepherd
+mantis
 mantis shrimp
 mantled free tailed bat
 mantled giant mastiff bat
@@ -26627,6 +26689,7 @@ masoala fork crowned lemur
 masoala fork marked lemur
 masoala sportive lemur
 masoala woolly lemur
+mason bee
 massasauga
 massif madagascar frog
 massoias lutrine opossum
@@ -26726,6 +26789,7 @@ mayan coral snake
 mayan deer mouse
 mayan deermouse
 mayan tropical night lizard
+mayfly
 maylan
 maylands rainbowfish
 mayorga rocket frog
@@ -26789,6 +26853,7 @@ meadow viper
 meadow vole
 meadowlark
 meagre
+mealybug
 mearnss grasshopper mouse
 mearnss luzon rat
 mearnss pouched mouse
@@ -27236,6 +27301,7 @@ middle eastern mouse tailed dormouse
 middle eastern rock gecko
 middle eastern short fingered gecko
 middle spotted woodpecker
+midge
 midget flowerpecker
 midget myzomela
 midgleys grunter
@@ -27636,6 +27702,7 @@ mona island boa
 mona monkey
 monachus
 monal
+monarch butterfly
 monarch cichlid
 monarch damsel
 monarchidae
@@ -28326,6 +28393,7 @@ mud carp
 mud catshark
 mud crabs
 mud darter
+mud dauber
 mud dwelling caecilian
 mud eel
 mud flounder
@@ -30958,6 +31026,7 @@ owl faced guenon
 owl faced monkey
 owl monkey
 owl parrot
+owlet moth
 owlet nightjars
 owls spiny rat
 owstons banded civet
@@ -31200,6 +31269,7 @@ painted frogs
 painted goby
 painted honeyeater
 painted hunting dog
+painted lady
 painted manakin
 painted mantella
 painted maskray
@@ -31637,6 +31707,7 @@ papallacta robber frog
 papallacta tree frog
 papaloapan chub
 paper nautilus
+paper wasp
 paperbark flycatcher
 papermouth
 papillon
@@ -31927,6 +31998,7 @@ peach fronted parakeet
 peach throated monitor
 peacock
 peacock blenny
+peacock butterfly
 peacock coquette
 peacock day gecko
 peacock flounder
@@ -33466,6 +33538,7 @@ pratts snail eater
 pratts vole
 prawn
 prawn gobies
+praying mantis
 prazsky krysarik
 prebles shrew
 predatory carp
@@ -34345,6 +34418,7 @@ recurvirostridae
 red
 red acouchi
 red adder
+red admiral
 red and black grosbeak
 red and black thrush
 red and blue lory
@@ -35421,6 +35495,7 @@ rhino pipefish
 rhino threefin
 rhinoceros
 rhinoceros auklet
+rhinoceros beetle
 rhinoceros chameleon
 rhinoceros filefish
 rhinoceros hornbill
@@ -35744,6 +35819,7 @@ roatan island agouti
 roatan spiny tailed iguana
 robalo
 robber crab
+robber fly
 robber frog
 robber frogs
 robbinss house bat
@@ -37333,6 +37409,7 @@ sanderling
 sandersons rainfrog
 sandersons streamfrog
 sandfish
+sandfly
 sandgrouse
 sandhill crane
 sandhill dunnart
@@ -37643,6 +37720,7 @@ sawcheek darter
 sawfin
 sawfin catlet
 sawfin suckermouth
+sawfly
 sawscale soldierfish
 sawtail grouper
 sawtail shark
@@ -37681,6 +37759,7 @@ scale breasted woodpecker
 scale crested pygmy tyrant
 scale eating fangblenny
 scale feathered malkoha
+scale insect
 scale rayed wrasse
 scale throated earthcreeper
 scale throated hermit
@@ -37770,6 +37849,7 @@ scamperdown beaked whale
 scandentia
 scanty frog
 scaphopoda
+scarab beetle
 scarbreast tuskfin
 scarce swift
 scarce wolf snake
@@ -38556,6 +38636,7 @@ shetland cattle
 shetland pony
 shetland sheepdog
 shiba inu
+shield bug
 shield darter
 shield faced leaf nosed bat
 shield faced roundleaf bat
@@ -39105,6 +39186,7 @@ silken windhound
 silken windsprite
 silkie
 silktail
+silkworm
 silky anteater
 silky cuscus
 silky mouse
@@ -40117,6 +40199,7 @@ snake skin wrasse
 snake tailed fringe toed lizard
 snakeblenny
 snakefish
+snakefly
 snakehead gudgeon
 snakehead murrel
 snakeskin gourami
@@ -42008,6 +42091,7 @@ st vincent pygmy rice rat
 stabijhoun
 stacys bachia
 staffordshire bull terrier
+stag beetle
 staghorn coral
 staghound
 stalk eyed marvel
@@ -42177,6 +42261,7 @@ stewart shag
 stewarts puddle frog
 stewarts river frog
 stichelhaar
+stick insect
 stickfish
 stickleback
 sticky caecilian
@@ -42192,6 +42277,7 @@ stimsons python
 sting ray
 stinging catfish
 stingray
+stink bug
 stinkpot
 stipple throated antwren
 stippled darter
@@ -42231,6 +42317,7 @@ stone spider
 stone triggerfish
 stonecat
 stonefish
+stonefly
 stonemasons toadlet
 stoneside
 stony coral
@@ -43118,6 +43205,7 @@ swallow tailed nightjar
 swallow tanager
 swallow wing
 swallow winged puffbird
+swallowtail
 swallowtail angelfish
 swallowtail bass
 swallowtail hawkfish
@@ -43171,6 +43259,7 @@ swarthy skate
 swaynes hartebeest
 swazi rock snake
 swaziland house snake
+sweat bee
 swedish ardennes
 swedish black chicken
 swedish friesian
@@ -43567,6 +43656,7 @@ tarahumara salamander
 tarai gray langur
 tarai sacred langur
 taran
+tarantula hawk
 tarantula wolf spider
 tarantulas
 tarapaca pacific iguana
@@ -44306,6 +44396,7 @@ threespot tilapia
 threespot torpedo
 threespot wrasse
 thresher shark
+thrips
 throated robber frog
 throatspine gudgeon
 thrush
@@ -44391,6 +44482,7 @@ tiffanie
 tiger
 tiger angelfish
 tiger barb
+tiger beetle
 tiger blenny
 tiger botia
 tiger cat
@@ -44403,6 +44495,7 @@ tiger grouper
 tiger horse
 tiger keelback
 tiger loach
+tiger moth
 tiger pacific iguana
 tiger perch
 tiger peters frog
@@ -44715,6 +44808,7 @@ torress akodont
 torress crimson nosed rat
 torricelli mountains shrew mouse
 tortoise
+tortoise beetle
 tortoise marsupial frog
 tortoneses goby
 tortuguero tetra
@@ -45079,6 +45173,7 @@ tschudis tapaculo
 tschudis tyrannulet
 tschudis woodcreeper
 tschudis yellow shouldered bat
+tsetse fly
 tshimbulu reed frog
 tshuapa red colobus
 tsii kaa ii bit aa halchi igii
@@ -46355,6 +46450,7 @@ walkers sierra frog
 walkers stubfoot toad
 walkers treefrog
 walking dandruff
+walking stick
 wall crab spider
 wall roosting whiskered bat
 wall spiders
@@ -46460,6 +46556,7 @@ wasp
 wassachie
 watanabes angelfish
 watases shrew
+water boatman
 water box turtle
 water buffalo
 water chevrotain
@@ -46480,6 +46577,7 @@ water rats
 water shrew
 water shrimpfish
 water spider
+water strider
 water thick knee
 water vole
 waterbuck
@@ -46582,6 +46680,7 @@ weeping frog
 weeping lizard
 weeping toado
 weever
+weevil
 wehrles salamander
 weidholzs banana frog
 weigels toad
@@ -47095,6 +47194,7 @@ whiptail catfish
 whiptail shark
 whiptail wallaby
 whiptails
+whirligig beetle
 whirring tree frog
 whiskered auklet
 whiskered bat
@@ -47364,6 +47464,7 @@ white browed triller
 white browed wagtail
 white browed woodswallow
 white butterfish
+white butterfly
 white button wrasse
 white capped albatross
 white capped bunting
@@ -48194,6 +48295,7 @@ whitefin surgeonfish
 whitefin swellshark
 whitefin topeshark
 whitefish
+whitefly
 whitegoby
 whitehead
 whiteheads borneo frog
@@ -48486,6 +48588,7 @@ woods long eared bat
 woods slit faced bat
 woodwards batis
 woodworker frog
+woodworm
 woolleys antechinus
 woolleys false antechinus
 woolleys pseudantechinus
@@ -49019,6 +49122,7 @@ yellow honeyeater
 yellow hooded blackbird
 yellow horse mackerel
 yellow isthmus rat
+yellow jacket
 yellow kingfish
 yellow knobbed curassow
 yellow lampeye

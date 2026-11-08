@@ -45,6 +45,11 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   int _answerSeconds = GameSettings.defaultAnswerSeconds;
   Set<Category> _categories = Category.startingPicks.toSet();
   AnswerCheck _answerCheck = AnswerCheck.smart;
+  BotLevel _botLevel = BotLevel.medium;
+
+  /// Practice rooms always have bots; nearby ones only when they fill the
+  /// empty seats.
+  bool get _hasBots => _mode == RoomMode.practice || _fillWithBots;
 
   @override
   void dispose() {
@@ -75,6 +80,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
               answerSeconds: _answerSeconds,
               categories: _categories,
               answerCheck: _answerCheck,
+              botLevel: _botLevel,
             ),
           );
     } on JoinRefused catch (error) {
@@ -137,6 +143,13 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                     FillWithBotsSwitch(
                       value: _fillWithBots,
                       onChanged: (on) => setState(() => _fillWithBots = on),
+                    ),
+                  ],
+                  if (_hasBots) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    BotLevelPicker(
+                      selected: _botLevel,
+                      onChanged: (level) => setState(() => _botLevel = level),
                     ),
                   ],
                 ],

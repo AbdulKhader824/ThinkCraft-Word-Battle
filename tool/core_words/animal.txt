@@ -204,3 +204,130 @@ Woodpecker
 Worm
 Yak
 Zebra
+# Insects and other creepy-crawlies. Wikidata's insect family tree is too
+# big for the free service to search, so insects come from this list.
+Ant
+Antlion
+Aphid
+Army ant
+Assassin bug
+Atlas moth
+Backswimmer
+Bed bug
+Bee
+Beetle
+Blowfly
+Blue morpho
+Bluebottle
+Body louse
+Bombardier beetle
+Booklouse
+Botfly
+Bullet ant
+Bumblebee
+Butterfly
+Caddisfly
+Carpenter ant
+Carpenter bee
+Caterpillar
+Cicada
+Click beetle
+Cockchafer
+Cockroach
+Colorado potato beetle
+Common blue
+Crane fly
+Cricket
+Cuckoo bee
+Damselfly
+Darkling beetle
+Deer fly
+Diving beetle
+Dragonfly
+Drone fly
+Dung beetle
+Earwig
+Emperor moth
+Fire ant
+Firefly
+Flea
+Fly
+Fruit fly
+Gall wasp
+Giant water bug
+Glow worm
+Gnat
+Goliath beetle
+Grasshopper
+Green lacewing
+Ground beetle
+Hawk moth
+Hercules beetle
+Honey bee
+Hornet
+Horsefly
+Housefly
+Hoverfly
+Jewel beetle
+June bug
+Katydid
+Lacewing
+Ladybird
+Ladybug
+Leaf insect
+Leafcutter ant
+Leafhopper
+Locust
+Long-horned beetle
+Louse
+Luna moth
+Maggot
+Mantis
+Mason bee
+Mayfly
+Mealybug
+Midge
+Monarch butterfly
+Mosquito
+Moth
+Mud dauber
+Owlet moth
+Painted lady
+Paper wasp
+Peacock butterfly
+Praying mantis
+Red admiral
+Rhinoceros beetle
+Robber fly
+Sandfly
+Sawfly
+Scarab beetle
+Scale insect
+Shield bug
+Silkworm
+Silverfish
+Skipper
+Snakefly
+Stag beetle
+Stick insect
+Stink bug
+Stonefly
+Swallowtail
+Sweat bee
+Tarantula hawk
+Termite
+Thrips
+Tiger beetle
+Tiger moth
+Tortoise beetle
+Tsetse fly
+Walking stick
+Wasp
+Water boatman
+Water strider
+Weevil
+Whirligig beetle
+White butterfly
+Whitefly
+Woodworm
+Yellow jacket

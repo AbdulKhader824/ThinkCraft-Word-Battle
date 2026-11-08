@@ -3,30 +3,55 @@ actinomorphic flower
 adenophora triphylla
 adonis aestivalis flower
 adonis vernalis flower
+african daisy
+african violet
+agapanthus
 allamanda
 almond blossom
+alstroemeria
+alyssum
+amaryllis
+anemone
+angels trumpet
 anthurium
 apple blossom
 apricot blossom
+arum lily
 aster
 azafran de la mancha
 azalea
+babys breath
+balsam
 basal cymule flower
 basal cymule pistillate flower
 basal cymule staminate flower
 begonia
 bigleaf maple flower cluster
+bird of paradise
+black eyed susan
 black pearl pepper
+blanket flower
+bleeding heart
 blossom
 blue flower
 bluebell
+bluebonnet
 borage flower
+bottlebrush
 bougainvillea
+bromeliad
 brugmansia
 buttercup
+butterfly pea
+calendula
+calla lily
 camellia
+canna
+canterbury bells
+cape jasmine
 carnation
 carthami flos
+celosia
 centaurea cyanus
 chamomile flowers
 champa
@@ -36,41 +61,71 @@ cherry blossoms in seattle
 chochas
 chrysanthemum
 cloud tree
+cockscomb
+columbine
+coneflower
+coral bells
+cornflower
+cosmos
+cowslip
 crocus
 crocus sativus flower
+crown of thorns
 cut flowers
+cyclamen
 cymule flower
 daffodil
 dahlia
 daisy
 dandelion
+daylily
+delphinium
+desert rose
+dianthus
 disk flowers
 distal cymule staminate flower
 dok ngio
 double flowered
+echinacea
 edelweiss
 edible chrysanthemum
 edible flower
 edimental
 elderflower
+evening primrose
+everlasting flower
 female flower
+fireweed
+flame lily
+flame of the forest
 flowering tea
 flowers in art
 forget me not
 forking larkspur flower
+foxglove
 foxglove flower
 frangipani
 freesia
 freesia flower
 fresh cut flower
 fritillaria imperialis
+fuchsia
 gardenia
+gazania
+geranium
 gerbera
 gladiolus
+gloriosa
+golden shower
+goldenrod
 grapefruit blossom
 gulmohar
 hazakura
+heather
+heliconia
+heliotrope
 heliotrope flower
+hellebore
 hemerocallis
 hibiscus
 hibiscus flower
@@ -81,33 +136,57 @@ houseplant
 hyacinth
 hyacinth flower
 hydrangea
+impatiens
+indian cork tree
 iris
 ixora
+jacaranda
 jasmine
+jonquil
 jpg
+kadamba
+kalanchoe
 kanakambaram
+kanchan
+kaner
+kewra
 kuldzhinka krupnoplodnaya
 kurinji
 kusamono and shitakusa
+lantana
+larkspur
 lavender
 lilac
 lily
+lily of the valley
 lily of the valley flower
+lisianthus
 lotus
+lupin
+madhumalti
 magnolia
 magnolia flower
 male flower
+mallow
+marguerite
 marigold
 matricaria flower
 melilot flowers
+mimosa
 mimosa flower
 mogra
+moonflower
 morning glory
+moss rose
 nanohana
 narcissus
 narcissus flower
+nasturtium
 neelakurinji
+nerium
+nigella
 night jasmine
+nightqueen
 niwaki
 oleander
 orange blossom
@@ -121,15 +200,25 @@ ornamental fern
 ornamental grass
 ornamental shrub
 ornamental tree
+ox eye daisy
+palash
 pansy
 parijat
+passion flower
 peach blossom
 pear blossom
+pentas
 peony
 peony flower
 periwinkle
 petunia
+phlox
+plumeria
+poinsettia
 poppy
+portulaca
+primrose
+protea
 prunus chihara zakura
 prunus eigenji
 prunus hanagasa
@@ -138,41 +227,67 @@ prunus izutoi
 prunus sendaiya
 prunus subhirtella ujou shidare
 purple flower
+queen of the night
 rajnigandha
+rangoon creeper
+ranunculus
 red flower
+rhododendron
 roman chamomile flower
 rose
+rose of sharon
 rose petals
 rosebuds
 rosemary flowers
 saffron
+salvia
+saraca
 saskatoon berry cultivar
 shitakusa
+shoeflower
 snapdragon
+snowdrop
 spanish broom flower
+spider lily
 spiklet floret
 squash blossom
 st johns wort flower
+statice
+stock
+strawflower
 sunflower
+sweet pea
+sweet william
 symphytum hidcotense
 tahitian gardenia flower
 taraxacum officinale flowering top
+tecoma
+thistle
 thumba
+torenia
 tropaeolum majus
+trumpet vine
 tuberose
 tuberose flower
 tulip
 tulipa gesneriana var dracontia
 ulex europaeus flower
 unisexual flower
+verbena
+vinca
 violet
+wallflower
+water hyacinth
 water lily
 white flower
 white jasmine
 white lilies in heraldry
+wild rose
 wisteria
 yaezakura
 yakuboku
+yarrow
+yellow bells
 yellow flower
 zafferano dellaquila pdo
 zinnia

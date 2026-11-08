@@ -117,4 +117,45 @@ void main() {
       expect(groups.single.checkedByWordList, isFalse);
     });
   });
+
+  group('full names in Person Name', () {
+    final names = SetWordList({
+      Category.person: ['Priya', 'Sharma', 'Arjun', 'Kumar', 'Virat Kohli'],
+      Category.animal: ['Panda', 'Tiger'],
+    });
+
+    test('a known full name counts', () {
+      expect(names.contains(Category.person, 'Virat Kohli'), isTrue);
+    });
+
+    test('a first and family name together count', () {
+      expect(names.contains(Category.person, 'Priya Sharma'), isTrue);
+      expect(names.contains(Category.person, 'arjun kumar sharma'), isTrue);
+    });
+
+    test('an unknown part, or too many parts, does not', () {
+      expect(names.contains(Category.person, 'Priya Blorp'), isFalse);
+      expect(
+        names.contains(Category.person, 'Priya Arjun Kumar Sharma'),
+        isFalse,
+      );
+    });
+
+    test('only Person Name joins parts like this', () {
+      expect(names.contains(Category.animal, 'Panda Tiger'), isFalse);
+    });
+  });
+
+  test('lists the words starting with a letter, in either case', () {
+    final words = SetWordList({
+      Category.animal: ['Panda', 'Parrot', 'Tiger'],
+    });
+    expect(
+      words.wordsStartingWith(Category.animal, 'p'),
+      unorderedEquals(['panda', 'parrot']),
+    );
+    expect(words.wordsStartingWith(Category.animal, 'T'), ['tiger']);
+    expect(words.wordsStartingWith(Category.animal, 'Z'), isEmpty);
+    expect(words.wordsStartingWith(Category.food, 'P'), isEmpty);
+  });
 }

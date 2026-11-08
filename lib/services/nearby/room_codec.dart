@@ -31,6 +31,7 @@ abstract final class RoomCodec {
         'answerSeconds': room.settings.answerSeconds,
         'categories': [for (final c in room.settings.categories) c.name],
         'answerCheck': room.settings.answerCheck.name,
+        'botLevel': room.settings.botLevel.name,
       },
       'players': [for (final player in room.players) _player(player)],
       'usedLetters': room.usedLetters.toList(),
@@ -61,6 +62,10 @@ abstract final class RoomCodec {
         answerCheck:
             AnswerCheck.values.asNameMap()[settings['answerCheck']] ??
             AnswerCheck.vote,
+        // Rooms from an older app version don't say; theirs are Medium.
+        botLevel:
+            BotLevel.values.asNameMap()[settings['botLevel']] ??
+            BotLevel.medium,
       ),
       players: [
         for (final player in json['players']! as List)

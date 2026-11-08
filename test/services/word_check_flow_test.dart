@@ -24,6 +24,8 @@ class _MonkeyBot extends BotPlayer {
   Map<Category, String> answersFor(
     String letter, [
     Iterable<Category> categories = Category.values,
+    BotLevel level = BotLevel.medium,
+    WordList? words,
   ]) => {for (final category in categories) category: 'Monkey'};
 
   @override

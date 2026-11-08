@@ -66,3 +66,120 @@ Violet
 Water lily
 Wisteria
 Zinnia
+# More garden, wild and Indian flowers.
+African daisy
+African violet
+Agapanthus
+Alstroemeria
+Alyssum
+Amaryllis
+Anemone
+Angel's trumpet
+Arum lily
+Baby's breath
+Balsam
+Bird of paradise
+Black-eyed Susan
+Blanket flower
+Bleeding heart
+Bluebonnet
+Bottlebrush
+Bromeliad
+Butterfly pea
+Calendula
+Calla lily
+Canna
+Canterbury bells
+Cape jasmine
+Celosia
+Cockscomb
+Columbine
+Coneflower
+Coral bells
+Cornflower
+Cosmos
+Cowslip
+Crown of thorns
+Cyclamen
+Daylily
+Delphinium
+Desert rose
+Dianthus
+Echinacea
+Evening primrose
+Everlasting flower
+Fireweed
+Flame lily
+Flame of the forest
+Foxglove
+Fuchsia
+Gazania
+Geranium
+Gloriosa
+Golden shower
+Goldenrod
+Heather
+Heliconia
+Hellebore
+Heliotrope
+Impatiens
+Indian cork tree
+Jacaranda
+Jonquil
+Kadamba
+Kalanchoe
+Kanchan
+Kaner
+Kewra
+Lantana
+Larkspur
+Lily of the valley
+Lisianthus
+Lupin
+Madhumalti
+Mallow
+Marguerite
+Mimosa
+Moonflower
+Moss rose
+Nasturtium
+Nerium
+Nigella
+Nightqueen
+Orange blossom
+Ox-eye daisy
+Palash
+Passion flower
+Pentas
+Phlox
+Plumeria
+Poinsettia
+Portulaca
+Primrose
+Protea
+Queen of the night
+Rangoon creeper
+Ranunculus
+Rhododendron
+Rose of Sharon
+Salvia
+Saraca
+Shoeflower
+Snowdrop
+Spider lily
+Statice
+Stock
+Strawflower
+Sweet pea
+Sweet William
+Tecoma
+Thistle
+Torenia
+Trumpet vine
+Verbena
+Vinca
+Wallflower
+Water hyacinth
+Wild rose
+Yarrow
+Yellow bells

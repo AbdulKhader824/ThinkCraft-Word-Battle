@@ -3,9 +3,12 @@ acorn squash
 aglio bianco polesano pdo
 aglio di voghiera pdo
 aglio rosso di sulmona
+alfalfa sprouts
 allium sativum
 amaranth
+amla
 artichoke
+arugula
 asazuke
 ash gourd
 asparagus
@@ -13,15 +16,22 @@ asparagus bean
 atchara
 aubergine
 avakaya
+avarakkai
 baby carrot
 baby corn
 baby napa cabbage
 baechu kimchi
 baekkimchi
+bamboo shoot
+banana flower
+banana stem
+bathua
 bean sprout
+bean sprouts
 beans
 beefsteak tomato
 beet
+beet greens
 beetroot
 bell pepper
 beni shoga
@@ -29,6 +39,7 @@ bettarazuke
 bhindi
 bitter gourd
 bitter melon
+black eyed peas
 black garlic
 blue tomato
 bok choy
@@ -39,6 +50,7 @@ bottle gourd
 brassica oleracea acephala group
 brassica oleracea var palmifolia
 brassica rapa subsp chinensis
+breadfruit
 brinjal
 broad beans
 broccoflower
@@ -46,6 +58,7 @@ broccoli
 broccolini
 brussels sprouts
 bush tomato
+butter beans
 butternut squash
 cabbage
 calabaza
@@ -55,30 +68,42 @@ campari tomato
 canned tomato
 capsicum
 carrot
+cassava
 cauliflower
+celeriac
 celery
 cereal legume
+chard
 charentais melon
+chayote
 cherry tomato
+chickpeas
 chilli
 chinese cabbage
 chinese pickles
+chives
+chow chow
 cladosiphon okamuranus
 cluster beans
 cocktail onion
+collard greens
 colocasia
 colocasia antiquorum var toonoimo
 colocasia esculenta
 coriander
 corn
 cornichons
+courgette
+cress
 cruciferous vegetable
 crushed red pepper
 cucumber
 cucurbita pepo subsp pepo
 curry leaves
+daikon
 dalle khursani
 dandelion
+dill
 dioscorea trifida
 dongchimi
 dried beans
@@ -86,12 +111,15 @@ dried chili pepper
 drumstick
 dua hanh
 early potato
+edamame
 edible plant stem
 efo riro
 eggplant
 elephant foot yam
 endive
 european cucumber
+fava beans
+fennel
 fenugreek
 fiddlehead fern
 figueres onion
@@ -108,6 +136,7 @@ garlic
 gem squash
 genetically modified potato
 geotjeori
+gherkin
 ginger
 globe artichoke
 gongura
@@ -117,6 +146,7 @@ grape tomato
 green bean
 green beans
 green chilli
+green onion
 green peas
 gulkand
 haft bijar
@@ -126,41 +156,58 @@ heirloom tomato
 honeydew
 honeynut squash
 hop shoots
+horseradish
+iceberg lettuce
 inflorescence vegetable
 ivy gourd
+jackfruit
 jalapeno
 jangajji
 japanese radish
+jerusalem artichoke
+jicama
 kale
 kale sprouts
 karashizuke
 karedok
 karela
 kasuzuke
+kidney beans
 kimchi
 kkakdugi
 knieperkohl
 kohlrabi
 kombu
+kovakkai
 kumato
 kuttiger carrot
 kyoyasai
 lactuca sativa
 ladies finger
+lady finger
+lauki
 leaf vegetable
 leek
 lettuce
+lima beans
 lomagne white garlic
+long beans
 lotus rhizome
 lotus root
+lotus stem
+malabar spinach
+marrow
 matsumaezuke
 melon
 methi
 microgreen
 mint
 mixed pickle
+mooli
+moringa
 mozuku
 mung bean sprout
+mung beans
 muraturi
 mushroom
 mustard greens
@@ -168,6 +215,7 @@ mustard pickle
 nabak kimchi
 napa cabbage
 narazuke
+navy beans
 nerima daikon
 noonsom
 nopal
@@ -176,12 +224,16 @@ nukazuke
 oignon de roscoff
 oignon doux des cevennes
 okra
+olive
 onion
 ornamental kales and cabbages
 padron peppers
+padwal
+pak choi
 palak
 parsley
 parsnip
+parwal
 pattypan squash
 pea sprout
 pear tomato
@@ -204,6 +256,7 @@ plantain
 plum tomato
 pochas
 pointed cabbage
+pointed gourd
 pomato
 pomodorino del piennolo del vesuvio
 potato
@@ -212,6 +265,7 @@ potatoes of chiloe
 preserved lemon
 pumpkin
 puntarelle
+purple yam
 quelite
 radicchio
 radicchio di chioggia
@@ -225,67 +279,96 @@ red cabbage
 red kuri squash
 red leaf lettuce
 red onion
+rhubarb
 ridge gourd
 roma tomato
+romaine lettuce
 romanesco broccoli
 root vegetable
 rosa de barbastro
 rucola
+runner beans
 russet potato
+rutabaga
 saengchae
+salsify
 salt potatoes
 salzgurke
+samphire
 san marzano tomato
 santa claus melon
 santorini tomato
+sarson
+savoy cabbage
 scallion
+seaweed
 seedless watermelon
 shallot
 shikrarpuri achar
 sichuan pickles
 siraegi
 snake gourd
+snow peas
 solo garlic
+sorrel
 soup vegetables
+soybean
 soybean sprout
 spaghetti squash
 spinach
 spinacia oleracea
+sponge gourd
 spreewald gherkins
 spring onion
 sprouting
 square watermelon
 squash
 suan cai
+sugar snap peas
 summer squash
 sun dried tomato
+suran
+swede
 sweet corn
 sweet onion
 sweet potato
+swiss chard
 takuan
 tapioca
 taro
 thai eggplant
 tigerella
+tinda
+tindora
+tomatillo
 tomato
 torshi
 tsukemono
 turnip
+turnip greens
 ubi cilembu
 umeboshi
 unusually shaped vegetable
 urfa biber
+vazhakkai
 vidalia onion
+wasabi
 water chestnut
+water spinach
 watercress
 watermelon
+wax gourd
 welsh onion
 white cabbage
 white onion
+white radish
+winged bean
 winter squash
 winter vegetable
 yam
+yardlong bean
 yellow onion
+yellow squash
 yellow summer squash
 yeolmu kimchi
 yorkshire forced rhubarb

@@ -160,6 +160,21 @@ void main() {
       expect(find.text('5 rounds · 90s each · 2 categories'), findsOneWidget);
     });
 
+    testWidgets('the Lobby says how smart the bots are', (tester) async {
+      await pumpGame(
+        tester,
+        service: FakeGameService(
+          fakeLobby(
+            players: [fakePlayer(localId, name: 'Sam', isHost: true)],
+            settings: GameSettings(botLevel: BotLevel.hard),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Answers: Smart check · Bots: Hard'), findsOneWidget);
+    });
+
     testWidgets('the Lobby shows a standard game simply', (tester) async {
       await pumpGame(
         tester,

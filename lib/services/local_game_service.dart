@@ -763,6 +763,8 @@ class LocalGameService implements GameService {
       _answers[botId] = _bots[botId]!.answersFor(
         room.round!.letter!,
         room.settings.categories,
+        room.settings.botLevel,
+        _wordList,
       );
       _markSubmitted(botId);
     });
@@ -808,6 +810,8 @@ class LocalGameService implements GameService {
       _answers[entry.key] ??= entry.value.answersFor(
         round.letter!,
         room.settings.categories,
+        room.settings.botLevel,
+        _wordList,
       );
     }
 

@@ -4,6 +4,8 @@ import 'dart:math';
 
 import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:thinkcraft_word_battle/models/game_settings.dart';
+import 'package:thinkcraft_word_battle/services/rules/word_check.dart';
 import 'package:thinkcraft_word_battle/models/category.dart';
 import 'package:thinkcraft_word_battle/models/game_phase.dart';
 import 'package:thinkcraft_word_battle/models/room.dart';
@@ -39,6 +41,8 @@ class _ScriptedBot extends BotPlayer {
   Map<Category, String> answersFor(
     String letter, [
     Iterable<Category> categories = Category.values,
+    BotLevel level = BotLevel.medium,
+    WordList? words,
   ]) {
     return {for (final category in categories) category: answer};
   }

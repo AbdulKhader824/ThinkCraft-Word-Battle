@@ -53,7 +53,13 @@ class LobbyScreen extends ConsumerWidget {
               _InviteCard(address: _hostAddress(ref)),
             ],
             const SizedBox(height: AppSpacing.sm),
-            _SettingsSummary(settings: room.settings),
+            _SettingsSummary(
+              settings: room.settings,
+              hasBots:
+                  room.mode == RoomMode.practice ||
+                  room.fillWithBots ||
+                  room.players.any((player) => player.isBot),
+            ),
             const SizedBox(height: AppSpacing.md),
             if (room.mode == RoomMode.nearby) ...[
               _SeatsLine(room: room),
@@ -145,9 +151,12 @@ class _RoomCodeCard extends StatelessWidget {
 
 /// Shows everyone the host's choices before the game starts.
 class _SettingsSummary extends StatelessWidget {
-  const _SettingsSummary({required this.settings});
+  const _SettingsSummary({required this.settings, required this.hasBots});
 
   final GameSettings settings;
+
+  /// Whether to say how well the bots play.
+  final bool hasBots;
 
   @override
   Widget build(BuildContext context) {
@@ -168,7 +177,10 @@ class _SettingsSummary extends StatelessWidget {
             style: AppText.label,
           ),
           Text(
-            'Answers: ${settings.answerCheck.label}',
+            [
+              'Answers: ${settings.answerCheck.label}',
+              if (hasBots) 'Bots: ${settings.botLevel.label}',
+            ].join(' · '),
             style: AppText.bodySmall,
           ),
           const SizedBox(height: AppSpacing.xs),
