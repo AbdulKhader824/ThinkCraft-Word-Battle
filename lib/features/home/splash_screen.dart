@@ -10,7 +10,7 @@ import '../../core/constants/app_constants.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text.dart';
 import '../../core/widgets/game_screen.dart';
-import '../../core/widgets/rainbow_title.dart';
+import '../../core/widgets/title_3d.dart';
 import '../../models/category.dart';
 import '../../services/sound_service.dart';
 import '../gameplay/category_style.dart';
@@ -110,7 +110,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     semanticsLabel: '${AppStrings.appName} logo',
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  RainbowTitle(
+                  Title3D(
                     AppStrings.appName,
                     style: AppText.display,
                     textAlign: TextAlign.center,

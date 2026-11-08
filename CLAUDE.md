@@ -89,7 +89,9 @@ Never hard-code colours or spacing on a screen.
 
 Playful style: screens sit on a sky background with clouds, a sun and stars
 (`GameBackground`). Headers use `RainbowTitle`, with each letter a candy
-colour and a navy outline. Cards are cream paper (`GameCard`, optionally with
+colour and a navy outline, drawn as chunky 3D toy letters by `Title3D`: a
+raised side in a darker shade, a glossy shine and a soft shadow. The
+PlayPals name and each game's name on the hub use `Title3D` too. Cards are cream paper (`GameCard`, optionally with
 a folded corner and a sticker). Number and letter choices use `CandyTile`,
 which shows white numbers with a navy outline and a crown on the chosen one.
 Sticker art is in `assets/images/stickers/`. Each category has an illustrated
@@ -194,7 +196,7 @@ These settle conflicts and gaps in the briefs.
 - [x] Phase 1: foundation (approved)
 - [x] Phase 2: lobby and answers (approved)
 - [x] Phase 3: voting and scoring (approved)
-- [x] Phase 4: polish and APK (awaiting approval)
+- [x] Phase 4: polish and APK (approved)
 - Phase 5 needs separate approval.
 
 ## Commands

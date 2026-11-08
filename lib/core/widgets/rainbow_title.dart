@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
-import '../theme/app_text.dart';
-import 'outlined_text.dart';
+import 'title_3d.dart';
 
-/// A playful title where each letter has its own candy colour and a thick
-/// navy outline, like letters cut from coloured paper.
+/// A playful title where each letter has its own candy colour, a navy
+/// outline and a raised 3D side, like chunky toy letters. Every screen
+/// header uses it.
 ///
 /// It is one piece of text, so screen readers and tests read it normally.
 class RainbowTitle extends StatelessWidget {
@@ -24,27 +23,11 @@ class RainbowTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = style ?? AppText.title;
-    var colour = 0;
-
-    return OutlinedText.rich(
-      TextSpan(
-        children: [
-          for (final character in text.characters)
-            TextSpan(
-              text: character,
-              style: character.trim().isEmpty
-                  ? null
-                  : TextStyle(
-                      color: AppColors.candy[colour++ % AppColors.candy.length],
-                    ),
-            ),
-        ],
-      ),
-      style: base,
+    return Title3D(
+      text,
+      style: style,
       textAlign: textAlign,
       outlineWidth: outlineWidth,
-      dropShadow: true,
     );
   }
 }

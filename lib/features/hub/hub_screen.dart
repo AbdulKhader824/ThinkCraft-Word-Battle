@@ -12,7 +12,7 @@ import '../../core/theme/app_text.dart';
 import '../../core/widgets/entrance.dart';
 import '../../core/widgets/game_button.dart';
 import '../../core/widgets/game_screen.dart';
-import '../../core/widgets/rainbow_title.dart';
+import '../../core/widgets/title_3d.dart';
 import '../../services/sound_service.dart';
 import 'game_catalog.dart';
 
@@ -156,7 +156,7 @@ class _Header extends StatelessWidget {
                 FittedBox(
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.centerLeft,
-                  child: RainbowTitle(
+                  child: Title3D(
                     AppStrings.appName,
                     style: AppText.display,
                     outlineWidth: 3,
@@ -486,10 +486,11 @@ class _GameDetails extends StatelessWidget {
             children: [
               FittedBox(
                 fit: BoxFit.scaleDown,
-                child: Text(
+                child: Title3D(
                   game.name,
                   textAlign: TextAlign.center,
                   style: AppText.title,
+                  outlineWidth: 2.5,
                 ),
               ),
               const SizedBox(height: AppSpacing.xxs),
