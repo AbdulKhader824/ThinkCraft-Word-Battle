@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:thinkcraft_word_battle/app/app.dart';
 import 'package:thinkcraft_word_battle/app/router.dart';
 import 'package:thinkcraft_word_battle/features/home/splash_screen.dart';
+import 'package:thinkcraft_word_battle/services/drawing/drawing_providers.dart';
+import 'package:thinkcraft_word_battle/services/drawing/drawing_service.dart';
 import 'package:thinkcraft_word_battle/services/game_providers.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
 import 'package:thinkcraft_word_battle/services/local_game_service.dart';
@@ -27,6 +29,7 @@ Future<void> pumpGame(
   ProfileStore? profiles,
   FakeSoundPlayer? sounds,
   FakeRoomFinder? finder,
+  DrawingService? drawing,
   double textScale = 1,
   bool reduceMotion = true,
 }) async {
@@ -54,6 +57,11 @@ Future<void> pumpGame(
         soundPlayerProvider.overrideWithValue(sounds ?? FakeSoundPlayer()),
         // Nor do they open network sockets to look for nearby rooms.
         roomFinderProvider.overrideWithValue(finder ?? FakeRoomFinder()),
+        if (drawing != null)
+          drawingServiceProvider.overrideWith((ref) {
+            ref.onDispose(drawing.dispose);
+            return drawing;
+          }),
       ],
       child: const ThinkCraftApp(),
     ),

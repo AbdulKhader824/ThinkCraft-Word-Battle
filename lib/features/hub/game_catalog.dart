@@ -45,6 +45,7 @@ class GameInfo {
 
 abstract final class GameCatalog {
   static const wordBattleRoute = '/word-battle';
+  static const guessTheDrawingRoute = '/guess-the-drawing';
 
   static const games = [
     GameInfo(
@@ -59,6 +60,7 @@ abstract final class GameCatalog {
       name: 'Guess the Drawing',
       tagline: 'One player draws, and everyone races to guess it.',
       devices: GameDevices.everyPhone,
+      route: guessTheDrawingRoute,
     ),
     GameInfo(
       id: 'card_game',

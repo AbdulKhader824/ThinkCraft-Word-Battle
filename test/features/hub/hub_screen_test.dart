@@ -17,11 +17,11 @@ void main() {
       expect(ids, hasLength(15));
     });
 
-    test('Word Battle comes first and is the only playable game', () {
+    test('Word Battle comes first, then Guess the Drawing, both playable', () {
       expect(GameCatalog.games.first.name, 'Word Battle');
       expect(
         GameCatalog.games.where((game) => game.isPlayable).map((g) => g.id),
-        ['word_battle'],
+        ['word_battle', 'guess_the_drawing'],
       );
     });
 
@@ -45,10 +45,15 @@ void main() {
     await pumpGame(tester);
     await goToHome(tester);
 
+    // Guess the Drawing is next and playable; Colour Rush is coming soon.
     await tester.drag(find.byType(PageView), const Offset(-200, 0));
     await tester.pumpAndSettle();
-
     expect(find.text('Guess the Drawing'), findsOneWidget);
+    expect(buttonLabelled('Play'), findsOneWidget);
+
+    await tester.drag(find.byType(PageView), const Offset(-200, 0));
+    await tester.pumpAndSettle();
+    expect(find.text('Colour Rush'), findsOneWidget);
     expect(buttonLabelled('Play'), findsNothing);
 
     final soon = tester.widget<InkWell>(buttonLabelled('Coming soon'));

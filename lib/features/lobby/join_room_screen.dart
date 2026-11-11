@@ -16,6 +16,7 @@ import '../../core/widgets/game_dialog.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/game_text_field.dart';
 import '../../core/widgets/player_avatar.dart';
+import '../../services/drawing/drawing_providers.dart';
 import '../../services/game_providers.dart';
 import '../../services/game_service.dart';
 import '../../services/nearby/nearby_discovery.dart';
@@ -26,7 +27,11 @@ import 'room_form_widgets.dart';
 /// Joins a friend's room: tap one of the rooms found nearby, or type its
 /// code. If a room doesn't show up, the host's address can be typed in.
 class JoinRoomScreen extends ConsumerStatefulWidget {
-  const JoinRoomScreen({super.key});
+  const JoinRoomScreen({super.key, this.game = NearbyRoomInfo.wordBattle});
+
+  /// Which game's rooms to list and join, such as
+  /// [NearbyRoomInfo.guessTheDrawing].
+  final String game;
 
   @override
   ConsumerState<JoinRoomScreen> createState() => _JoinRoomScreenState();
@@ -49,12 +54,19 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
   @override
   void initState() {
     super.initState();
-    _rooms = _finder.current;
+    _rooms = _forThisGame(_finder.current);
     _finding = _finder.rooms.listen((rooms) {
-      if (mounted) setState(() => _rooms = rooms);
+      if (mounted) setState(() => _rooms = _forThisGame(rooms));
     });
     unawaited(_finder.start());
   }
+
+  /// Only this game's rooms: a Word Battle room can't be joined from
+  /// Guess the Drawing.
+  List<NearbyRoomInfo> _forThisGame(List<NearbyRoomInfo> rooms) => [
+    for (final room in rooms)
+      if (room.game == widget.game) room,
+  ];
 
   @override
   void dispose() {
@@ -78,17 +90,18 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
     final typedAddress = _addressController.text.trim();
 
     setState(() => _joining = true);
+    final join = widget.game == NearbyRoomInfo.guessTheDrawing
+        ? ref.read(drawingServiceProvider).joinRoom
+        : ref.read(gameServiceProvider).joinRoom;
     try {
-      await ref
-          .read(gameServiceProvider)
-          .joinRoom(
-            playerName: name,
-            roomCode: RoomInputRules.normalizeRoomCode(_codeController.text),
-            avatarIndex: profile.avatarIndex,
-            hostAddress:
-                room?.address ??
-                (_showAddress && typedAddress.isNotEmpty ? typedAddress : null),
-          );
+      await join(
+        playerName: name,
+        roomCode: RoomInputRules.normalizeRoomCode(_codeController.text),
+        avatarIndex: profile.avatarIndex,
+        hostAddress:
+            room?.address ??
+            (_showAddress && typedAddress.isNotEmpty ? typedAddress : null),
+      );
     } on JoinRefused catch (error) {
       if (mounted) {
         await showGameMessage(

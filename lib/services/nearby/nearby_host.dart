@@ -127,6 +127,12 @@ class NearbyHost {
   /// player coming back after their connection dropped.
   void _greet(NearbyLink link, Map<String, Object?> message) {
     final room = engine.room;
+    // Another game's phone, such as Guess the Drawing, says which game it
+    // is. Word Battle phones don't.
+    if (message['game'] != null) {
+      _refuse(link, 'That room is playing a different game.');
+      return;
+    }
     if (message['v'] != NearbyMessage.version) {
       _refuse(link, 'Update the app so you can join this room.');
       return;

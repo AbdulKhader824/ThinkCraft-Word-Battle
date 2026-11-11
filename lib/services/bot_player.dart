@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../models/category.dart';
 import '../models/game_settings.dart';
+import 'rules/rude_words.dart';
 import 'rules/word_check.dart';
 import 'word_bank.dart';
 
@@ -148,7 +149,7 @@ class BotPlayer {
       final word = all[random.nextInt(all.length)];
       if (word.length <= style.maxWordListLength &&
           _looksTypeable(word) &&
-          !_soundsRude(word)) {
+          !soundsRude(word)) {
         return _titleCase(word);
       }
     }
@@ -159,16 +160,6 @@ class BotPlayer {
   static final _typeable = RegExp(r'^[a-z]+( [a-z]+){0,2}$');
 
   static bool _looksTypeable(String word) => _typeable.hasMatch(word);
-
-  /// Letters that spell something rude, even inside a real word (a pickle
-  /// called "shitakusa"). The word list only blocks whole rude words, so
-  /// bots skip these: a player may type one, but a bot never says one.
-  static final _rude = RegExp(
-    'shit|fuck|cunt|porn|sex|nigg|dick|cock|slut|whore|rape|bitch|piss|'
-    'tits|penis|anal|wank|twat|crap|boob|nazi',
-  );
-
-  static bool _soundsRude(String word) => _rude.hasMatch(word);
 
   static String _titleCase(String word) => word
       .split(' ')

@@ -5,6 +5,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import '../core/constants/app_constants.dart';
 import '../core/theme/app_theme.dart';
 import '../models/room.dart';
+import '../services/drawing/drawing_providers.dart';
 import '../services/game_providers.dart';
 import 'router.dart';
 
@@ -23,6 +24,10 @@ class ThinkCraftApp extends ConsumerWidget {
       final wasNearby = previous?.mode == RoomMode.nearby;
       final isNearby = next?.mode == RoomMode.nearby;
       if (wasNearby != isNearby) _keepScreenOn(isNearby);
+    });
+    // Guess the Drawing rooms are always nearby rooms.
+    ref.listen(drawingRoomProvider, (previous, next) {
+      if ((previous == null) != (next == null)) _keepScreenOn(next != null);
     });
 
     return MaterialApp.router(

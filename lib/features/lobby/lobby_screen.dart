@@ -46,11 +46,11 @@ class LobbyScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _RoomCodeCard(code: room.code, mode: room.mode),
+            RoomCodeCard(code: room.code, mode: room.mode),
             if (room.mode == RoomMode.nearby &&
                 room.playerById(myId).isHost) ...[
               const SizedBox(height: AppSpacing.sm),
-              _InviteCard(address: _hostAddress(ref)),
+              InviteCard(address: _hostAddress(ref)),
             ],
             const SizedBox(height: AppSpacing.sm),
             _SettingsSummary(
@@ -65,7 +65,7 @@ class LobbyScreen extends ConsumerWidget {
               _SeatsLine(room: room),
               const SizedBox(height: AppSpacing.xs),
             ],
-            _PlayerGrid(players: room.players, myId: myId),
+            PlayerGrid(players: room.players, myId: myId),
             const SizedBox(height: AppSpacing.lg),
             _LobbyAction(room: room, me: room.playerById(myId)),
           ],
@@ -82,8 +82,8 @@ String? _hostAddress(WidgetRef ref) {
 }
 
 /// Tells friends how to join this phone's nearby room.
-class _InviteCard extends StatelessWidget {
-  const _InviteCard({required this.address});
+class InviteCard extends StatelessWidget {
+  const InviteCard({super.key, required this.address});
 
   final String? address;
 
@@ -118,8 +118,8 @@ class _InviteCard extends StatelessWidget {
   }
 }
 
-class _RoomCodeCard extends StatelessWidget {
-  const _RoomCodeCard({required this.code, required this.mode});
+class RoomCodeCard extends StatelessWidget {
+  const RoomCodeCard({super.key, required this.code, required this.mode});
 
   final String code;
   final RoomMode mode;
@@ -226,8 +226,8 @@ class _SeatsLine extends StatelessWidget {
   }
 }
 
-class _PlayerGrid extends StatelessWidget {
-  const _PlayerGrid({required this.players, required this.myId});
+class PlayerGrid extends StatelessWidget {
+  const PlayerGrid({super.key, required this.players, required this.myId});
 
   static const _colors = [
     AppColors.mint,

@@ -2,8 +2,8 @@
 
 A Flutter party-game app, "Play together. Anywhere." It opens on a game hub,
 a swipeable shelf of 15 game cards. Word Battle ("Think fast. Find unique
-words.") is the first playable game, and the rest show Coming soon until
-they're built, one at a time. The audience is ages 7-16, and it should also
+words.") and Guess the Drawing are playable, and the rest show Coming soon
+until they're built, one at a time. The audience is ages 7-16, and it should also
 be fun for adults. The full Word Battle briefs are in `docs/spec.md`.
 
 The project folder, Dart package (`thinkcraft_word_battle`) and Android
@@ -42,10 +42,12 @@ lib/
   features/
     hub/              game hub and `GameCatalog`, the list of games
     home/  lobby/  gameplay/  validation/  results/  settings/
+    drawing/          Guess the Drawing's screens and drawing canvas
   models/             plain immutable data classes
   services/
     rules/            pure Dart rules and scoring
     nearby/           Wi-Fi and hotspot rooms: host, guest, finding rooms
+    drawing/          Guess the Drawing: engine, host, guest, messages
 assets/
   fonts/  images/
 ```
@@ -191,6 +193,36 @@ These settle conflicts and gaps in the briefs.
 | Rooms | One game per room. Play on a card opens that game's own start screen with Create and Join |
 | One-phone games | Truth or Dare, Dumb Charades, Complete the Lyrics and Who Am I? share one phone and skip rooms |
 | Trademarked games | Our UNO-style game is Colour Rush (a placeholder name) and Heads Up is Who Am I?; never use UNO or Heads Up names or looks |
+
+## Guess the Drawing
+
+Its own code, beside Word Battle's rather than inside it:
+`DrawingRoom` and `Sketch` in `lib/models/`, `DrawingRules` and
+`rude_words.dart` in `lib/services/rules/`, `DrawingWords` (about 370
+kid-safe words in Easy, Medium and Hard), and `lib/services/drawing/`:
+`DrawingEngine` runs the game on the host's phone, `DrawingHost` and
+`DrawingClient` carry it between phones over the shared `NearbyLink` and
+`NearbyServer`, and `AppDrawingService` (`drawingServiceProvider`) is what
+the screens use. Messages carry `'game': 'guess_the_drawing'`, so a Word
+Battle phone and a drawing phone turn each other away. Room announcements
+carry the game too, and each game's Join Room lists only its own rooms
+(`JoinRoomScreen(game:)`). Strokes are points from 0 to 1000 on a square
+canvas, so they land in the same place on every phone; the drawer's phone
+shows them at once and sends them in batches every 40ms (`InkBatcher`).
+
+| Situation | Decision |
+| --- | --- |
+| Rooms | Friends nearby only (online shows Coming soon). No practice and no bots: bots can't draw or see a drawing. 2-8 players (the room's size), and the host can start with 2 once everyone is ready |
+| Room settings | Rounds 1, 2, 3 or 5 (default 2; each round everyone draws once), draw time 60, 80 or 100 seconds (default 80), words Easy (default), Medium, Hard or Mixed |
+| Turn order | The host first, then in joining order. Players who are away when their turn comes are skipped |
+| Choosing | The drawer alone sees 3 unused words and has 15 seconds; then one is picked for them. Others see "Sam is choosing a word..." |
+| Drawing | 8 colours, 3 pen sizes, eraser, Undo and Clear. Guessers see the drawing live and the word as blanks, with one letter shown at half time and another with a quarter left (one hint for 3 letters, none for shorter) |
+| Guesses | Match ignoring capitals, spaces and plurals. A wrong guess shows in everyone's feed; a right one shows "Riya got it!" without the word; one letter off (4+ letters) shows "so close!" only to that player. Rude guesses are never shown. 30 characters at most |
+| Turn end | When every guesser here has it, or time runs out. Then 6 seconds showing the word and the turn's points |
+| Points | Guessers by order: 10, 8, 6, 5, 4, then 3; the first also gets a star. The drawer gets 3 for each player who guessed, plus 2 if everyone did. A drawer who leaves or drops mid-turn ends the turn and nobody scores |
+| Between rounds | Leaderboard with Next Round, like Word Battle: starts when everyone here is ready, or after 60 seconds with those who are; the rest leave. Fewer than 2 left closes the room |
+| Final round | Winner banner, confetti for the winner, New Game (host only, same players and settings) and Return Home |
+| Leaving | A guest who drops is marked away and can rejoin; one who leaves on purpose is gone. The host leaving closes the room |
 
 ## Phase status
 

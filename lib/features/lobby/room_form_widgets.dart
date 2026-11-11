@@ -9,6 +9,7 @@ import '../../core/widgets/candy_tile.dart';
 import '../../core/constants/app_constants.dart';
 import '../../core/widgets/game_card.dart';
 import '../../models/category.dart';
+import '../../models/drawing_room.dart';
 import '../../models/game_settings.dart';
 import '../../models/room.dart';
 import '../../services/rules/room_input_rules.dart';
@@ -141,10 +142,14 @@ class RoomModePicker extends StatelessWidget {
     super.key,
     required this.selected,
     required this.onChanged,
+    this.allowPractice = true,
   });
 
   final RoomMode selected;
   final ValueChanged<RoomMode> onChanged;
+
+  /// False for games bots can't play, such as Guess the Drawing.
+  final bool allowPractice;
 
   static const _options = [
     (
@@ -174,23 +179,24 @@ class RoomModePicker extends StatelessWidget {
       children: [
         Text('Who are you playing with?', style: AppText.label),
         const SizedBox(height: AppSpacing.xs),
-        for (final (mode, icon, title, detail) in _options) ...[
-          _ModeOption(
-            key: ValueKey('mode-${mode.name}'),
-            icon: icon,
-            title: title,
-            detail: detail,
-            selected: selected == mode,
-            // Online play needs the server, which comes later.
-            comingSoon: mode == RoomMode.online,
-            onTap: () {
-              if (mode == selected) return;
-              playSoundFrom(context, GameSound.select);
-              onChanged(mode);
-            },
-          ),
-          const SizedBox(height: AppSpacing.xs),
-        ],
+        for (final (mode, icon, title, detail) in _options)
+          if (allowPractice || mode != RoomMode.practice) ...[
+            _ModeOption(
+              key: ValueKey('mode-${mode.name}'),
+              icon: icon,
+              title: title,
+              detail: detail,
+              selected: selected == mode,
+              // Online play needs the server, which comes later.
+              comingSoon: mode == RoomMode.online,
+              onTap: () {
+                if (mode == selected) return;
+                playSoundFrom(context, GameSound.select);
+                onChanged(mode);
+              },
+            ),
+            const SizedBox(height: AppSpacing.xs),
+          ],
       ],
     );
   }
@@ -232,6 +238,52 @@ class AnswerCheckPicker extends StatelessWidget {
               if (check == selected) return;
               playSoundFrom(context, GameSound.select);
               onChanged(check);
+            },
+          ),
+          const SizedBox(height: AppSpacing.xs),
+        ],
+      ],
+    );
+  }
+}
+
+/// How hard the words in Guess the Drawing are.
+class WordLevelPicker extends StatelessWidget {
+  const WordLevelPicker({
+    super.key,
+    required this.selected,
+    required this.onChanged,
+  });
+
+  final WordLevel selected;
+  final ValueChanged<WordLevel> onChanged;
+
+  static const _icons = {
+    WordLevel.easy: Icons.sentiment_satisfied_alt_rounded,
+    WordLevel.medium: Icons.brush_rounded,
+    WordLevel.hard: Icons.local_fire_department_rounded,
+    WordLevel.mixed: Icons.shuffle_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text('How hard are the words?', style: AppText.label),
+        const SizedBox(height: AppSpacing.xs),
+        for (final level in WordLevel.values) ...[
+          _ModeOption(
+            key: ValueKey('word-level-${level.name}'),
+            icon: _icons[level]!,
+            title: level.label,
+            detail: level.detail,
+            selected: selected == level,
+            comingSoon: false,
+            onTap: () {
+              if (level == selected) return;
+              playSoundFrom(context, GameSound.select);
+              onChanged(level);
             },
           ),
           const SizedBox(height: AppSpacing.xs),

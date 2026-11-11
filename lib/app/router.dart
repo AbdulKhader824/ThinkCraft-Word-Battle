@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/drawing/drawing_create_screen.dart';
+import '../features/drawing/drawing_home_screen.dart';
+import '../features/drawing/drawing_how_to_play_screen.dart';
+import '../features/drawing/drawing_lobby_screen.dart';
+import '../features/drawing/drawing_play_screen.dart';
+import '../features/drawing/drawing_results_screen.dart';
 import '../features/gameplay/answer_screen.dart';
 import '../features/gameplay/letter_selection_screen.dart';
 import '../features/home/word_battle_screen.dart';
@@ -15,8 +21,11 @@ import '../features/results/results_screen.dart';
 import '../features/settings/how_to_play_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/validation/validation_screen.dart';
+import '../models/drawing_room.dart';
 import '../models/game_phase.dart';
+import '../services/drawing/drawing_providers.dart';
 import '../services/game_providers.dart';
+import '../services/nearby/nearby_discovery.dart';
 
 /// The address of every screen.
 abstract final class AppRoutes {
@@ -40,6 +49,42 @@ abstract final class AppRoutes {
     validation,
     results,
   };
+
+  // Guess the Drawing.
+  static const drawing = GameCatalog.guessTheDrawingRoute;
+  static const drawingCreate = '$drawing/create';
+  static const drawingJoin = '$drawing/join';
+  static const drawingHowToPlay = '$drawing/how-to-play';
+  static const drawingLobby = '$drawing/lobby';
+  static const drawingPlay = '$drawing/play';
+  static const drawingResults = '$drawing/results';
+
+  static const drawingGameRoutes = {drawingLobby, drawingPlay, drawingResults};
+}
+
+/// The Guess the Drawing screen for each stage of its game. Picking a word,
+/// drawing and the turn's result share one screen, so the drawing stays
+/// put between them.
+String routeForDrawingPhase(DrawingPhase phase) {
+  return switch (phase) {
+    DrawingPhase.lobby => AppRoutes.drawingLobby,
+    DrawingPhase.choosing ||
+    DrawingPhase.drawing ||
+    DrawingPhase.turnResult => AppRoutes.drawingPlay,
+    DrawingPhase.results => AppRoutes.drawingResults,
+  };
+}
+
+/// Like [gameRedirect], for Guess the Drawing. Returns null when the
+/// drawing game has nothing to say about [location].
+String? drawingRedirect(String location, DrawingPhase? phase) {
+  if (phase == null) {
+    return AppRoutes.drawingGameRoutes.contains(location)
+        ? AppRoutes.home
+        : null;
+  }
+  final target = routeForDrawingPhase(phase);
+  return location == target ? null : target;
 }
 
 /// The screen for each stage of the game.
@@ -110,12 +155,27 @@ GoRoute _route(String path, Widget screen) {
 final routerProvider = Provider<GoRouter>((ref) {
   final phase = ValueNotifier<GamePhase?>(ref.read(gameRoomProvider)?.phase);
   ref.listen(gameRoomProvider, (_, room) => phase.value = room?.phase);
+  final drawingPhase = ValueNotifier<DrawingPhase?>(
+    ref.read(drawingRoomProvider)?.phase,
+  );
+  ref.listen(
+    drawingRoomProvider,
+    (_, room) => drawingPhase.value = room?.phase,
+  );
 
   final router = GoRouter(
     initialLocation: AppRoutes.splash,
-    refreshListenable: phase,
-    redirect: (context, state) =>
-        gameRedirect(state.matchedLocation, phase.value),
+    refreshListenable: Listenable.merge([phase, drawingPhase]),
+    redirect: (context, state) {
+      final location = state.matchedLocation;
+      // A drawing game in progress decides where to be; otherwise Word
+      // Battle does, and sends drawing game screens home.
+      if (drawingPhase.value != null) {
+        return drawingRedirect(location, drawingPhase.value);
+      }
+      return drawingRedirect(location, null) ??
+          gameRedirect(location, phase.value);
+    },
     routes: [
       _route(AppRoutes.splash, const SplashScreen()),
       _route(AppRoutes.home, const HubScreen()),
@@ -129,12 +189,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       _route(AppRoutes.answering, const AnswerScreen()),
       _route(AppRoutes.validation, const ValidationScreen()),
       _route(AppRoutes.results, const ResultsScreen()),
+      _route(AppRoutes.drawing, const DrawingHomeScreen()),
+      _route(AppRoutes.drawingCreate, const DrawingCreateScreen()),
+      _route(
+        AppRoutes.drawingJoin,
+        const JoinRoomScreen(game: NearbyRoomInfo.guessTheDrawing),
+      ),
+      _route(AppRoutes.drawingHowToPlay, const DrawingHowToPlayScreen()),
+      _route(AppRoutes.drawingLobby, const DrawingLobbyScreen()),
+      _route(AppRoutes.drawingPlay, const DrawingPlayScreen()),
+      _route(AppRoutes.drawingResults, const DrawingResultsScreen()),
     ],
   );
 
   ref.onDispose(() {
     router.dispose();
     phase.dispose();
+    drawingPhase.dispose();
   });
   return router;
 });

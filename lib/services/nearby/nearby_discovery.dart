@@ -10,6 +10,7 @@ class NearbyRoomInfo {
     this.capacity,
     required this.address,
     required this.port,
+    this.game = wordBattle,
   });
 
   final String code;
@@ -28,6 +29,12 @@ class NearbyRoomInfo {
   final String address;
   final int port;
 
+  /// Which game the room plays, such as [wordBattle].
+  final String game;
+
+  static const wordBattle = 'word_battle';
+  static const guessTheDrawing = 'guess_the_drawing';
+
   /// The announcement the host sends. The address isn't in it: the
   /// receiving phone knows where the message came from.
   Map<String, Object?> toBeacon() => {
@@ -39,6 +46,7 @@ class NearbyRoomInfo {
     'players': playerCount,
     'seats': capacity,
     'port': port,
+    'game': game,
   };
 
   /// Reads an announcement, or returns null if it isn't one of ours.
@@ -65,6 +73,8 @@ class NearbyRoomInfo {
       capacity: json['seats'] as int?,
       address: address,
       port: port,
+      // Older versions only had Word Battle, and didn't say.
+      game: json['game'] as String? ?? wordBattle,
     );
   }
 
