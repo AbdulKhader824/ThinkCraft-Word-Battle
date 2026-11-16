@@ -116,6 +116,14 @@ public sealed class Peer
             if (_socket.State is WebSocketState.Open or WebSocketState.CloseReceived)
             {
                 using var timeout = new CancellationTokenSource(_options.SendTimeout);
+                // Some hosts' proxies (Render's) drop close frames, so the
+                // reason goes ahead as a text frame too: x:<close code>.
+                if (_socket.State == WebSocketState.Open)
+                {
+                    await _socket.SendAsync(
+                        Encoding.UTF8.GetBytes($"x:{(int)_goodbye.Status}"),
+                        WebSocketMessageType.Text, true, timeout.Token);
+                }
                 await _socket.CloseOutputAsync(_goodbye.Status, _goodbye.Reason, timeout.Token);
             }
         }

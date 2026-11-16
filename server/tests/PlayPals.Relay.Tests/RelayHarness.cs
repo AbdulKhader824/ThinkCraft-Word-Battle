@@ -73,11 +73,17 @@ public sealed class Phone(WebSocket socket) : IAsyncDisposable
     /// <summary>Waits for the relay to close the connection, and returns how.</summary>
     public async Task<(int Code, string? Reason)> ClosedAsync()
     {
+        // The relay sends the close code as text first (x:<code>), for
+        // proxies that drop close frames.
+        string? said = null;
         while (await ReceiveAsync() is { } text)
         {
-            Assert.Fail($"Expected the connection to close, but got: {text}");
+            if (said is null && text.StartsWith("x:")) said = text;
+            else Assert.Fail($"Expected the connection to close, but got: {text}");
         }
-        return ((int)Socket.CloseStatus!, Socket.CloseStatusDescription);
+        var code = (int)Socket.CloseStatus!;
+        Assert.Equal($"x:{code}", said);
+        return (code, Socket.CloseStatusDescription);
     }
 
     public Task CloseAsync(WebSocketCloseStatus status = WebSocketCloseStatus.NormalClosure) =>

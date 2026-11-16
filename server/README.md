@@ -40,6 +40,10 @@ Guests send and receive the game's messages as they are.
 
 ## Close codes
 
+Just before closing, the relay also sends the code as a text frame,
+`x:<code>` (for example `x:4003`), because some hosts' proxies (Render's)
+drop WebSocket close frames. The app treats that frame as the close.
+
 | Code | Reason |
 | --- | --- |
 | 1000 | `room closed` or `removed` (by the host) |
