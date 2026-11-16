@@ -11,6 +11,8 @@ import 'nearby/nearby_client.dart';
 import 'nearby/nearby_discovery.dart';
 import 'nearby/nearby_host.dart';
 import 'nearby/nearby_link.dart';
+import 'online/online_rooms.dart';
+import 'online/relay.dart';
 
 /// The game service the app uses. It hands each game to the right place:
 ///
@@ -19,6 +21,8 @@ import 'nearby/nearby_link.dart';
 ///   can play in it, and announces itself with a [RoomBeacon].
 /// - Joining a friend's room uses a [NearbyClientService], which talks to
 ///   the host's phone.
+/// - **Online** rooms work the same way, but through the relay server
+///   ([online]) instead of Wi-Fi, and aren't announced.
 ///
 /// Screens only see [GameService], so none of this reaches them.
 class AppGameService implements GameService {
@@ -29,6 +33,8 @@ class AppGameService implements GameService {
     required this.startServer,
     required this.connect,
     required this.findAddress,
+    this.online,
+    this.onNotice,
   }) {
     _engineChanges = engine.roomChanges.listen((room) {
       if (identical(_active, engine)) _onRoom(room);
@@ -41,6 +47,13 @@ class AppGameService implements GameService {
   final Future<NearbyServer> Function() startServer;
   final NearbyConnector connect;
   final Future<String?> Function() findAddress;
+
+  /// Opens and joins online rooms. Null where they aren't offered.
+  final OnlineRooms? online;
+
+  /// Tells the player something happened outside the screens' control,
+  /// such as an online room being lost.
+  final void Function(String message)? onNotice;
 
   final _changes = StreamController<Room?>.broadcast();
   late final StreamSubscription<Room?> _engineChanges;
@@ -77,7 +90,13 @@ class AppGameService implements GameService {
     await _stopNearby();
     _active = engine;
 
-    if (mode == RoomMode.nearby) {
+    String? code;
+    if (mode == RoomMode.online) {
+      final server = await _online.host(game: NearbyRoomInfo.wordBattle);
+      code = server.code;
+      _host = NearbyHost(engine: engine, server: server)..start();
+      unawaited(server.lost.then((_) => _lost(server)));
+    } else if (mode == RoomMode.nearby) {
       // Open the door for friends first, so a problem shows before the
       // lobby does.
       final NearbyServer server;
@@ -99,7 +118,23 @@ class AppGameService implements GameService {
       settings: settings,
       mode: mode,
       fillWithBots: fillWithBots,
+      code: code,
     );
+  }
+
+  OnlineRooms get _online {
+    final online = this.online;
+    if (online == null) {
+      throw const JoinRefused('Online rooms need the phone app.');
+    }
+    return online;
+  }
+
+  /// The online room's connection is gone for good: the room closes.
+  Future<void> _lost(RelayServer server) async {
+    if (!identical(_host?.server, server)) return;
+    onNotice?.call(onlineRoomLost);
+    await leaveRoom();
   }
 
   @override
@@ -108,9 +143,10 @@ class AppGameService implements GameService {
     required String roomCode,
     int avatarIndex = 0,
     String? hostAddress,
+    bool online = false,
   }) async {
     final found = finder.current.where((room) => room.code == roomCode);
-    final address = hostAddress ?? found.firstOrNull?.address;
+    final address = online ? '' : hostAddress ?? found.firstOrNull?.address;
     final port = hostAddress == null
         ? found.firstOrNull?.port ?? nearbyGamePort
         : nearbyGamePort;
@@ -120,9 +156,12 @@ class AppGameService implements GameService {
         'the host, then try again.',
       );
     }
+    final link = online
+        ? _online.guest(code: roomCode, game: NearbyRoomInfo.wordBattle)
+        : connect;
 
     await _leaveCurrent();
-    final client = NearbyClientService(connect: connect);
+    final client = NearbyClientService(connect: link);
     // Switch over before joining, so the room the host sends straight after
     // its welcome isn't missed.
     _client = client;
@@ -160,6 +199,7 @@ class AppGameService implements GameService {
     final wanted =
         _host != null &&
         room != null &&
+        room.mode == RoomMode.nearby &&
         room.phase == GamePhase.lobby &&
         room.players.length < LocalGameService.maxPlayers;
     if (wanted == _announcing) return;

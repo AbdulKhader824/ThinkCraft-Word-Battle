@@ -25,21 +25,28 @@ abstract interface class DrawingService {
   /// doesn't show up by itself. Null when not hosting.
   String? get hostAddress;
 
-  /// Opens a nearby room on this phone. Throws [JoinRefused] (from
-  /// game_service.dart) if the network can't be used.
+  /// True in an online room, played through the internet.
+  bool get isOnline;
+
+  /// Opens a room on this phone, for friends nearby or, with [online],
+  /// anywhere. Throws [JoinRefused] (from game_service.dart) if the
+  /// network can't be used.
   Future<void> createRoom({
     required String playerName,
     required int avatarIndex,
     required int capacity,
     required DrawingSettings settings,
+    bool online = false,
   });
 
-  /// Joins a friend's room. Throws [JoinRefused] when it can't.
+  /// Joins a friend's room, nearby or [online]. Throws [JoinRefused] when
+  /// it can't.
   Future<void> joinRoom({
     required String playerName,
     required String roomCode,
     int avatarIndex = 0,
     String? hostAddress,
+    bool online = false,
   });
 
   Future<void> setReady(bool isReady);

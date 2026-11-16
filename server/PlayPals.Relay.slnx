@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PlayPals.Relay/PlayPals.Relay.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PlayPals.Relay.Tests/PlayPals.Relay.Tests.csproj" />
+  </Folder>
+</Solution>

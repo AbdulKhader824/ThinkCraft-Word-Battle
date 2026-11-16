@@ -113,6 +113,9 @@ class FakeGameService implements GameService {
   /// The host address passed to the last [joinRoom].
   String? joinedAddress;
 
+  /// Whether the last [joinRoom] was for an online room.
+  bool? joinedOnline;
+
   /// The settings passed to the last [createRoom].
   GameSettings? createdWith;
 
@@ -122,9 +125,11 @@ class FakeGameService implements GameService {
     required String roomCode,
     int avatarIndex = 0,
     String? hostAddress,
+    bool online = false,
   }) async {
     calls.add('joinRoom $roomCode');
     joinedAddress = hostAddress;
+    joinedOnline = online;
     final refusal = refuseJoin;
     if (refusal != null) throw refusal;
   }

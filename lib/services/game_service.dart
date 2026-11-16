@@ -45,12 +45,14 @@ abstract interface class GameService {
 
   /// Joins a friend's room by its code. [hostAddress] is the host phone's
   /// network address, for when the room can't be found automatically.
+  /// [online] joins through the internet instead of Wi-Fi.
   /// Throws [JoinRefused] when the room can't be joined.
   Future<void> joinRoom({
     required String playerName,
     required String roomCode,
     int avatarIndex = 0,
     String? hostAddress,
+    bool online = false,
   });
 
   /// Marks the local player as ready or not. Hosts are always ready.

@@ -2,7 +2,7 @@
 
 A Flutter party-game app, "Play together. Anywhere." It opens on a game hub,
 a swipeable shelf of 15 game cards. Word Battle ("Think fast. Find unique
-words.") and Guess the Drawing are playable, and the rest show Coming soon
+words."), Guess the Drawing and The Impostor are playable, and the rest show Coming soon
 until they're built, one at a time. The audience is ages 7-16, and it should also
 be fun for adults. The full Word Battle briefs are in `docs/spec.md`.
 
@@ -26,8 +26,14 @@ application id keep their old names, so installs update in place.
 Flutter 3.47, Dart 3.13, Material 3, Riverpod 3 without code generation,
 GoRouter 18 and flutter_svg. Fonts are bundled, not downloaded at runtime.
 
-Phase 5 only, not before: ASP.NET Core on the current .NET LTS, SignalR, and
-PostgreSQL. The server will own the timer, votes and scoring.
+Online play (Phase 5): a small relay server in `server/`, ASP.NET Core on
+.NET 10 (the current LTS) with plain WebSockets and no database. The game
+still runs on the host's phone, as in nearby rooms; the relay only passes
+messages between phones, grouped by room code, so the games' rules aren't
+written twice. A server that owns the rules is only worth it if the app
+goes public. The protocol and limits are in `server/README.md`; run
+`dotnet test` in `server/`. The .NET 10 SDK on this PC is in
+`%LOCALAPPDATA%\Microsoft\dotnet10` (the `dotnet` on PATH is .NET 8).
 
 ## Folder structure
 
@@ -43,13 +49,17 @@ lib/
     hub/              game hub and `GameCatalog`, the list of games
     home/  lobby/  gameplay/  validation/  results/  settings/
     drawing/          Guess the Drawing's screens and drawing canvas
+    impostor/         The Impostor's screens
   models/             plain immutable data classes
   services/
     rules/            pure Dart rules and scoring
     nearby/           Wi-Fi and hotspot rooms: host, guest, finding rooms
     drawing/          Guess the Drawing: engine, host, guest, messages
+    impostor/         The Impostor: engine, host, guest, messages
+    online/           online rooms through the relay (RelayServer, RelayGuestLink)
 assets/
   fonts/  images/
+server/               the online relay (ASP.NET Core), with its tests
 ```
 
 Screens must depend on a `GameService` interface from Phase 2, so
@@ -70,7 +80,19 @@ Rooms travel between phones as JSON through `RoomCodec`, with timers sent as
 time left, because phone clocks differ. The real network code is in
 `nearby_io.dart`, picked by a conditional export so the web build still
 compiles; tests use `MemoryServer`, `FakeRoomFinder` and `FakeRoomBeacon`
-instead of sockets. Online play (Phase 5) adds a SignalR version later.
+instead of sockets. Online play (Phase 5) swaps the Wi-Fi connection for
+one through the relay, behind the same `NearbyServer` and `NearbyLink`:
+`RelayServer` on the host's phone (it reconnects with the room's key if its
+own connection drops, and completes `lost` if it can't) and
+`relayConnector` for guests, both in `lib/services/online/relay.dart`. The
+games' hosts and clients don't change. `OnlineRooms`
+(`onlineRoomsProvider`) opens a room with a fresh code (another if it's
+taken) and makes guests' connectors; each game's App service takes it as
+`online`, and the engines accept the relay's `code`. Tests use `MemoryRelay`
+(`test/memory_relay.dart`); `relay_live_test.dart` runs against a real
+relay when `RELAY_URL` is set. A Dart WebSocket's `done` waits for this
+side to close too, so `IoRelaySocket` treats the end of its messages as
+the end of the connection.
 
 ## Design system
 
@@ -154,7 +176,8 @@ These settle conflicts and gaps in the briefs.
 | Letter picker | Host first, then rotating; used letters are greyed out. Only the picker sees the letter tiles; everyone else sees the picker's avatar, "<name> is choosing the letter..." and a mystery tile flicking through the letters still in play (a "?" with reduced motion) |
 | Next Round | Next round in the same room, with running totals. Every round must be played, so results before the final round have no Return Home: everyone presses Next Round, and faces show who is ready or waiting. The round starts once all are ready, or after 60 seconds (`GameRules.nextRoundWait`) with only the ready players; the rest leave the room and go home. With fewer than 2 left, the room closes. A host who leaves hands over to the first player still there. Bots press it in 1-4 seconds |
 | Return Home | Only after the final round (or Leave Game from the back button); clears the room and scores, and goes back to the hub |
-| Room types | Create Room asks "Who are you playing with?": Friends nearby (same Wi-Fi or the host's hotspot), Friends online (shown as Coming soon) or Practice (1 human and 1-7 bots). Practice is the default, so the button always starts a game |
+| Room types | Create Room asks "Who are you playing with?": Friends nearby (same Wi-Fi or the host's hotspot), Friends online (anywhere, through the relay, joined by typing the code) or Practice (1 human and 1-7 bots). Practice is the default, so the button always starts a game |
+| Online rooms | All 3 games. They work like nearby rooms (the host's phone runs the game, guests reconnect, the screen stays on, "Fill empty seats with bots" in Word Battle) but aren't announced and have no address: the lobby shows the code with Share code (the phone's share sheet, `shareTextProvider`), for everyone. Join Room asks "Where is the room?"; online hides the nearby list and the address. While an online room opens, "Connecting to the online server... can take up to a minute" shows, because the free server sleeps. If the host's connection is lost for good, the room closes and a snack bar says why (`roomNoticeProvider`). The relay address is `relayAddress` in `online_rooms.dart`, changed with `--dart-define=RELAY_URL=...` (`ws://10.0.2.2:8080` reaches a relay on this PC from the emulator) |
 | Simulation | Practice is 1 human and 1-7 bots, with some deliberately wrong bot answers. Nearby rooms only have bots if the host turns on "Fill empty seats with bots" |
 | Join Room | Lists rooms announced on the network, one tap to join; a typed code joins a room found nearby; "Can't see the room?" takes the host's address, which the host's lobby shows. Refusals (full, started, wrong code, not found) explain themselves in a dialog |
 | Room size | Create Room asks "How many players?" (2-8) for practice and nearby rooms. In practice it's you plus bots. In a nearby room it's the room's size (`Room.capacity`): friends join until it's full, then are turned away ("That room is full."), and Join Room shows "2 of 4 players" or "Full". A "Fill empty seats with bots" switch (off by default, `Room.fillWithBots`) gives the seats nobody took to bots when the host starts; with it on the host can start alone. With it off, the game is just the friends who joined, and needs at least 2. The lobby shows "2 of 4 players · 2 bots join at start" |
@@ -212,7 +235,7 @@ shows them at once and sends them in batches every 40ms (`InkBatcher`).
 
 | Situation | Decision |
 | --- | --- |
-| Rooms | Friends nearby only (online shows Coming soon). No practice and no bots: bots can't draw or see a drawing. 2-8 players (the room's size), and the host can start with 2 once everyone is ready |
+| Rooms | Friends nearby or online. No practice and no bots: bots can't draw or see a drawing. 2-8 players (the room's size), and the host can start with 2 once everyone is ready |
 | Room settings | Rounds 1, 2, 3 or 5 (default 2; each round everyone draws once), draw time 60, 80 or 100 seconds (default 80), words Easy (default), Medium, Hard or Mixed |
 | Turn order | The host first, then in joining order. Players who are away when their turn comes are skipped |
 | Choosing | The drawer alone sees 3 unused words and has 15 seconds; then one is picked for them. Others see "Sam is choosing a word..." |
@@ -223,6 +246,36 @@ shows them at once and sends them in batches every 40ms (`InkBatcher`).
 | Between rounds | Leaderboard with Next Round, like Word Battle: starts when everyone here is ready, or after 60 seconds with those who are; the rest leave. Fewer than 2 left closes the room |
 | Final round | Winner banner, confetti for the winner, New Game (host only, same players and settings) and Return Home |
 | Leaving | A guest who drops is marked away and can rejoin; one who leaves on purpose is gone. The host leaving closes the room |
+
+## The Impostor
+
+Built like Guess the Drawing, beside it: `ImpostorRoom` in `lib/models/`,
+`ImpostorRules` in `lib/services/rules/`, `ImpostorWords` (about 300
+kid-safe words in 7 topics) and `lib/services/impostor/`: `ImpostorEngine`
+runs the game on the host's phone, `ImpostorHost` and `ImpostorClient`
+carry it between phones, and `AppImpostorService`
+(`impostorServiceProvider`) is what the screens use. Messages and room
+announcements carry `'game': 'the_impostor'`. The host's phone keeps the
+whole room; `roomFor(playerId)` hides the word from the Impostor, the
+Impostor from everyone else until the reveal, and other players' votes
+until the reveal.
+
+| Situation | Decision |
+| --- | --- |
+| Rooms | Friends nearby or online. Online players need a voice call to say clues, which Create Room and the lobby say (typed clues may come later). No practice and no bots: bots can't talk. 3-8 players; the host can start with 3 once everyone is ready |
+| Room settings | Rounds 3, 5 or 8 (default 5), 15, 20 or 30 seconds per clue (default 20), 1 or 2 clue turns each (default 2), and topics: Animals, Food, Places, Things, Jobs, Sports, Movies and cartoons (at least 1, default all) |
+| Round | Secret word (10s) → clues → talk it over (30s, the host can tap Vote now) → secret vote (20s) → reveal (8s) → the Impostor's guess (15s) → results with Next Round |
+| Secret word | Shown only while the card is held down, so nobody can peek. Normal players see the word and topic; the Impostor sees "You are the Impostor!" and the topic. A smaller card lets players check again during clues and talking |
+| Clues | Said out loud. Everyone in a random order, never starting with the Impostor, once or twice round. The speaker taps Done, or the timer moves on. Away players are skipped |
+| Vote | Tap a face, then Lock vote; no voting for yourself, and a vote can't be changed. Faces show who has voted, never for whom. Ends when everyone here has voted or time is up |
+| Caught | Most votes on the Impostor catches them. A tie, or no votes, means not caught |
+| Guess | Always, caught or not: the Impostor picks the word from 6 of the same topic. Running out of time counts as wrong. Everyone else sees the choices but can't tap them |
+| Points | Voting for the Impostor: 3. Everyone but the Impostor gets 1 more if they're caught. The Impostor: 2 for each player who voted for someone else (players who didn't vote don't count), 3 if not caught, and 3 for the right word, caught or not |
+| Picking the Impostor | Random, and anyone can be picked in any round, even twice running, but each time a player has been the Impostor their chance halves (`ImpostorRules.impostorChances`). Counts reset with a new game |
+| Words | Never repeat in a room until a topic runs out. Kept free of anything `soundsRude` catches, even inside a word (so no "grapes" or "peacock") |
+| Impostor leaves | If the Impostor leaves or drops mid-round, the round ends: "The Impostor left!", nobody scores, and results show Next Round |
+| Between rounds | Like the other games: Next Round starts when everyone here is ready, or after 60 seconds with those who are; the rest leave. Fewer than 3 left closes the room, as does the host leaving |
+| Final round | Winner banner, confetti for the winner, Best Detective (most right votes) and Master of Disguise (most points as the Impostor), New Game (host only) and Return Home |
 
 ## Phase status
 

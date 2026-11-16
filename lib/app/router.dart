@@ -11,6 +11,12 @@ import '../features/drawing/drawing_results_screen.dart';
 import '../features/gameplay/answer_screen.dart';
 import '../features/gameplay/letter_selection_screen.dart';
 import '../features/home/word_battle_screen.dart';
+import '../features/impostor/impostor_create_screen.dart';
+import '../features/impostor/impostor_home_screen.dart';
+import '../features/impostor/impostor_how_to_play_screen.dart';
+import '../features/impostor/impostor_lobby_screen.dart';
+import '../features/impostor/impostor_play_screen.dart';
+import '../features/impostor/impostor_results_screen.dart';
 import '../features/home/splash_screen.dart';
 import '../features/hub/game_catalog.dart';
 import '../features/hub/hub_screen.dart';
@@ -23,8 +29,10 @@ import '../features/settings/settings_screen.dart';
 import '../features/validation/validation_screen.dart';
 import '../models/drawing_room.dart';
 import '../models/game_phase.dart';
+import '../models/impostor_room.dart';
 import '../services/drawing/drawing_providers.dart';
 import '../services/game_providers.dart';
+import '../services/impostor/impostor_providers.dart';
 import '../services/nearby/nearby_discovery.dart';
 
 /// The address of every screen.
@@ -60,6 +68,43 @@ abstract final class AppRoutes {
   static const drawingResults = '$drawing/results';
 
   static const drawingGameRoutes = {drawingLobby, drawingPlay, drawingResults};
+
+  // The Impostor.
+  static const impostor = GameCatalog.theImpostorRoute;
+  static const impostorCreate = '$impostor/create';
+  static const impostorJoin = '$impostor/join';
+  static const impostorHowToPlay = '$impostor/how-to-play';
+  static const impostorLobby = '$impostor/lobby';
+  static const impostorPlay = '$impostor/play';
+  static const impostorResults = '$impostor/results';
+
+  static const impostorGameRoutes = {
+    impostorLobby,
+    impostorPlay,
+    impostorResults,
+  };
+}
+
+/// The Impostor screen for each stage of its game. Every stage of a round
+/// shares one screen; results have their own.
+String routeForImpostorPhase(ImpostorPhase phase) {
+  return switch (phase) {
+    ImpostorPhase.lobby => AppRoutes.impostorLobby,
+    ImpostorPhase.results => AppRoutes.impostorResults,
+    _ => AppRoutes.impostorPlay,
+  };
+}
+
+/// Like [gameRedirect], for The Impostor. Returns null when the Impostor
+/// game has nothing to say about [location].
+String? impostorRedirect(String location, ImpostorPhase? phase) {
+  if (phase == null) {
+    return AppRoutes.impostorGameRoutes.contains(location)
+        ? AppRoutes.home
+        : null;
+  }
+  final target = routeForImpostorPhase(phase);
+  return location == target ? null : target;
 }
 
 /// The Guess the Drawing screen for each stage of its game. Picking a word,
@@ -163,17 +208,30 @@ final routerProvider = Provider<GoRouter>((ref) {
     (_, room) => drawingPhase.value = room?.phase,
   );
 
+  final impostorPhase = ValueNotifier<ImpostorPhase?>(
+    ref.read(impostorRoomProvider)?.phase,
+  );
+  ref.listen(
+    impostorRoomProvider,
+    (_, room) => impostorPhase.value = room?.phase,
+  );
+
   final router = GoRouter(
     initialLocation: AppRoutes.splash,
-    refreshListenable: Listenable.merge([phase, drawingPhase]),
+    refreshListenable: Listenable.merge([phase, drawingPhase, impostorPhase]),
     redirect: (context, state) {
       final location = state.matchedLocation;
-      // A drawing game in progress decides where to be; otherwise Word
-      // Battle does, and sends drawing game screens home.
+      // A drawing or Impostor game in progress decides where to be;
+      // otherwise Word Battle does, and sends the other games' screens
+      // home.
       if (drawingPhase.value != null) {
         return drawingRedirect(location, drawingPhase.value);
       }
+      if (impostorPhase.value != null) {
+        return impostorRedirect(location, impostorPhase.value);
+      }
       return drawingRedirect(location, null) ??
+          impostorRedirect(location, null) ??
           gameRedirect(location, phase.value);
     },
     routes: [
@@ -199,6 +257,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       _route(AppRoutes.drawingLobby, const DrawingLobbyScreen()),
       _route(AppRoutes.drawingPlay, const DrawingPlayScreen()),
       _route(AppRoutes.drawingResults, const DrawingResultsScreen()),
+      _route(AppRoutes.impostor, const ImpostorHomeScreen()),
+      _route(AppRoutes.impostorCreate, const ImpostorCreateScreen()),
+      _route(
+        AppRoutes.impostorJoin,
+        const JoinRoomScreen(game: NearbyRoomInfo.theImpostor),
+      ),
+      _route(AppRoutes.impostorHowToPlay, const ImpostorHowToPlayScreen()),
+      _route(AppRoutes.impostorLobby, const ImpostorLobbyScreen()),
+      _route(AppRoutes.impostorPlay, const ImpostorPlayScreen()),
+      _route(AppRoutes.impostorResults, const ImpostorResultsScreen()),
     ],
   );
 
@@ -206,6 +274,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     router.dispose();
     phase.dispose();
     drawingPhase.dispose();
+    impostorPhase.dispose();
   });
   return router;
 });

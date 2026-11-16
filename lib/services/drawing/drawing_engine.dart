@@ -75,11 +75,13 @@ class DrawingEngine {
 
   // ----------------------------------------------------------------- rooms
 
+  /// Opens a room. An online room passes the [code] the relay holds for it.
   void createRoom({
     required String hostName,
     required int avatarIndex,
     required int capacity,
     required DrawingSettings settings,
+    String? code,
   }) {
     _clearTimers();
     sketch.clear();
@@ -87,7 +89,7 @@ class DrawingEngine {
     _nextGuestNumber = 1;
     _publish(
       DrawingRoom(
-        code: _newCode(),
+        code: code ?? _newCode(),
         settings: settings,
         capacity: capacity.clamp(
           RoomInputRules.minPlayers,

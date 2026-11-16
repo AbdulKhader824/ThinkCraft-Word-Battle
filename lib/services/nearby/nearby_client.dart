@@ -83,6 +83,9 @@ class NearbyClientService implements GameService {
     final NearbyLink link;
     try {
       link = await connect(_address!, _port!);
+    } on JoinRefused {
+      // An online room's relay says why, in words for the player.
+      rethrow;
     } on Object {
       throw const JoinRefused(
         "Couldn't reach that room. Check you're on the same Wi-Fi.",
@@ -227,6 +230,7 @@ class NearbyClientService implements GameService {
     required String roomCode,
     int avatarIndex = 0,
     String? hostAddress,
+    bool online = false,
   }) {
     if (hostAddress == null) {
       throw const JoinRefused('No room with that code was found nearby.');

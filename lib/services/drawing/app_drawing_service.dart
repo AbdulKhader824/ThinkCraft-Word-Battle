@@ -5,6 +5,8 @@ import '../../models/sketch.dart';
 import '../game_service.dart';
 import '../nearby/nearby_discovery.dart';
 import '../nearby/nearby_link.dart';
+import '../online/online_rooms.dart';
+import '../online/relay.dart';
 import 'drawing_client.dart';
 import 'drawing_engine.dart';
 import 'drawing_host.dart';
@@ -22,6 +24,8 @@ class AppDrawingService implements DrawingService {
     required this.startServer,
     required this.connect,
     required this.findAddress,
+    this.online,
+    this.onNotice,
   }) {
     _engineRoom = engine.roomChanges.listen((_) {
       if (_hosting) {
@@ -41,6 +45,14 @@ class AppDrawingService implements DrawingService {
   final NearbyConnector connect;
   final Future<String?> Function() findAddress;
 
+  /// Opens and joins online rooms through the relay. Null where they
+  /// aren't offered.
+  final OnlineRooms? online;
+
+  /// Tells the player something happened outside the screens' control,
+  /// such as an online room being lost.
+  final void Function(String message)? onNotice;
+
   final _changes = StreamController<DrawingRoom?>.broadcast();
   final _sketchChanges = StreamController<void>.broadcast();
   late final StreamSubscription<DrawingRoom?> _engineRoom;
@@ -52,6 +64,7 @@ class AppDrawingService implements DrawingService {
   DrawingClient? _client;
   bool _announcing = false;
   String? _hostAddress;
+  bool _isOnline = false;
 
   bool get _hosting => _host != null;
 
@@ -79,6 +92,17 @@ class AppDrawingService implements DrawingService {
   @override
   String? get hostAddress => _hostAddress;
 
+  @override
+  bool get isOnline => _isOnline;
+
+  OnlineRooms get _online {
+    final online = this.online;
+    if (online == null) {
+      throw const JoinRefused('Online rooms need the phone app.');
+    }
+    return online;
+  }
+
   void _publish(DrawingRoom? room) {
     if (!_changes.isClosed) _changes.add(room);
     unawaited(_announce(room));
@@ -95,8 +119,24 @@ class AppDrawingService implements DrawingService {
     required int avatarIndex,
     required int capacity,
     required DrawingSettings settings,
+    bool online = false,
   }) async {
     await _leaveCurrent();
+    if (online) {
+      final server = await _online.host(game: NearbyRoomInfo.guessTheDrawing);
+      _host = DrawingHost(engine: engine, server: server)..start();
+      _isOnline = true;
+      unawaited(server.lost.then((_) => _lost(server)));
+      engine.createRoom(
+        hostName: playerName,
+        avatarIndex: avatarIndex,
+        capacity: capacity,
+        settings: settings,
+        code: server.code,
+      );
+      return;
+    }
+
     final NearbyServer server;
     try {
       server = await startServer();
@@ -115,18 +155,26 @@ class AppDrawingService implements DrawingService {
     );
   }
 
+  /// The online room's connection is gone for good: the room closes.
+  Future<void> _lost(RelayServer server) async {
+    if (!identical(_host?.server, server)) return;
+    onNotice?.call(onlineRoomLost);
+    await leaveRoom();
+  }
+
   @override
   Future<void> joinRoom({
     required String playerName,
     required String roomCode,
     int avatarIndex = 0,
     String? hostAddress,
+    bool online = false,
   }) async {
     final found = finder.current.where(
       (room) =>
           room.code == roomCode && room.game == NearbyRoomInfo.guessTheDrawing,
     );
-    final address = hostAddress ?? found.firstOrNull?.address;
+    final address = online ? '' : hostAddress ?? found.firstOrNull?.address;
     final port = hostAddress == null
         ? found.firstOrNull?.port ?? nearbyGamePort
         : nearbyGamePort;
@@ -137,9 +185,14 @@ class AppDrawingService implements DrawingService {
       );
     }
 
+    final link = online
+        ? _online.guest(code: roomCode, game: NearbyRoomInfo.guessTheDrawing)
+        : connect;
+
     await _leaveCurrent();
-    final client = DrawingClient(connect: connect);
+    final client = DrawingClient(connect: link);
     _client = client;
+    _isOnline = online;
     _clientRoom = client.roomChanges.listen((room) {
       if (identical(_client, client)) _publish(room);
     });
@@ -155,6 +208,7 @@ class AppDrawingService implements DrawingService {
         avatarIndex: avatarIndex,
       );
     } on Object {
+      _isOnline = false;
       await _dropClient();
       rethrow;
     }
@@ -164,6 +218,7 @@ class AppDrawingService implements DrawingService {
   Future<void> _announce(DrawingRoom? room) async {
     final wanted =
         _hosting &&
+        !_isOnline &&
         room != null &&
         room.phase == DrawingPhase.lobby &&
         room.emptySeats > 0;
@@ -215,6 +270,7 @@ class AppDrawingService implements DrawingService {
     final host = _host;
     _host = null;
     _hostAddress = null;
+    _isOnline = false;
     if (_announcing) {
       _announcing = false;
       await beacon.stop();

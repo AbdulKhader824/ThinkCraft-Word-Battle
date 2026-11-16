@@ -154,16 +154,20 @@ void main() {
       expect(service.createdFillWithBots, isFalse);
     });
 
-    testWidgets('online is shown but cannot be chosen yet', (tester) async {
-      await openCreateRoom(tester);
+    testWidgets('an online room is created as online', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
 
-      final online = find.byKey(const ValueKey('mode-online'));
-      expect(
-        find.descendant(of: online, matching: find.text('Coming soon')),
-        findsOneWidget,
-      );
-      await tapAndSettle(tester, online);
-      expect(find.textContaining('Practice:'), findsOneWidget);
+      await tester.enterText(find.byType(TextFormField).first, 'Sam');
+      await tapAndSettle(tester, find.byKey(const ValueKey('mode-online')));
+      expect(find.textContaining('Friends anywhere can join'), findsOneWidget);
+      // Bots can fill an online room's empty seats, as in a nearby one.
+      expect(find.text('Fill empty seats with bots'), findsOneWidget);
+      await tapAndSettle(tester, buttonLabelled('Create Room'));
+
+      expect(service.createdMode, RoomMode.online);
     });
 
     testWidgets('a nearby room is created as nearby', (tester) async {
@@ -231,6 +235,27 @@ void main() {
       await goToWordBattle(tester);
       await tapAndSettle(tester, buttonLabelled('Join Room'));
     }
+
+    testWidgets('an online room is joined by its code alone', (tester) async {
+      final service = FakeGameService(null);
+      await pumpGame(tester, service: service);
+      await goToWordBattle(tester);
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      await tapAndSettle(tester, find.byKey(const ValueKey('mode-online')));
+      // No Wi-Fi rooms or addresses online.
+      expect(find.text('Rooms nearby'), findsNothing);
+      expect(find.textContaining("Can't see the room?"), findsNothing);
+      expect(find.text("Type your friend's room code"), findsOneWidget);
+
+      await tester.enterText(_fields.at(0), 'Sam');
+      await tester.enterText(_fields.at(1), 'abc234');
+      await tapAndSettle(tester, buttonLabelled('Join Room'));
+
+      expect(service.calls, ['joinRoom ABC234']);
+      expect(service.joinedOnline, isTrue);
+      expect(service.joinedAddress, isNull);
+    });
 
     testWidgets('looks for rooms nearby', (tester) async {
       final finder = FakeRoomFinder();

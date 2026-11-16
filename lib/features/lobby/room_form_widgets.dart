@@ -65,6 +65,55 @@ class NearbyModeNote extends StatelessWidget {
   }
 }
 
+/// Tells the host how friends get into an online room.
+class OnlineModeNote extends StatelessWidget {
+  const OnlineModeNote({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const _ModeNote(
+      icon: Icons.public_rounded,
+      color: AppColors.mint,
+      text:
+          'Friends anywhere can join with the room code. Everyone needs '
+          'internet. Share the code from the lobby.',
+    );
+  }
+}
+
+/// Shown while an online room opens. The free online server sleeps when
+/// nobody is playing, and takes a while to wake.
+class OnlineConnectingNote extends StatelessWidget {
+  const OnlineConnectingNote({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const _ModeNote(
+      icon: Icons.hourglass_top_rounded,
+      color: AppColors.sunshine,
+      text:
+          'Connecting to the online server... The first room in a while '
+          'can take up to a minute.',
+    );
+  }
+}
+
+/// The Impostor's clues are said out loud, so online players need a call.
+class VoiceCallNote extends StatelessWidget {
+  const VoiceCallNote({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const _ModeNote(
+      icon: Icons.call_rounded,
+      color: AppColors.lavender,
+      text:
+          'Playing online? Start a group voice call (WhatsApp works) so '
+          'everyone can say their clues out loud.',
+    );
+  }
+}
+
 class _ModeNote extends StatelessWidget {
   const _ModeNote({
     required this.icon,
@@ -111,7 +160,11 @@ class RoomModeChip extends StatelessWidget {
         'Nearby room: same Wi-Fi or hotspot',
         AppColors.sky,
       ),
-      RoomMode.online => (Icons.public_rounded, 'Online room', AppColors.mint),
+      RoomMode.online => (
+        Icons.public_rounded,
+        'Online room: friends anywhere',
+        AppColors.mint,
+      ),
     };
 
     return Container(
@@ -135,18 +188,20 @@ class RoomModeChip extends StatelessWidget {
   }
 }
 
-/// "Who are you playing with?": friends nearby, friends online (coming
-/// soon) or practice with bots.
+/// "Who are you playing with?": friends nearby, friends online or practice
+/// with bots.
 class RoomModePicker extends StatelessWidget {
   const RoomModePicker({
     super.key,
     required this.selected,
     required this.onChanged,
     this.allowPractice = true,
+    this.label = 'Who are you playing with?',
   });
 
   final RoomMode selected;
   final ValueChanged<RoomMode> onChanged;
+  final String label;
 
   /// False for games bots can't play, such as Guess the Drawing.
   final bool allowPractice;
@@ -177,7 +232,7 @@ class RoomModePicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Who are you playing with?', style: AppText.label),
+        Text(label, style: AppText.label),
         const SizedBox(height: AppSpacing.xs),
         for (final (mode, icon, title, detail) in _options)
           if (allowPractice || mode != RoomMode.practice) ...[
@@ -187,8 +242,6 @@ class RoomModePicker extends StatelessWidget {
               title: title,
               detail: detail,
               selected: selected == mode,
-              // Online play needs the server, which comes later.
-              comingSoon: mode == RoomMode.online,
               onTap: () {
                 if (mode == selected) return;
                 playSoundFrom(context, GameSound.select);
@@ -233,7 +286,6 @@ class AnswerCheckPicker extends StatelessWidget {
             title: check.label,
             detail: check.detail,
             selected: selected == check,
-            comingSoon: false,
             onTap: () {
               if (check == selected) return;
               playSoundFrom(context, GameSound.select);
@@ -279,7 +331,6 @@ class WordLevelPicker extends StatelessWidget {
             title: level.label,
             detail: level.detail,
             selected: selected == level,
-            comingSoon: false,
             onTap: () {
               if (level == selected) return;
               playSoundFrom(context, GameSound.select);
@@ -324,7 +375,6 @@ class BotLevelPicker extends StatelessWidget {
             title: level.label,
             detail: level.detail,
             selected: selected == level,
-            comingSoon: false,
             onTap: () {
               if (level == selected) return;
               playSoundFrom(context, GameSound.select);
@@ -345,7 +395,6 @@ class _ModeOption extends StatelessWidget {
     required this.title,
     required this.detail,
     required this.selected,
-    required this.comingSoon,
     required this.onTap,
   });
 
@@ -353,7 +402,6 @@ class _ModeOption extends StatelessWidget {
   final String title;
   final String detail;
   final bool selected;
-  final bool comingSoon;
   final VoidCallback onTap;
 
   @override
@@ -364,57 +412,48 @@ class _ModeOption extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      enabled: !comingSoon,
-      label: comingSoon ? '$title, coming soon' : '$title. $detail',
+      label: '$title. $detail',
       excludeSemantics: true,
-      child: Opacity(
-        opacity: comingSoon ? 0.6 : 1,
-        child: Material(
-          color: selected ? AppColors.mint : AppColors.background,
+      child: Material(
+        color: selected ? AppColors.mint : AppColors.background,
+        borderRadius: radius,
+        child: InkWell(
           borderRadius: radius,
-          child: InkWell(
-            borderRadius: radius,
-            onTap: comingSoon ? null : onTap,
-            child: AnimatedContainer(
-              duration: reduceMotion ? Duration.zero : AppDurations.fast,
-              constraints: const BoxConstraints(
-                minHeight: AppSizes.minTapTarget,
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: reduceMotion ? Duration.zero : AppDurations.fast,
+            constraints: const BoxConstraints(minHeight: AppSizes.minTapTarget),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.sm,
+              vertical: AppSpacing.xs,
+            ),
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(
+                color: selected ? AppColors.navy : AppColors.outline,
+                width: selected ? 3 : 2,
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm,
-                vertical: AppSpacing.xs,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: radius,
-                border: Border.all(
-                  color: selected ? AppColors.navy : AppColors.outline,
-                  width: selected ? 3 : 2,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(icon, color: AppColors.navy, size: 28),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(title, style: AppText.label),
-                        Text(
-                          comingSoon ? 'Coming soon' : detail,
-                          style: AppText.bodySmall,
-                        ),
-                      ],
-                    ),
+            ),
+            child: Row(
+              children: [
+                Icon(icon, color: AppColors.navy, size: 28),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: AppText.label),
+                      Text(detail, style: AppText.bodySmall),
+                    ],
                   ),
-                  if (selected)
-                    const Icon(
-                      Icons.check_circle_rounded,
-                      color: AppColors.navy,
-                      size: 28,
-                    ),
-                ],
-              ),
+                ),
+                if (selected)
+                  const Icon(
+                    Icons.check_circle_rounded,
+                    color: AppColors.navy,
+                    size: 28,
+                  ),
+              ],
             ),
           ),
         ),
@@ -643,7 +682,7 @@ class CategoryPicker extends StatelessWidget {
                 for (final category in Category.values)
                   SizedBox(
                     width: width,
-                    child: _CategoryToggle(
+                    child: CategoryToggle(
                       category: category,
                       selected: selected.contains(category),
                       onTap: () => _toggle(category),
@@ -658,16 +697,29 @@ class CategoryPicker extends StatelessWidget {
   }
 }
 
-class _CategoryToggle extends StatelessWidget {
-  const _CategoryToggle({
+/// A category's picture and name that can be turned on and off. Other
+/// games use it for their own choices, with a [label] of their own.
+class CategoryToggle extends StatelessWidget {
+  const CategoryToggle({
+    super.key,
     required this.category,
     required this.selected,
     required this.onTap,
+    this.label,
+    this.tapKey,
   });
 
+  /// Gives the picture and colour.
   final Category category;
   final bool selected;
   final VoidCallback onTap;
+
+  /// Shown instead of the category's own name.
+  final String? label;
+
+  /// The key on the tappable part, for tests. Defaults to
+  /// `category-<name>`.
+  final Key? tapKey;
 
   @override
   Widget build(BuildContext context) {
@@ -678,7 +730,7 @@ class _CategoryToggle extends StatelessWidget {
     return Semantics(
       button: true,
       selected: selected,
-      label: category.label,
+      label: label ?? category.label,
       excludeSemantics: true,
       child: AnimatedScale(
         scale: selected ? 1 : 0.96,
@@ -699,7 +751,7 @@ class _CategoryToggle extends StatelessWidget {
               child: Material(
                 type: MaterialType.transparency,
                 child: InkWell(
-                  key: ValueKey('category-${category.name}'),
+                  key: tapKey ?? ValueKey('category-${category.name}'),
                   borderRadius: radius,
                   onTap: () {
                     playSoundFrom(context, GameSound.select);
@@ -737,7 +789,7 @@ class _CategoryToggle extends StatelessWidget {
                                   fit: BoxFit.scaleDown,
                                   alignment: Alignment.centerLeft,
                                   child: Text(
-                                    category.label,
+                                    label ?? category.label,
                                     maxLines: 1,
                                     style: AppText.label,
                                   ),

@@ -16,6 +16,7 @@ import '../../models/player.dart';
 import '../../models/room.dart';
 import '../../services/app_game_service.dart';
 import '../../services/game_providers.dart';
+import '../../services/share_service.dart';
 import '../../services/sound_service.dart';
 import '../gameplay/category_picture.dart';
 import '../gameplay/leave_game_guard.dart';
@@ -46,7 +47,7 @@ class LobbyScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            RoomCodeCard(code: room.code, mode: room.mode),
+            RoomCodeCard(code: room.code, mode: room.mode, game: 'Word Battle'),
             if (room.mode == RoomMode.nearby &&
                 room.playerById(myId).isHost) ...[
               const SizedBox(height: AppSpacing.sm),
@@ -61,7 +62,7 @@ class LobbyScreen extends ConsumerWidget {
                   room.players.any((player) => player.isBot),
             ),
             const SizedBox(height: AppSpacing.md),
-            if (room.mode == RoomMode.nearby) ...[
+            if (room.mode != RoomMode.practice) ...[
               _SeatsLine(room: room),
               const SizedBox(height: AppSpacing.xs),
             ],
@@ -118,14 +119,24 @@ class InviteCard extends StatelessWidget {
   }
 }
 
-class RoomCodeCard extends StatelessWidget {
-  const RoomCodeCard({super.key, required this.code, required this.mode});
+/// The room's code, big. In an online room it has a Share button, since
+/// friends anywhere join by typing the code.
+class RoomCodeCard extends ConsumerWidget {
+  const RoomCodeCard({
+    super.key,
+    required this.code,
+    required this.mode,
+    required this.game,
+  });
 
   final String code;
   final RoomMode mode;
 
+  /// The game's name, for the message friends are sent.
+  final String game;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final onNavy = AppText.bodySmall.copyWith(color: Colors.white);
 
     return GameCard(
@@ -143,6 +154,24 @@ class RoomCodeCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           RoomModeChip(mode: mode),
+          if (mode == RoomMode.online) ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'Send friends the code. They tap Join Room, pick Friends '
+              'online and type it.',
+              textAlign: TextAlign.center,
+              style: onNavy,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            GameButton(
+              label: 'Share code',
+              icon: Icons.share_rounded,
+              style: GameButtonStyle.sunshine,
+              onPressed: () => ref.read(shareTextProvider)(
+                onlineInvite(game: game, code: code),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -368,7 +397,7 @@ class _LobbyAction extends ConsumerWidget {
     }
 
     final waiting = room.players.where((player) => !player.isReady).length;
-    if (waiting == 0 && room.mode == RoomMode.nearby && room.fillWithBots) {
+    if (waiting == 0 && room.mode != RoomMode.practice && room.fillWithBots) {
       return room.players.length < 2
           ? 'Start now to play with bots, or wait for friends.'
           : 'Everyone is ready! Bots fill the empty seats.';

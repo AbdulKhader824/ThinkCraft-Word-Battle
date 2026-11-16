@@ -44,8 +44,12 @@ class DrawingLobbyScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            RoomCodeCard(code: room.code, mode: RoomMode.nearby),
-            if (me.isHost) ...[
+            RoomCodeCard(
+              code: room.code,
+              mode: service.isOnline ? RoomMode.online : RoomMode.nearby,
+              game: 'Guess the Drawing',
+            ),
+            if (me.isHost && !service.isOnline) ...[
               const SizedBox(height: AppSpacing.sm),
               InviteCard(address: service.hostAddress),
             ],

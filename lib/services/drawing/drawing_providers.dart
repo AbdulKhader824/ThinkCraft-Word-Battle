@@ -17,6 +17,8 @@ final drawingServiceProvider = Provider<DrawingService>((ref) {
     startServer: startNearbyServer,
     connect: connectNearby,
     findAddress: localNetworkAddress,
+    online: ref.watch(onlineRoomsProvider),
+    onNotice: ref.read(roomNoticeProvider.notifier).show,
   );
   ref.onDispose(service.dispose);
   return service;

@@ -17,11 +17,12 @@ void main() {
       expect(ids, hasLength(15));
     });
 
-    test('Word Battle comes first, then Guess the Drawing, both playable', () {
+    test('Word Battle comes first, then Guess the Drawing; The Impostor is '
+        'playable too', () {
       expect(GameCatalog.games.first.name, 'Word Battle');
       expect(
         GameCatalog.games.where((game) => game.isPlayable).map((g) => g.id),
-        ['word_battle', 'guess_the_drawing'],
+        ['word_battle', 'guess_the_drawing', 'the_impostor'],
       );
     });
 

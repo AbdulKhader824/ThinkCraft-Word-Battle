@@ -165,4 +165,29 @@ void main() {
     expect(find.text('Waiting for friends to join...'), findsOneWidget);
     expect(_button(tester, 'Start Game').onPressed, isNull);
   });
+
+  testWidgets('an online room shares its code, with no Wi-Fi address', (
+    tester,
+  ) async {
+    final shared = <String>[];
+    final service = FakeGameService(
+      Room(
+        code: 'K7PQ2M',
+        mode: RoomMode.online,
+        players: [fakePlayer(localId, name: 'Sam', isHost: true)],
+      ),
+    );
+    await pumpGame(tester, service: service, shared: shared);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Online room'), findsOneWidget);
+    expect(find.textContaining('Host address'), findsNothing);
+    expect(find.textContaining('join this Wi-Fi'), findsNothing);
+    expect(find.text('1 of 8 players · No bots'), findsOneWidget);
+
+    await tapAndSettle(tester, buttonLabelled('Share code'));
+    expect(shared, hasLength(1));
+    expect(shared.single, contains('K7PQ2M'));
+    expect(shared.single, contains('Word Battle'));
+  });
 }

@@ -196,23 +196,23 @@ class LocalGameService implements GameService {
     GameSettings? settings,
     RoomMode mode = RoomMode.practice,
     bool fillWithBots = false,
+    String? code,
   }) async {
-    if (mode == RoomMode.online) {
-      throw UnsupportedError('Online rooms are coming soon.');
-    }
     _startLoadingWords();
-    final nearby = mode == RoomMode.nearby;
+    // Nearby and online rooms are for friends; only the connection differs.
+    final withFriends = mode != RoomMode.practice;
     _startSession(
-      code: _generateRoomCode(),
+      // An online room uses the code the relay holds for it.
+      code: code ?? _generateRoomCode(),
       settings: settings ?? GameSettings.standard,
       mode: mode,
       // In a nearby room, the count is the room's size: it starts with
       // just the host, friends join it, and bots may fill the rest.
       capacity: playerCount.clamp(2, maxPlayers),
-      fillWithBots: nearby && fillWithBots,
+      fillWithBots: withFriends && fillWithBots,
       players: _buildPlayers(
         playerName: playerName,
-        playerCount: nearby ? 1 : playerCount,
+        playerCount: withFriends ? 1 : playerCount,
         avatarIndex: avatarIndex,
         localIsHost: true,
       ),
@@ -227,6 +227,7 @@ class LocalGameService implements GameService {
     required String roomCode,
     int avatarIndex = 0,
     String? hostAddress,
+    bool online = false,
   }) async {
     _startLoadingWords();
     // A guest plays by the host's settings. The bot host uses the standard.

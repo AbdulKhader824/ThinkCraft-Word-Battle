@@ -11,8 +11,11 @@ import 'package:thinkcraft_word_battle/services/drawing/drawing_providers.dart';
 import 'package:thinkcraft_word_battle/services/drawing/drawing_service.dart';
 import 'package:thinkcraft_word_battle/services/game_providers.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
+import 'package:thinkcraft_word_battle/services/impostor/impostor_providers.dart';
+import 'package:thinkcraft_word_battle/services/impostor/impostor_service.dart';
 import 'package:thinkcraft_word_battle/services/local_game_service.dart';
 import 'package:thinkcraft_word_battle/services/profile_store.dart';
+import 'package:thinkcraft_word_battle/services/share_service.dart';
 import 'package:thinkcraft_word_battle/services/sound_service.dart';
 
 import 'fakes.dart';
@@ -30,6 +33,8 @@ Future<void> pumpGame(
   FakeSoundPlayer? sounds,
   FakeRoomFinder? finder,
   DrawingService? drawing,
+  ImpostorService? impostor,
+  List<String>? shared,
   double textScale = 1,
   bool reduceMotion = true,
 }) async {
@@ -57,10 +62,17 @@ Future<void> pumpGame(
         soundPlayerProvider.overrideWithValue(sounds ?? FakeSoundPlayer()),
         // Nor do they open network sockets to look for nearby rooms.
         roomFinderProvider.overrideWithValue(finder ?? FakeRoomFinder()),
+        // Nor do they open the phone's share sheet; they note what it got.
+        shareTextProvider.overrideWithValue((text) async => shared?.add(text)),
         if (drawing != null)
           drawingServiceProvider.overrideWith((ref) {
             ref.onDispose(drawing.dispose);
             return drawing;
+          }),
+        if (impostor != null)
+          impostorServiceProvider.overrideWith((ref) {
+            ref.onDispose(impostor.dispose);
+            return impostor;
           }),
       ],
       child: const ThinkCraftApp(),

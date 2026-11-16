@@ -186,6 +186,8 @@ void main() {
       find.byKey(const ValueKey('host-address')),
       '10.0.0.9',
     );
+    await tester.ensureVisible(buttonLabelled('Join Room').last);
+    await tester.pump();
     await tester.tap(buttonLabelled('Join Room').last);
     await _waitFor(
       tester,

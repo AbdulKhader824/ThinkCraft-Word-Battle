@@ -38,7 +38,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   /// friends or Wi-Fi around.
   RoomMode _mode = RoomMode.practice;
 
-  /// For a nearby room: whether bots take the seats friends don't.
+  /// For a room with friends: whether bots take the seats friends don't.
   bool _fillWithBots = false;
   bool _creating = false;
   int _rounds = GameSettings.defaultRounds;
@@ -47,8 +47,8 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
   AnswerCheck _answerCheck = AnswerCheck.smart;
   BotLevel _botLevel = BotLevel.medium;
 
-  /// Practice rooms always have bots; nearby ones only when they fill the
-  /// empty seats.
+  /// Practice rooms always have bots; rooms with friends only when they
+  /// fill the empty seats.
   bool get _hasBots => _mode == RoomMode.practice || _fillWithBots;
 
   @override
@@ -74,7 +74,7 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
             playerCount: _playerCount,
             avatarIndex: profile.avatarIndex,
             mode: _mode,
-            fillWithBots: _mode == RoomMode.nearby && _fillWithBots,
+            fillWithBots: _mode != RoomMode.practice && _fillWithBots,
             settings: GameSettings(
               rounds: _rounds,
               answerSeconds: _answerSeconds,
@@ -130,15 +130,15 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
                     selected: _mode,
                     onChanged: (mode) => setState(() => _mode = mode),
                   ),
-                  // In practice the count is you plus bots. In a nearby
-                  // room it's the room's size: friends fill it, and bots
-                  // can take the seats left over.
+                  // In practice the count is you plus bots. In a room with
+                  // friends it's the room's size: friends fill it, and
+                  // bots can take the seats left over.
                   const SizedBox(height: AppSpacing.lg),
                   PlayerCountPicker(
                     selected: _playerCount,
                     onChanged: (count) => setState(() => _playerCount = count),
                   ),
-                  if (_mode == RoomMode.nearby) ...[
+                  if (_mode != RoomMode.practice) ...[
                     const SizedBox(height: AppSpacing.sm),
                     FillWithBotsSwitch(
                       value: _fillWithBots,
@@ -186,10 +186,15 @@ class _CreateRoomScreenState extends ConsumerState<CreateRoomScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            if (_mode == RoomMode.nearby)
-              const NearbyModeNote()
-            else
-              const PracticeModeNote(),
+            switch (_mode) {
+              RoomMode.nearby => const NearbyModeNote(),
+              RoomMode.online => const OnlineModeNote(),
+              RoomMode.practice => const PracticeModeNote(),
+            },
+            if (_creating && _mode == RoomMode.online) ...[
+              const SizedBox(height: AppSpacing.sm),
+              const OnlineConnectingNote(),
+            ],
             const SizedBox(height: AppSpacing.lg),
             GameButton(
               label: _creating ? 'Opening...' : 'Create Room',

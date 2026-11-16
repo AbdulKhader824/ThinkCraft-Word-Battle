@@ -19,7 +19,8 @@ import '../../services/profile_store.dart';
 import '../../services/rules/room_input_rules.dart';
 import '../lobby/room_form_widgets.dart';
 
-/// Opens a Guess the Drawing room on this phone, for friends nearby.
+/// Opens a Guess the Drawing room on this phone, for friends nearby or
+/// online.
 class DrawingCreateScreen extends ConsumerStatefulWidget {
   const DrawingCreateScreen({super.key});
 
@@ -38,6 +39,11 @@ class _DrawingCreateScreenState extends ConsumerState<DrawingCreateScreen> {
   int _drawSeconds = DrawingSettings.defaultDrawSeconds;
   WordLevel _wordLevel = WordLevel.easy;
   bool _creating = false;
+
+  /// Friends nearby or online. Bots can't play, so no practice.
+  RoomMode _mode = RoomMode.nearby;
+
+  bool get _online => _mode == RoomMode.online;
 
   @override
   void dispose() {
@@ -66,6 +72,7 @@ class _DrawingCreateScreenState extends ConsumerState<DrawingCreateScreen> {
               drawSeconds: _drawSeconds,
               wordLevel: _wordLevel,
             ),
+            online: _online,
           );
     } on JoinRefused catch (error) {
       if (mounted) {
@@ -112,9 +119,9 @@ class _DrawingCreateScreenState extends ConsumerState<DrawingCreateScreen> {
                   const SizedBox(height: AppSpacing.lg),
                   // Bots can't draw or see a drawing, so friends only.
                   RoomModePicker(
-                    selected: RoomMode.nearby,
+                    selected: _mode,
                     allowPractice: false,
-                    onChanged: (_) {},
+                    onChanged: (mode) => setState(() => _mode = mode),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   PlayerCountPicker(
@@ -160,7 +167,11 @@ class _DrawingCreateScreenState extends ConsumerState<DrawingCreateScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            const NearbyModeNote(),
+            if (_online) const OnlineModeNote() else const NearbyModeNote(),
+            if (_creating && _online) ...[
+              const SizedBox(height: AppSpacing.sm),
+              const OnlineConnectingNote(),
+            ],
             const SizedBox(height: AppSpacing.lg),
             GameButton(
               label: _creating ? 'Opening...' : 'Create Room',

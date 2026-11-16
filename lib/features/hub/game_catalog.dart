@@ -46,6 +46,7 @@ class GameInfo {
 abstract final class GameCatalog {
   static const wordBattleRoute = '/word-battle';
   static const guessTheDrawingRoute = '/guess-the-drawing';
+  static const theImpostorRoute = '/the-impostor';
 
   static const games = [
     GameInfo(
@@ -79,6 +80,7 @@ abstract final class GameCatalog {
       name: 'The Impostor',
       tagline: 'Everyone knows the secret word except one. Who is it?',
       devices: GameDevices.everyPhone,
+      route: theImpostorRoute,
     ),
     GameInfo(
       id: 'most_likely_to',

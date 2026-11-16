@@ -16,9 +16,11 @@ import '../../core/widgets/game_dialog.dart';
 import '../../core/widgets/game_screen.dart';
 import '../../core/widgets/game_text_field.dart';
 import '../../core/widgets/player_avatar.dart';
+import '../../models/room.dart';
 import '../../services/drawing/drawing_providers.dart';
 import '../../services/game_providers.dart';
 import '../../services/game_service.dart';
+import '../../services/impostor/impostor_providers.dart';
 import '../../services/nearby/nearby_discovery.dart';
 import '../../services/profile_store.dart';
 import '../../services/rules/room_input_rules.dart';
@@ -26,6 +28,7 @@ import 'room_form_widgets.dart';
 
 /// Joins a friend's room: tap one of the rooms found nearby, or type its
 /// code. If a room doesn't show up, the host's address can be typed in.
+/// An online room is joined by typing its code.
 class JoinRoomScreen extends ConsumerStatefulWidget {
   const JoinRoomScreen({super.key, this.game = NearbyRoomInfo.wordBattle});
 
@@ -50,6 +53,11 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
   List<NearbyRoomInfo> _rooms = const [];
   bool _showAddress = false;
   bool _joining = false;
+
+  /// Friends nearby, or online through the internet.
+  RoomMode _where = RoomMode.nearby;
+
+  bool get _online => _where == RoomMode.online;
 
   @override
   void initState() {
@@ -88,19 +96,27 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
     final profile = ref.read(profileProvider).copyWith(name: name);
     await ref.read(profileProvider.notifier).save(profile);
     final typedAddress = _addressController.text.trim();
+    final online = _online && room == null;
 
     setState(() => _joining = true);
-    final join = widget.game == NearbyRoomInfo.guessTheDrawing
-        ? ref.read(drawingServiceProvider).joinRoom
-        : ref.read(gameServiceProvider).joinRoom;
+    final join = switch (widget.game) {
+      NearbyRoomInfo.guessTheDrawing =>
+        ref.read(drawingServiceProvider).joinRoom,
+      NearbyRoomInfo.theImpostor => ref.read(impostorServiceProvider).joinRoom,
+      _ => ref.read(gameServiceProvider).joinRoom,
+    };
     try {
       await join(
         playerName: name,
         roomCode: RoomInputRules.normalizeRoomCode(_codeController.text),
         avatarIndex: profile.avatarIndex,
-        hostAddress:
-            room?.address ??
-            (_showAddress && typedAddress.isNotEmpty ? typedAddress : null),
+        hostAddress: online
+            ? null
+            : room?.address ??
+                  (_showAddress && typedAddress.isNotEmpty
+                      ? typedAddress
+                      : null),
+        online: online,
       );
     } on JoinRefused catch (error) {
       if (mounted) {
@@ -141,17 +157,31 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
               ),
             ),
             const SizedBox(height: AppSpacing.md),
-            _NearbyRooms(
-              rooms: _rooms,
-              onJoin: _joining ? null : (room) => _submit(room: room),
+            GameCard(
+              child: RoomModePicker(
+                selected: _where,
+                allowPractice: false,
+                label: 'Where is the room?',
+                onChanged: (where) => setState(() => _where = where),
+              ),
             ),
+            if (!_online) ...[
+              const SizedBox(height: AppSpacing.md),
+              _NearbyRooms(
+                rooms: _rooms,
+                onJoin: _joining ? null : (room) => _submit(room: room),
+              ),
+            ],
             const SizedBox(height: AppSpacing.md),
             GameCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   GameTextField(
-                    label: 'Or enter a room code',
+                    key: const ValueKey('room-code'),
+                    label: _online
+                        ? "Type your friend's room code"
+                        : 'Or enter a room code',
                     hint: 'ABC234',
                     controller: _codeController,
                     validator: RoomInputRules.validateRoomCode,
@@ -160,7 +190,10 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
                     inputFormatters: [RoomCodeFormatter()],
                     onSubmitted: (_) => _submit(),
                   ),
-                  if (_showAddress) ...[
+                  // Online rooms have no address: the code is enough.
+                  if (_online)
+                    const SizedBox.shrink()
+                  else if (_showAddress) ...[
                     const SizedBox(height: AppSpacing.md),
                     GameTextField(
                       key: const ValueKey('host-address'),
