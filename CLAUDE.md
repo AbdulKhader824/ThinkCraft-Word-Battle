@@ -2,7 +2,7 @@
 
 A Flutter party-game app, "Play together. Anywhere." It opens on a game hub,
 a swipeable shelf of 15 game cards. Word Battle ("Think fast. Find unique
-words."), Guess the Drawing, The Impostor and Most Likely To... are playable, and the rest show Coming soon
+words."), Guess the Drawing, The Impostor, Most Likely To... and Truth or Dare are playable, and the rest show Coming soon
 until they're built, one at a time. The audience is ages 7-16, and it should also
 be fun for adults. The full Word Battle briefs are in `docs/spec.md`.
 
@@ -51,6 +51,7 @@ lib/
     drawing/          Guess the Drawing's screens and drawing canvas
     impostor/         The Impostor's screens
     most_likely/      Most Likely To...'s screens
+    truth_or_dare/    Truth or Dare's screens (one phone)
   models/             plain immutable data classes
   services/
     rules/            pure Dart rules and scoring
@@ -301,6 +302,25 @@ only their own vote, and only their own points until the leaderboard.
 | Rounds | Every 5 questions a leaderboard with Next Round, like the other games: starts when everyone here is ready, or after 60 seconds with those who are; the rest leave. Fewer than 3 left closes the room, as does the host leaving |
 | Final results | Winner banner (most points; ties share), confetti for the winner, each player's titles (the questions they were most likely for), New Game (host only) and Return Home |
 | Questions | Funny or nice to be picked for, never mean: nothing about looks, bodies, being clever, money worries or crushes, and kept free of anything `soundsRude` catches. They never repeat in a room until a topic runs out |
+
+## Truth or Dare
+
+One phone passed around the group, so no rooms or networking:
+`TodGame` in `lib/models/truth_or_dare_game.dart`, `TruthOrDareRules` in
+`lib/services/rules/` (every move returns a new game), the cards in
+`TruthOrDareCards` (`lib/services/truth_or_dare_cards.dart`) and
+`truthOrDareProvider` (`lib/services/truth_or_dare_providers.dart`), which
+holds the game; `truthOrDareRandomProvider` can be seeded.
+
+| Situation | Decision |
+| --- | --- |
+| Players | 2-12 names typed on the players screen (the saved name is filled in); no duplicates, ignoring capitals. Each gets a character face, different where there are enough |
+| Settings | 3, 5 or 10 rounds (default 5) and cards: Kids (default, silly and gentle), Teens (cheekier, still clean) or Mix |
+| Turns | A spinner lights the faces and lands on the player (instant with reduced motion). Everyone still in has one turn a round, in a random order, never the same player twice in a row |
+| Card | The player picks Truth or Dare. "Another card" is free and swaps the card for one of the same kind. Cards don't repeat until a deck runs out |
+| Done or Skip | Done: 1 point (a truth or a dare). Skip: a life lost. Everyone has 3 lives (hearts); after 3 skips a player is out, keeps their points and gets no more turns. Fewer than 2 players still in ends the game |
+| End | After the last round, or End game (asks first). Winner by points (ties share), Bravest (most dares), Most Honest (most truths), confetti when someone scored, Play Again (same players and settings) and Return Home |
+| Cards | 60 in each of Kids truths, Kids dares, Teens truths and Teens dares. Dares happen in the room: nothing dangerous, nothing to eat or drink, nothing that costs money, nothing posted online, nothing done to people outside the game. Truths never ask about crushes, bodies, looks or money |
 
 ## Phase status
 

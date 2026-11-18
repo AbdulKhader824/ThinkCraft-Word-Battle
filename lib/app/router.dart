@@ -23,6 +23,11 @@ import '../features/most_likely/most_likely_how_to_play_screen.dart';
 import '../features/most_likely/most_likely_lobby_screen.dart';
 import '../features/most_likely/most_likely_play_screen.dart';
 import '../features/most_likely/most_likely_results_screen.dart';
+import '../features/truth_or_dare/truth_or_dare_home_screen.dart';
+import '../features/truth_or_dare/truth_or_dare_how_to_play_screen.dart';
+import '../features/truth_or_dare/truth_or_dare_play_screen.dart';
+import '../features/truth_or_dare/truth_or_dare_results_screen.dart';
+import '../features/truth_or_dare/truth_or_dare_setup_screen.dart';
 import '../features/home/splash_screen.dart';
 import '../features/hub/game_catalog.dart';
 import '../features/hub/hub_screen.dart';
@@ -106,6 +111,13 @@ abstract final class AppRoutes {
     mostLikelyPlay,
     mostLikelyResults,
   };
+
+  // Truth or Dare, on one phone.
+  static const truthOrDare = GameCatalog.truthOrDareRoute;
+  static const truthOrDareSetup = '$truthOrDare/players';
+  static const truthOrDareHowToPlay = '$truthOrDare/how-to-play';
+  static const truthOrDarePlay = '$truthOrDare/play';
+  static const truthOrDareResults = '$truthOrDare/results';
 }
 
 /// The Most Likely To... screen for each stage of its game. The vote and
@@ -339,6 +351,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       _route(AppRoutes.mostLikelyLobby, const MostLikelyLobbyScreen()),
       _route(AppRoutes.mostLikelyPlay, const MostLikelyPlayScreen()),
       _route(AppRoutes.mostLikelyResults, const MostLikelyResultsScreen()),
+      _route(AppRoutes.truthOrDare, const TruthOrDareHomeScreen()),
+      _route(AppRoutes.truthOrDareSetup, const TruthOrDareSetupScreen()),
+      _route(
+        AppRoutes.truthOrDareHowToPlay,
+        const TruthOrDareHowToPlayScreen(),
+      ),
+      _route(AppRoutes.truthOrDarePlay, const TruthOrDarePlayScreen()),
+      _route(AppRoutes.truthOrDareResults, const TruthOrDareResultsScreen()),
     ],
   );
 

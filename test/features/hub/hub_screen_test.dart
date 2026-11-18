@@ -22,7 +22,13 @@ void main() {
       expect(GameCatalog.games.first.name, 'Word Battle');
       expect(
         GameCatalog.games.where((game) => game.isPlayable).map((g) => g.id),
-        ['word_battle', 'guess_the_drawing', 'the_impostor', 'most_likely_to'],
+        [
+          'word_battle',
+          'guess_the_drawing',
+          'the_impostor',
+          'most_likely_to',
+          'truth_or_dare',
+        ],
       );
     });
 

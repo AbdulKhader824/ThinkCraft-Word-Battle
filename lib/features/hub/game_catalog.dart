@@ -48,6 +48,7 @@ abstract final class GameCatalog {
   static const guessTheDrawingRoute = '/guess-the-drawing';
   static const theImpostorRoute = '/the-impostor';
   static const mostLikelyToRoute = '/most-likely-to';
+  static const truthOrDareRoute = '/truth-or-dare';
 
   static const games = [
     GameInfo(
@@ -107,6 +108,7 @@ abstract final class GameCatalog {
       name: 'Truth or Dare',
       tagline: 'Spin to pick a player, then answer a truth or do a dare.',
       devices: GameDevices.onePhone,
+      route: truthOrDareRoute,
     ),
     GameInfo(
       id: 'pass_the_bomb',
