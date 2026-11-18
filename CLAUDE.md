@@ -2,7 +2,7 @@
 
 A Flutter party-game app, "Play together. Anywhere." It opens on a game hub,
 a swipeable shelf of 15 game cards. Word Battle ("Think fast. Find unique
-words."), Guess the Drawing and The Impostor are playable, and the rest show Coming soon
+words."), Guess the Drawing, The Impostor and Most Likely To... are playable, and the rest show Coming soon
 until they're built, one at a time. The audience is ages 7-16, and it should also
 be fun for adults. The full Word Battle briefs are in `docs/spec.md`.
 
@@ -50,12 +50,14 @@ lib/
     home/  lobby/  gameplay/  validation/  results/  settings/
     drawing/          Guess the Drawing's screens and drawing canvas
     impostor/         The Impostor's screens
+    most_likely/      Most Likely To...'s screens
   models/             plain immutable data classes
   services/
     rules/            pure Dart rules and scoring
     nearby/           Wi-Fi and hotspot rooms: host, guest, finding rooms
     drawing/          Guess the Drawing: engine, host, guest, messages
     impostor/         The Impostor: engine, host, guest, messages
+    most_likely/      Most Likely To...: engine, host, guest, messages
     online/           online rooms through the relay (RelayServer, RelayGuestLink)
 assets/
   fonts/  images/
@@ -276,6 +278,29 @@ until the reveal.
 | Impostor leaves | If the Impostor leaves or drops mid-round, the round ends: "The Impostor left!", nobody scores, and results show Next Round |
 | Between rounds | Like the other games: Next Round starts when everyone here is ready, or after 60 seconds with those who are; the rest leave. Fewer than 3 left closes the room, as does the host leaving |
 | Final round | Winner banner, confetti for the winner, Best Detective (most right votes) and Master of Disguise (most points as the Impostor), New Game (host only) and Return Home |
+
+## Most Likely To...
+
+Built like The Impostor, beside it: `MostLikelyRoom` in `lib/models/`,
+`MostLikelyRules` in `lib/services/rules/` and `MostLikelyQuestions`
+(about 200 questions in 4 topics), and `lib/services/most_likely/`:
+`MostLikelyEngine` runs the game on the host's phone, `MostLikelyHost` and
+`MostLikelyClient` carry it between phones, and `AppMostLikelyService`
+(`mostLikelyServiceProvider`) is what the screens use. Each question
+finishes "Who is most likely to ...?". Messages and room announcements
+carry `'game': 'most_likely_to'`. `roomFor(playerId)` gives each player
+only their own vote, and only their own points until the leaderboard.
+
+| Situation | Decision |
+| --- | --- |
+| Rooms | Friends nearby or online. No practice and no bots. 3-8 players; the host can start with 3 once everyone is ready |
+| Room settings | 10, 15 or 20 questions (default 10), and topics: Silly, Future, Adventure, Everyday (at least 1, default all) |
+| Question | Vote (20s): tap a face and lock it in; voting for yourself is allowed, and a vote can't be changed. Faces show who has voted, never for whom. Ends when everyone here has voted or time is up. Then the reveal (8s): each player's vote count and a crown on the most likely |
+| Votes stay secret | Nobody ever sees who voted for whom, only the counts, so friends don't fall out. Each player sees only their own points until the leaderboard, because points would give votes away |
+| Points | Mind-reader: 1 point for voting for the player who got the most votes. On a tie, voting for any of the tied players scores, and they all get the title. No votes, no points |
+| Rounds | Every 5 questions a leaderboard with Next Round, like the other games: starts when everyone here is ready, or after 60 seconds with those who are; the rest leave. Fewer than 3 left closes the room, as does the host leaving |
+| Final results | Winner banner (most points; ties share), confetti for the winner, each player's titles (the questions they were most likely for), New Game (host only) and Return Home |
+| Questions | Funny or nice to be picked for, never mean: nothing about looks, bodies, being clever, money worries or crushes, and kept free of anything `soundsRude` catches. They never repeat in a room until a topic runs out |
 
 ## Phase status
 

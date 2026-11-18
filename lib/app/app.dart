@@ -8,6 +8,7 @@ import '../models/room.dart';
 import '../services/drawing/drawing_providers.dart';
 import '../services/game_providers.dart';
 import '../services/impostor/impostor_providers.dart';
+import '../services/most_likely/most_likely_providers.dart';
 import 'router.dart';
 
 class ThinkCraftApp extends ConsumerWidget {
@@ -34,6 +35,10 @@ class ThinkCraftApp extends ConsumerWidget {
     });
     // So are Impostor rooms.
     ref.listen(impostorRoomProvider, (previous, next) {
+      if ((previous == null) != (next == null)) _keepScreenOn(next != null);
+    });
+    // And Most Likely To... rooms.
+    ref.listen(mostLikelyRoomProvider, (previous, next) {
       if ((previous == null) != (next == null)) _keepScreenOn(next != null);
     });
     // A snack bar sits above every screen, so it stays while the app goes

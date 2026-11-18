@@ -35,6 +35,7 @@ class NearbyRoomInfo {
   static const wordBattle = 'word_battle';
   static const guessTheDrawing = 'guess_the_drawing';
   static const theImpostor = 'the_impostor';
+  static const mostLikelyTo = 'most_likely_to';
 
   /// The announcement the host sends. The address isn't in it: the
   /// receiving phone knows where the message came from.

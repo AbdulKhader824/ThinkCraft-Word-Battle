@@ -13,6 +13,8 @@ import 'package:thinkcraft_word_battle/services/game_providers.dart';
 import 'package:thinkcraft_word_battle/services/game_service.dart';
 import 'package:thinkcraft_word_battle/services/impostor/impostor_providers.dart';
 import 'package:thinkcraft_word_battle/services/impostor/impostor_service.dart';
+import 'package:thinkcraft_word_battle/services/most_likely/most_likely_providers.dart';
+import 'package:thinkcraft_word_battle/services/most_likely/most_likely_service.dart';
 import 'package:thinkcraft_word_battle/services/local_game_service.dart';
 import 'package:thinkcraft_word_battle/services/profile_store.dart';
 import 'package:thinkcraft_word_battle/services/share_service.dart';
@@ -34,6 +36,7 @@ Future<void> pumpGame(
   FakeRoomFinder? finder,
   DrawingService? drawing,
   ImpostorService? impostor,
+  MostLikelyService? mostLikely,
   List<String>? shared,
   double textScale = 1,
   bool reduceMotion = true,
@@ -73,6 +76,11 @@ Future<void> pumpGame(
           impostorServiceProvider.overrideWith((ref) {
             ref.onDispose(impostor.dispose);
             return impostor;
+          }),
+        if (mostLikely != null)
+          mostLikelyServiceProvider.overrideWith((ref) {
+            ref.onDispose(mostLikely.dispose);
+            return mostLikely;
           }),
       ],
       child: const ThinkCraftApp(),

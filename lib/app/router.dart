@@ -17,6 +17,12 @@ import '../features/impostor/impostor_how_to_play_screen.dart';
 import '../features/impostor/impostor_lobby_screen.dart';
 import '../features/impostor/impostor_play_screen.dart';
 import '../features/impostor/impostor_results_screen.dart';
+import '../features/most_likely/most_likely_create_screen.dart';
+import '../features/most_likely/most_likely_home_screen.dart';
+import '../features/most_likely/most_likely_how_to_play_screen.dart';
+import '../features/most_likely/most_likely_lobby_screen.dart';
+import '../features/most_likely/most_likely_play_screen.dart';
+import '../features/most_likely/most_likely_results_screen.dart';
 import '../features/home/splash_screen.dart';
 import '../features/hub/game_catalog.dart';
 import '../features/hub/hub_screen.dart';
@@ -30,9 +36,11 @@ import '../features/validation/validation_screen.dart';
 import '../models/drawing_room.dart';
 import '../models/game_phase.dart';
 import '../models/impostor_room.dart';
+import '../models/most_likely_room.dart';
 import '../services/drawing/drawing_providers.dart';
 import '../services/game_providers.dart';
 import '../services/impostor/impostor_providers.dart';
+import '../services/most_likely/most_likely_providers.dart';
 import '../services/nearby/nearby_discovery.dart';
 
 /// The address of every screen.
@@ -83,6 +91,43 @@ abstract final class AppRoutes {
     impostorPlay,
     impostorResults,
   };
+
+  // Most Likely To...
+  static const mostLikely = GameCatalog.mostLikelyToRoute;
+  static const mostLikelyCreate = '$mostLikely/create';
+  static const mostLikelyJoin = '$mostLikely/join';
+  static const mostLikelyHowToPlay = '$mostLikely/how-to-play';
+  static const mostLikelyLobby = '$mostLikely/lobby';
+  static const mostLikelyPlay = '$mostLikely/play';
+  static const mostLikelyResults = '$mostLikely/results';
+
+  static const mostLikelyGameRoutes = {
+    mostLikelyLobby,
+    mostLikelyPlay,
+    mostLikelyResults,
+  };
+}
+
+/// The Most Likely To... screen for each stage of its game. The vote and
+/// the reveal share one screen; results have their own.
+String routeForMostLikelyPhase(MostLikelyPhase phase) {
+  return switch (phase) {
+    MostLikelyPhase.lobby => AppRoutes.mostLikelyLobby,
+    MostLikelyPhase.results => AppRoutes.mostLikelyResults,
+    _ => AppRoutes.mostLikelyPlay,
+  };
+}
+
+/// Like [gameRedirect], for Most Likely To... Returns null when that game
+/// has nothing to say about [location].
+String? mostLikelyRedirect(String location, MostLikelyPhase? phase) {
+  if (phase == null) {
+    return AppRoutes.mostLikelyGameRoutes.contains(location)
+        ? AppRoutes.home
+        : null;
+  }
+  final target = routeForMostLikelyPhase(phase);
+  return location == target ? null : target;
 }
 
 /// The Impostor screen for each stage of its game. Every stage of a round
@@ -216,9 +261,22 @@ final routerProvider = Provider<GoRouter>((ref) {
     (_, room) => impostorPhase.value = room?.phase,
   );
 
+  final mostLikelyPhase = ValueNotifier<MostLikelyPhase?>(
+    ref.read(mostLikelyRoomProvider)?.phase,
+  );
+  ref.listen(
+    mostLikelyRoomProvider,
+    (_, room) => mostLikelyPhase.value = room?.phase,
+  );
+
   final router = GoRouter(
     initialLocation: AppRoutes.splash,
-    refreshListenable: Listenable.merge([phase, drawingPhase, impostorPhase]),
+    refreshListenable: Listenable.merge([
+      phase,
+      drawingPhase,
+      impostorPhase,
+      mostLikelyPhase,
+    ]),
     redirect: (context, state) {
       final location = state.matchedLocation;
       // A drawing or Impostor game in progress decides where to be;
@@ -230,8 +288,12 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (impostorPhase.value != null) {
         return impostorRedirect(location, impostorPhase.value);
       }
+      if (mostLikelyPhase.value != null) {
+        return mostLikelyRedirect(location, mostLikelyPhase.value);
+      }
       return drawingRedirect(location, null) ??
           impostorRedirect(location, null) ??
+          mostLikelyRedirect(location, null) ??
           gameRedirect(location, phase.value);
     },
     routes: [
@@ -267,6 +329,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       _route(AppRoutes.impostorLobby, const ImpostorLobbyScreen()),
       _route(AppRoutes.impostorPlay, const ImpostorPlayScreen()),
       _route(AppRoutes.impostorResults, const ImpostorResultsScreen()),
+      _route(AppRoutes.mostLikely, const MostLikelyHomeScreen()),
+      _route(AppRoutes.mostLikelyCreate, const MostLikelyCreateScreen()),
+      _route(
+        AppRoutes.mostLikelyJoin,
+        const JoinRoomScreen(game: NearbyRoomInfo.mostLikelyTo),
+      ),
+      _route(AppRoutes.mostLikelyHowToPlay, const MostLikelyHowToPlayScreen()),
+      _route(AppRoutes.mostLikelyLobby, const MostLikelyLobbyScreen()),
+      _route(AppRoutes.mostLikelyPlay, const MostLikelyPlayScreen()),
+      _route(AppRoutes.mostLikelyResults, const MostLikelyResultsScreen()),
     ],
   );
 
@@ -275,6 +347,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     phase.dispose();
     drawingPhase.dispose();
     impostorPhase.dispose();
+    mostLikelyPhase.dispose();
   });
   return router;
 });

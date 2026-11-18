@@ -47,6 +47,7 @@ abstract final class GameCatalog {
   static const wordBattleRoute = '/word-battle';
   static const guessTheDrawingRoute = '/guess-the-drawing';
   static const theImpostorRoute = '/the-impostor';
+  static const mostLikelyToRoute = '/most-likely-to';
 
   static const games = [
     GameInfo(
@@ -87,6 +88,7 @@ abstract final class GameCatalog {
       name: 'Most Likely To...',
       tagline: 'Vote for who fits each funny question best.',
       devices: GameDevices.everyPhone,
+      route: mostLikelyToRoute,
     ),
     GameInfo(
       id: 'two_truths_one_lie',

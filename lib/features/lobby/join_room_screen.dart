@@ -21,6 +21,7 @@ import '../../services/drawing/drawing_providers.dart';
 import '../../services/game_providers.dart';
 import '../../services/game_service.dart';
 import '../../services/impostor/impostor_providers.dart';
+import '../../services/most_likely/most_likely_providers.dart';
 import '../../services/nearby/nearby_discovery.dart';
 import '../../services/profile_store.dart';
 import '../../services/rules/room_input_rules.dart';
@@ -103,6 +104,8 @@ class _JoinRoomScreenState extends ConsumerState<JoinRoomScreen> {
       NearbyRoomInfo.guessTheDrawing =>
         ref.read(drawingServiceProvider).joinRoom,
       NearbyRoomInfo.theImpostor => ref.read(impostorServiceProvider).joinRoom,
+      NearbyRoomInfo.mostLikelyTo =>
+        ref.read(mostLikelyServiceProvider).joinRoom,
       _ => ref.read(gameServiceProvider).joinRoom,
     };
     try {
