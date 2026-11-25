@@ -67,17 +67,13 @@ void main() {
     expect(game.current, isNot(first));
   });
 
-  test('Another card is free and gives a new card of the same kind', () {
+  test('a card can\'t be swapped: choosing again changes nothing', () {
     var game = _start(['Sam', 'Riya']);
     final pick = _numbered();
-    final player = game.current!;
     game = TruthOrDareRules.choose(game, TodKind.truth, pick);
-    game = TruthOrDareRules.another(game, pick);
-    expect(game.card, 'truth 1');
-    expect(game.kind, TodKind.truth);
-    expect(game.current, player);
-    expect(game.players[player].livesLeft, 3);
-    expect(game.usedCards, {'truth 0', 'truth 1'});
+    expect(game.card, 'truth 0');
+    expect(TruthOrDareRules.choose(game, TodKind.dare, pick), same(game));
+    expect(game.usedCards, {'truth 0'});
   });
 
   test('each Skip costs a life, and three skips put a player out', () {
@@ -118,7 +114,7 @@ void main() {
     final pick = _numbered();
     // Done before a card is drawn does nothing.
     expect(TruthOrDareRules.done(game, random), same(game));
-    expect(TruthOrDareRules.another(game, pick), same(game));
+    expect(TruthOrDareRules.skip(game, random), same(game));
     game = TruthOrDareRules.finish(game);
     expect(game.phase, TodPhase.finished);
     expect(TruthOrDareRules.choose(game, TodKind.dare, pick), same(game));

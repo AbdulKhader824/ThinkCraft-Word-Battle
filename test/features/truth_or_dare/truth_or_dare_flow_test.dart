@@ -56,7 +56,7 @@ void main() {
     expect(find.text('Who is playing? (1 of 12)'), findsOneWidget);
   });
 
-  testWidgets('a turn: Truth or Dare, another card, Done', (tester) async {
+  testWidgets('a turn: Truth or Dare, no swapping, Done', (tester) async {
     await _setUp(tester, ['Sam', 'Riya', 'Ali']);
     await tester.ensureVisible(find.byKey(const ValueKey('level-teens')));
     await tapAndSettle(tester, find.byKey(const ValueKey('level-teens')));
@@ -75,10 +75,7 @@ void main() {
     expect(find.text(card), findsOneWidget);
     expect(find.text('⚡ DARE'), findsOneWidget);
 
-    await tapAndSettle(tester, find.text('Another card (free)'));
-    final another = _game(tester)!.card!;
-    expect(another, isNot(card));
-    expect(find.text(another), findsOneWidget);
+    expect(find.textContaining('Another card'), findsNothing);
 
     await tapAndSettle(tester, buttonLabelled('Done!'));
     final next = _game(tester)!;

@@ -317,7 +317,7 @@ holds the game; `truthOrDareRandomProvider` can be seeded.
 | Players | 2-12 names typed on the players screen (the saved name is filled in); no duplicates, ignoring capitals. Each gets a character face, different where there are enough |
 | Settings | 3, 5 or 10 rounds (default 5) and cards: Kids (default, silly and gentle), Teens (cheekier, still clean) or Mix |
 | Turns | A spinner lights the faces and lands on the player (instant with reduced motion). Everyone still in has one turn a round, in a random order, never the same player twice in a row |
-| Card | The player picks Truth or Dare. "Another card" is free and swaps the card for one of the same kind. Cards don't repeat until a deck runs out |
+| Card | The player picks Truth or Dare and plays the card they get: no swapping, so the only way out is Skip. Cards don't repeat until a deck runs out |
 | Done or Skip | Done: 1 point (a truth or a dare). Skip: a life lost. Everyone has 3 lives (hearts); after 3 skips a player is out, keeps their points and gets no more turns. Fewer than 2 players still in ends the game |
 | End | After the last round, or End game (asks first). Winner by points (ties share), Bravest (most dares), Most Honest (most truths), confetti when someone scored, Play Again (same players and settings) and Return Home |
 | Cards | 60 in each of Kids truths, Kids dares, Teens truths and Teens dares. Dares happen in the room: nothing dangerous, nothing to eat or drink, nothing that costs money, nothing posted online, nothing done to people outside the game. Truths never ask about crushes, bodies, looks or money |

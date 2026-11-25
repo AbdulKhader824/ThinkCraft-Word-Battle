@@ -78,7 +78,6 @@ class TruthOrDarePlayScreen extends ConsumerWidget {
                         player: player,
                         onDone: notifier.done,
                         onSkip: notifier.skip,
-                        onAnother: notifier.another,
                       )
                     : _ChooseStage(
                         key: ValueKey(
@@ -354,14 +353,12 @@ class _CardStage extends StatelessWidget {
     required this.player,
     required this.onDone,
     required this.onSkip,
-    required this.onAnother,
   });
 
   final TodGame game;
   final TodPlayer player;
   final VoidCallback onDone;
   final VoidCallback onSkip;
-  final VoidCallback onAnother;
 
   @override
   Widget build(BuildContext context) {
@@ -405,17 +402,7 @@ class _CardStage extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
-        TextButton.icon(
-          style: TextButton.styleFrom(
-            minimumSize: const Size.fromHeight(AppSizes.minTapTarget),
-            foregroundColor: AppColors.navy,
-          ),
-          onPressed: onAnother,
-          icon: const Icon(Icons.refresh_rounded),
-          label: Text('Another card (free)', style: AppText.label),
-        ),
-        const SizedBox(height: AppSpacing.xxs),
+        const SizedBox(height: AppSpacing.sm),
         GameButton(
           label: 'Done!',
           icon: Icons.check_circle_rounded,

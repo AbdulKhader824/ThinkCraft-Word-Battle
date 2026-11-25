@@ -74,23 +74,13 @@ abstract final class TruthOrDareRules {
     );
   }
 
-  /// The player picks Truth or Dare, and gets a card.
+  /// The player picks Truth or Dare, and gets a card. There's no swapping
+  /// it: the only way out is Skip, which costs a life.
   static TodGame choose(TodGame game, TodKind kind, TodCardPicker pick) {
     if (game.phase != TodPhase.choose) return game;
-    return _deal(game.copyWith(kind: () => kind), kind, pick);
-  }
-
-  /// A different card of the same kind, free: for a card that doesn't
-  /// suit the group.
-  static TodGame another(TodGame game, TodCardPicker pick) {
-    final kind = game.kind;
-    if (game.phase != TodPhase.card || kind == null) return game;
-    return _deal(game, kind, pick);
-  }
-
-  static TodGame _deal(TodGame game, TodKind kind, TodCardPicker pick) {
     final card = pick(game.settings.level, kind, game.usedCards);
     return game.copyWith(
+      kind: () => kind,
       phase: TodPhase.card,
       card: () => card,
       usedCards: {...game.usedCards, card},

@@ -34,8 +34,6 @@ class TruthOrDareNotifier extends Notifier<TodGame?> {
   void choose(TodKind kind) =>
       _update((game) => TruthOrDareRules.choose(game, kind, _pick));
 
-  void another() => _update((game) => TruthOrDareRules.another(game, _pick));
-
   void done() => _update((game) => TruthOrDareRules.done(game, _random));
 
   void skip() => _update((game) => TruthOrDareRules.skip(game, _random));

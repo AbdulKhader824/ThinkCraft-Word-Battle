@@ -30,7 +30,7 @@ class TruthOrDareHowToPlayScreen extends StatelessWidget {
       AppColors.lavender,
       'Truth or Dare?',
       'Pick Truth to answer a question out loud, or Dare to do something '
-          'funny. Don\'t like the card? Tap Another card, for free.',
+          'funny. No swapping cards: the card you get is the one you play.',
     ),
     (
       Icons.check_circle_rounded,
